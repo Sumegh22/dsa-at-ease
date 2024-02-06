@@ -18,26 +18,24 @@ public class SpeedTest {
      speedingFine (65, true) <b>---></b> 0 <br>
      */
     public static int speedingFine1(int speed, boolean isHoliday) {
-    if(isHoliday){
-        if(speed <=65){
-            return 0;
-        } else if (speed <80) {
-            return 100;
-        } else return 200;
-    }
-	else{
-        if(speed <=60){
-            return 0;
-        } else if (speed <80) {
-            return 100;
+        int minSpeed = 60;
+        int maxSpeed = 80;
+        int fine = 0;
+        if(isHoliday) {
+            minSpeed += 5;
+            maxSpeed += 6;
+         }
+        if (speed >= minSpeed && speed<=maxSpeed){
+            fine = 100;
+        } else if (speed>maxSpeed) {
+            fine = 200;
         }
-        else return 200;
+        return fine;
     }
-}
 
 
 //----------------------STARTING POINT OF PROGRAM. IGNORE BELOW --------------------//
 public static void main(String args[]){
-    System.out.println(speedingFine1(170, false));
+    System.out.println(speedingFine1(64, true));
 }
 }

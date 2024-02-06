@@ -15,18 +15,22 @@ public class BirdSong {
      birdsSinging(95, false)    <b>---></b> false <br>
      birdsSinging(95, true) <b>---></b> true <br>
      */
-    public static boolean birdsSinging(int temp, boolean isSummer) {
-        int minTemp = 60; int maxTemp = 90;
-        boolean birdSong = false;
-        if (isSummer){
-            maxTemp+=10;
-        }
-        if (temp>=minTemp && minTemp<=maxTemp){
-            birdSong = true;
-        }
-        return birdSong;
-    }
 
+//    public static boolean birdsSinging(int temp, boolean isSummer) {
+//        int minTemp = 60; int maxTemp = 90;
+//        boolean birdSong = false;
+//        if (isSummer){
+//            maxTemp+=10;
+//        }
+//        if (temp>=minTemp && minTemp<=maxTemp){
+//            birdSong = true;
+//        }
+//        return birdSong;
+//    }
+
+    public static boolean birdsSinging(int temp, boolean isSummer) {
+        return isSummer ?   (temp >=60 && temp<= 100) : (temp>=60 && temp<=90);
+    }
 
     //----------------------STARTING POINT OF PROGRAM. IGNORE BELOW --------------------//
     public static void main(String args[]){

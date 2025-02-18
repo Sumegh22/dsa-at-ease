@@ -1,4 +1,4 @@
-package project.src.logic.puzzle.src;
+package logic.puzzle.src;
 
 public class TwoSumOne {
 

@@ -1,6 +1,5 @@
-package dsa.array.easy;
+package project.src.dsa.array.easy;
 
-import java.util.*;
 
 public class LeftRotateByN {
 
@@ -41,7 +40,7 @@ public class LeftRotateByN {
 
     public static void main(String[] args) {
         int[] nums = {1, 2, 3, 4, 5, 6};
-        int k = 2;
+        int k = 72;
 
         LeftRotateByN sol = new LeftRotateByN();
 

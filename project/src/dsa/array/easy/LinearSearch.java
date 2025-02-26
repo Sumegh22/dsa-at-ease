@@ -24,7 +24,7 @@ public class LinearSearch {
         int[] nums = {1, 2, 3, 4, 5};
         int target = 4;
 
-        // Create an instance of the Solution class
+        // Create an instance of the LargestInArray class
         LinearSearch sol = new LinearSearch();
 
         // Call the linearSearch method

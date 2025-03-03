@@ -1,6 +1,5 @@
-package dsa.array.easy;
+package project.src.dsa.array.easy;
 
-import java.util.*;
 public class LinearSearch {
 
     // Linear Search Function

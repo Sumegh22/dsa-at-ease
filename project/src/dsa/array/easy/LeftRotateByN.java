@@ -3,7 +3,10 @@ package project.src.dsa.array.easy;
 
 public class LeftRotateByN {
 
+    // Uses 2 pointer approach where 1 pointer is at start and 2nd pointer is at end
+
     // Function to reverse the array between start and end
+
     private void reverseArray(int[] nums, int start, int end) {
 
         while (start < end) {

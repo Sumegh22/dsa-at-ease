@@ -1,4 +1,4 @@
-package dsa.array.easy;
+package project.src.dsa.array.easy;
 
 class MaxConsecutiveOnes {
     public int findMaxConsecutiveOnes(int[] nums) {

@@ -1,4 +1,4 @@
-package dsa.array.easy;
+package project.src.dsa.array.easy;
 
 public class SecondLargest {
     public static void main(String[] args) {

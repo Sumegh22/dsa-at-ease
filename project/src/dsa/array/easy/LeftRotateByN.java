@@ -1,10 +1,12 @@
-package dsa.array.easy;
+package project.src.dsa.array.easy;
 
-import java.util.*;
 
 public class LeftRotateByN {
 
+    // Uses 2 pointer approach where 1 pointer is at start and 2nd pointer is at end
+
     // Function to reverse the array between start and end
+
     private void reverseArray(int[] nums, int start, int end) {
 
         while (start < end) {
@@ -41,7 +43,7 @@ public class LeftRotateByN {
 
     public static void main(String[] args) {
         int[] nums = {1, 2, 3, 4, 5, 6};
-        int k = 2;
+        int k = 72;
 
         LeftRotateByN sol = new LeftRotateByN();
 

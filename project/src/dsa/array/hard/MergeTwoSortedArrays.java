@@ -4,15 +4,22 @@ import java.util.Arrays;
 
 public class MergeTwoSortedArrays {
 
+    public void swapIfGreater(int[] nums1, int[] nums2, int a, int b) {
+        if (nums1[a] > nums2[b]) {
+            int temp = nums1[a];
+            nums1[a] = nums2[b];
+            nums2[b] = temp;
+        }
+    }
+
     public void mergeArrays1(int[] nums1, int m, int[] nums2, int n) {
+        // This approach is based on 2 pointer approach
         int left = m - 1;
         int right = 0;
 
         while (left >= 0 && right < n) {
             if (nums1[left] < nums2[right]) {
-                int temp = nums1[left];
-                nums1[left] = nums2[right];
-                nums2[right] = temp;
+                swapIfGreater(nums1, nums2, left, right);
                 left--;
                 right++;
             } else {
@@ -27,7 +34,39 @@ public class MergeTwoSortedArrays {
         }
     }
 
-    void mergeArrays2(){
+    void mergeArrays2(int[] nums1, int m, int[] nums2, int n){
+        // this approach is based on shell sort algorithm
+
+        int len = m+n;
+        int gap = (len/2) + (len%2); // adding the remainder to make gap as Ceil value
+
+        while(gap > 0){
+            int left = 0 ;
+            int right = left+gap;
+
+            while(right<len){
+                // arr1 and arr2
+                if(left<m && right>=m){
+                    swapIfGreater(nums1, nums2,  left, right-m);
+                }
+                // arr2 & arr2
+                else if(left>=m){
+                    swapIfGreater(nums2,  nums2, left-m,right-m);
+                }
+                // arr1 and arr1
+                else{
+                    swapIfGreater(nums1,  nums2, left, right);
+                }
+                left++;
+                right++;
+            }
+            if (gap ==1) break;
+            else gap = (gap/2) + (gap%2);
+        }
+
+        for(int i=m; i<len; i++){
+            nums1[i] = nums2[i-m];
+        }
 
     }
 
@@ -40,7 +79,7 @@ public class MergeTwoSortedArrays {
         // Create an instance of the Solution class
         MergeTwoSortedArrays sol = new MergeTwoSortedArrays();
 
-        sol.mergeArrays1(nums1, m, nums2, n);
+        sol.mergeArrays2(nums1, m, nums2, n);
 
         // Output the merged arrays
         System.out.println("The merged arrays are:");

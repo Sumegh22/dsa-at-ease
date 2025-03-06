@@ -26,7 +26,7 @@ public class MergeTwoSortedArrays {
                 break;
             }
         }
-        Arrays.sort(nums1, 0 , m);
+        Arrays.sort(nums1, 0, m);
         Arrays.sort(nums2);
 
         for (int i = m; i < m + n; i++) {
@@ -34,38 +34,37 @@ public class MergeTwoSortedArrays {
         }
     }
 
-    void mergeArrays2(int[] nums1, int m, int[] nums2, int n){
+    void mergeArrays2(int[] nums1, int m, int[] nums2, int n) {
         // this approach is based on shell sort algorithm
 
-        int len = m+n;
-        int gap = (len/2) + (len%2); // adding the remainder to make gap as Ceil value
+        int len = m + n;
+        int gap = len / 2 + len % 2;// Adding remainder for ceil value;
 
-        while(gap > 0){
-            int left = 0 ;
-            int right = left+gap;
+        while (gap > 0) {
+            int left = 0;
+            int right = left + gap;
 
-            while(right<len){
-                // arr1 and arr2
-                if(left<m && right>=m){
-                    swapIfGreater(nums1, nums2,  left, right-m);
+            while (right < len) {
+                //ar1  and ar2
+                if (left < m && right >= m) {
+                    swapIfGreater(nums1, nums2, left, right - m);
                 }
-                // arr2 & arr2
-                else if(left>=m){
-                    swapIfGreater(nums2,  nums2, left-m,right-m);
-                }
-                // arr1 and arr1
-                else{
-                    swapIfGreater(nums1,  nums2, left, right);
+                //ar2 and ar2
+                else if (left >= m) {
+                    swapIfGreater(nums2, nums2, left - m, right - m);
+                } else {
+                    swapIfGreater(nums1, nums1, left, right);
                 }
                 left++;
                 right++;
             }
-            if (gap ==1) break;
-            else gap = (gap/2) + (gap%2);
+            if (gap == 1) break;
+
+            gap = (gap / 2) + (gap % 2);
         }
 
-        for(int i=m; i<len; i++){
-            nums1[i] = nums2[i-m];
+        for (int i = m; i < m + n; i++) {
+            nums1[i] = nums2[i - m];
         }
 
     }

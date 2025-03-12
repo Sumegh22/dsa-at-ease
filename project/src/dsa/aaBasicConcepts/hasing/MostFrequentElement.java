@@ -1,5 +1,8 @@
 package project.src.dsa.aaBasicConcepts.hasing;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class MostFrequentElement {
     // Using streams and lib methods to solve the problem
     public int mostFrequentElement(int[] nums) {

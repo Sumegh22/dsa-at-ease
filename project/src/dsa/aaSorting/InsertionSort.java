@@ -1,17 +1,15 @@
 package project.src.dsa.aaSorting;
 
-public class SelectionSort {
-
-    static void sortBySelectionSort(int[] nums) {
+public class InsertionSort {
+    static void insertionSort(int[] nums){
         int n = nums.length;
-        for (int i = 0; i < n; i++) {
-            int mini = i;
-            for (int j = i + 1; j < n; j++) {
-                if (nums[mini] > nums[j]) {
-                    mini = j;
-                }
+
+        for(int i=0; i<n; i++){
+            int j = i;
+            while(j>0 && nums[j-1]>nums[j]){
+                swap(nums, j-1, j);
+                j--;
             }
-            swap(nums, i, mini);
         }
     }
 
@@ -29,7 +27,7 @@ public class SelectionSort {
             System.out.print(num + " ");
         }
         System.out.println();
-        sortBySelectionSort(arr);
+        insertionSort(arr);
 
         System.out.print("After sorting : ");
         for (int num : arr) {

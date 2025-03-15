@@ -1,17 +1,15 @@
 package project.src.dsa.aaSorting;
 
-public class SelectionSort {
-
-    static void sortBySelectionSort(int[] nums) {
+public class BubbleSort {
+    static void sortByBubbleSort(int[] nums){
         int n = nums.length;
-        for (int i = 0; i < n; i++) {
-            int mini = i;
-            for (int j = i + 1; j < n; j++) {
-                if (nums[mini] > nums[j]) {
-                    mini = j;
+
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n-1-i; j++){
+                if(nums[j]>nums[j+1]){
+                    swap(nums, j+1 , j);
                 }
             }
-            swap(nums, i, mini);
         }
     }
 
@@ -29,7 +27,7 @@ public class SelectionSort {
             System.out.print(num + " ");
         }
         System.out.println();
-        sortBySelectionSort(arr);
+        sortByBubbleSort(arr);
 
         System.out.print("After sorting : ");
         for (int num : arr) {

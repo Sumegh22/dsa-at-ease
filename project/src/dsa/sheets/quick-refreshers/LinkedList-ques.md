@@ -202,4 +202,43 @@ If the list has an even number of nodes, the method should return the second mid
     }
 ```
 
+**LL: Swap Nodes in Pairs**
+* Write a method swapPairs() inside a LinkedList class that swaps every two adjacent nodes in a singly linked list.
+This method should update the linked list in-place by changing the next pointers — not by swapping values.
 
+* The method should work correctly for:
+
+	* empty lists,	
+	* single-node lists,	
+	* even-length lists,	
+	* odd-length lists.
+
+   ```java
+
+     public void swapPairs() {
+        
+        if (head == null) return;
+         
+        Node dummy = new Node(0);
+        dummy.next = head;
+        Node previous = dummy;
+        Node first = head;
+    
+        while (first != null && first.next != null) {
+            Node second = first.next;
+    
+            // Perform the swap
+            
+            first.next = second.next; 
+            previous.next = second;
+            second.next= first;
+    
+            // Move pointers
+            previous = first;
+            first = first.next;
+        }
+    
+        head = dummy.next;
+    }
+
+   ```

@@ -16,7 +16,6 @@ class Solution {
             int diff = target-nums[i];
             if(map.containsKey(diff)){
                 return new int[] {i, map.get(diff)};
-
             } else{
                 map.put(nums[i], i);
             }
@@ -168,6 +167,28 @@ Example 2:
     Input: nums = [-2,0,-1]
     Output: 0
     Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+
+```java
+
+class Solution{
+  static int maxProduct(int[] nums){
+      if(nums.length == 1) return nums[0];
+      
+      int min = nums[0];
+      int max = nums[0];
+      
+      for(int i=1; i<nums.length; i++){
+          int curr = nums[i];
+          
+          int temp = Math.max(max, Math.max(min*curr, max*curr));
+          min = Math.min(min, Math.min(min*curr, max*curr));
+          max = temp;
+      }
+      return max;
+  }
+}
+
+```
 
 ------------------------------------
 ### 7. 

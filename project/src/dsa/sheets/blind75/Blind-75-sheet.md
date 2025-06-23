@@ -3,10 +3,11 @@
 # Arrays Problem
 
 ### 1. Two Sum
-     * The optimal approach for this code uses time complexity of O(n)
+* The optimal approach for this code uses **time complexity of O(n)**
+
+**Solution:**
 
 ```java
-
 class Solution {
     public int[] twoSum(int[] nums, int target) {
         Map<Integer, Integer> map= new HashMap<>();
@@ -33,11 +34,10 @@ class Solution {
 ### 2. Best Time to Buy and Sell Stock 
 
 * You are given an array prices where prices[i] is the price of a given stock on the ith day.
-
 * You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
-
 * Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
 
+**Solution:**
 ```java
 
 class Solution {
@@ -63,6 +63,8 @@ class Solution {
 ### 3. 217. Contains Duplicate
 * Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.
 
+
+**Solution:**
 ```java
 
 class Solution {
@@ -86,12 +88,11 @@ class Solution {
 ### 4. Product of Array Except Self
 
 * Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].
-
 * The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.
-
 * You must write an algorithm that runs in O(n) time and without using the division operation.
 
- 
+
+**Solution:** 
 ```java
 
 class Solution {
@@ -122,14 +123,15 @@ class Solution {
 
 
 
-* Example 1:
+Example 1:
 
     Input: nums = [-2,1,-3,4,-1,2,1,-5,4]
     Output: 6
     Explanation: The subarray [4,-1,2,1] has the largest sum 6.
 
-```java
+**Solution:**
 
+```java
 class Solution {
     public int maxSubArray(int[] nums) {
         int max = nums[0]; 
@@ -167,6 +169,8 @@ Example 2:
     Input: nums = [-2,0,-1]
     Output: 0
     Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+
+**Solution:**
 
 ```java
 

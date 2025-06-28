@@ -371,7 +371,7 @@ class Solution {
 ```
 --------------------------------------
 
-### 10. 3Sum 
+### 10. 3Sum ([here](https://leetcode.com/problems/3sum/?envType=problem-list-v2&envId=array))
 
 * Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
 
@@ -449,9 +449,7 @@ class Solution {
 ```
 --------------------------------------
 
-### 11. Container With Most Water 
-    Medium
-    Hint: 
+### 11. Container With Most Water (Medium) [here](https://leetcode.com/problems/container-with-most-water/?envType=problem-list-v2&envId=array)
 * You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
 
 * Find two lines that together with the x-axis form a container, such that the container contains the most water.
@@ -499,4 +497,75 @@ class Solution {
 }
 ```
 -----------------------------
+# Bit Manipulation
+
+### 12. 371. Sum of Two Integers
+* Given two integers a and b, return the sum of the two integers without using the operators + and -.
+
+Example 1:
+
+    Input: a = 1, b = 2
+    Output: 3
+    Example 2:
+
+    Input: a = 2, b = 3
+    Output: 5
+
+**Solution**
+```java
+class Solution {
+    public int getSum(int a, int b) {
+        while(b!=0){
+            int temp = a ^ b; 
+            int carry = (a & b) <<1;
+            a = temp; 
+            b = carry;
+        }
+        return a;
+    }
+}
+```
+------------------------------
+
+### 13. 191. Number of 1 Bits ([here](https://leetcode.com/problems/number-of-1-bits/description/))
+
+
+* Given a positive integer n, write a function that returns the number of set bits in its binary representation (also known as the Hamming weight).
+
+Example 1:
+
+    Input: n = 11
+    Output: 3
+    Explanation: The input binary string 1011 has a total of three set bits.
+
+Example 2:
+
+    Input: n = 128
+    Output: 1
+    Explanation: The input binary string 10000000 has a total of one set bit.
+
+Example 3:
+
+    Input: n = 2147483645
+    Output: 30
+    Explanation: The input binary string 1111111111111111111111111111101 has a total of thirty set bits.
+
+**Solution**
+
+```java
+class Solution {
+    public int hammingWeight(int n) {
+        int count =0;
+        while(n!=0){
+            count++;
+            n = n & (n-1);
+        }
+        return count;
+        
+    }
+}
+```
+
+-------------------------
+
 

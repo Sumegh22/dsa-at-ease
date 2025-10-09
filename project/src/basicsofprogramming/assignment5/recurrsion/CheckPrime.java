@@ -1,12 +1,12 @@
 class CheckPrime {
-    public boolean checkPrime(int num) {
+    public static boolean checkPrime(int num) {
         //your code goes here
         if(num<=1){
             return false;
         }
         return primeCheck(num, 2);
     }
-    boolean primeCheck(int n, int i){
+    static boolean primeCheck(int n, int i){
         if(i > Math.sqrt(n)){
             return true;
         } 

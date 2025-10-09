@@ -8,10 +8,11 @@ public class ArmStrongNumber {
         int validator = n;
         double sum=0;
 
-        while(copy>0){
-            len++;
-            copy/=10;
-        }
+//        while(copy>0){
+//            len++;
+//            copy/=10;
+//        }
+        len = (int) Math.log10(n) + 1;
 
         while(n>0){
             sum+= Math.pow(n%10, len);

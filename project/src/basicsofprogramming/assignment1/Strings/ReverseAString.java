@@ -1,9 +1,10 @@
 package basicsofprogramming.assignment1.Strings;
 
+
 public class ReverseAString {
 
     public static String reverse1(String str){
-      StringBuilder sb = new StringBuilder(str)
+      StringBuilder sb = new StringBuilder(str);
         return sb.reverse().toString();
     }
 
@@ -12,7 +13,7 @@ public class ReverseAString {
         int right = s.length()-1;
 
         while(left<right) {
-          char ch = s.charAt(left);
+          char c = s.charAt(left);
           s.replace(s.charAt(left), s.charAt(right));
           s.replace(s.charAt(right), c);
           left++; right--;

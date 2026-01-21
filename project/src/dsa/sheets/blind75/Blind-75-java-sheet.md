@@ -13710,3 +13710,3091 @@ Key Insights:
 1. This is a classic combinatorics problem
 2. Each path corresponds to a sequence of R's and D's
 3. Optimal substructure: paths to (i,j) = paths to (i-1,j)
+
+```
+
+
+## Dynamic Programming Problems Solutions (Continued)
+
+### 52. Jump Game
+
+```java
+/**
+ * Problem: Determine if you can reach the last index
+ * Each element represents maximum jump length from that position
+ * 
+ * Multiple approaches: Greedy, DP, Backtracking
+ */
+public class JumpGame {
+    
+    // Approach 1: Greedy - Most efficient
+    // Time: O(n), Space: O(1)
+    public boolean canJump1(int[] nums) {
+        int maxReach = 0;
+        
+        for (int i = 0; i < nums.length; i++) {
+            // If current position is beyond max reachable, return false
+            if (i > maxReach) {
+                return false;
+            }
+            
+            // Update max reachable position
+            maxReach = Math.max(maxReach, i + nums[i]);
+            
+            // Early termination: if we can reach the end
+            if (maxReach >= nums.length - 1) {
+                return true;
+            }
+        }
+        
+        return true;
+    }
+    
+    // Approach 2: DP - Bottom up
+    // Time: O(n²), Space: O(n)
+    public boolean canJump2(int[] nums) {
+        int n = nums.length;
+        boolean[] dp = new boolean[n];
+        dp[n - 1] = true; // Last position is always reachable
+        
+        // Work backwards from second last position
+        for (int i = n - 2; i >= 0; i--) {
+            int maxJump = Math.min(i + nums[i], n - 1);
+            
+            // Check if any position within jump range is reachable
+            for (int j = i + 1; j <= maxJump; j++) {
+                if (dp[j]) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[1];
+    }
+    
+    // Approach 3: Memoization (Top-down DP)
+    // Time: O(n²), Space: O(n)
+    public boolean canJump3(int[] nums) {
+        Boolean[] memo = new Boolean[nums.length];
+        return canJumpHelper(nums, 0, memo);
+    }
+    
+    private boolean canJumpHelper(int[] nums, int position, Boolean[] memo) {
+        if (position >= nums.length - 1) {
+            return true;
+        }
+        
+        if (memo[position] != null) {
+            return memo[position];
+        }
+        
+        int maxJump = Math.min(position + nums[position], nums.length - 1);
+        
+        for (int nextPosition = position + 1; nextPosition <= maxJump; nextPosition++) {
+            if (canJumpHelper(nums, nextPosition, memo)) {
+                memo[position] = true;
+                return true;
+            }
+        }
+        
+        memo[position] = false;
+        return false;
+    }
+    
+    // Approach 4: Backtracking (Naive recursion)
+    // Time: O(2^n), Space: O(n)
+    public boolean canJump4(int[] nums) {
+        return canJumpBacktrack(nums, 0);
+    }
+    
+    private boolean canJumpBacktrack(int[] nums, int position) {
+        if (position >= nums.length - 1) {
+            return true;
+        }
+        
+        int maxJump = Math.min(position + nums[position], nums.length - 1);
+        
+        for (int nextPosition = position + 1; nextPosition <= maxJump; nextPosition++) {
+            if (canJumpBacktrack(nums, nextPosition)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 5: Greedy with early termination optimization
+    // Time: O(n), Space: O(1)
+    public boolean canJump5(int[] nums) {
+        int n = nums.length;
+        int lastGoodIndex = n - 1;
+        
+        // Work backwards to find if position 0 can reach last good index
+        for (int i = n - 2; i >= 0; i--) {
+            if (i + nums[i] >= lastG
+oodIndex) {
+                lastGoodIndex = i;
+            }
+        }
+        
+        return lastGoodIndex == 0;
+    }
+    
+    // Approach 6: BFS approach
+    // Time: O(n²), Space: O(n)
+    public boolean canJump6(int[] nums) {
+        if (nums.length <= 1) return true;
+        
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] visited = new boolean[nums.length];
+        
+        queue.offer(0);
+        visited[1] = true;
+        
+        while (!queue.isEmpty()) {
+            int position = queue.poll();
+            
+            // Try all possible jumps from current position
+            for (int jump = 1; jump <= nums[position]; jump++) {
+                int nextPosition = position + jump;
+                
+                if (nextPosition >= nums.length - 1) {
+                    return true;
+                }
+                
+                if (nextPosition < nums.length && !visited[nextPosition]) {
+                    visited[nextPosition] = true;
+                    queue.offer(nextPosition);
+                }
+            }
+        }
+        
+        return false;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given array where each element represents max jump length,
+determine if you can reach the last index starting from index 0.
+
+Example 1: [2,3,1,1,4]
+- From index 0: can jump to index 1 or 2
+- From index 1: can jump to index 2, 3, or 4
+- Can reach index 4, so return true
+
+Example 2: [3,2,1,0,4]
+- From index 0: can jump to index 1, 2, or 3
+- From index 1: can jump to index 2 or 3
+- From index 2: can jump to index 3
+- From index 3: nums[2]=0, can't jump anywhere
+- Cannot reach index 4, so return false
+
+Approach 1 (Greedy - Optimal):
+Key insight: Track the maximum reachable position as we iterate.
+If current position > max reachable, we're stuck.
+
+Step-by-step for [2,3,1,1,4]:
+i=0: maxReach = max(0, 0+2) = 2
+i=1: maxReach = max(2, 1+3) = 4
+i=2: maxReach = max(4, 2+1) = 4
+Since maxReach >= 4 (last index), return true
+
+Approach 2 (DP Bottom-up):
+Work backwards from the end.
+dp[i] = true if position i can reach the end.
+
+For [2,3,1,1,4]:
+dp[3] = true (base case)
+dp[2]: can jump to 4, so dp[2] = true
+dp[4]: can jump to 3, so dp[4] = true
+dp[5]: can jump to 2,3,4, so dp[5] = true
+dp[1]: can jump to 1,2, so dp[1] = true
+
+Approach 3 (Memoization):
+Top-down approach with caching.
+For each position, try all possible jumps.
+
+Approach 4 (Backtracking):
+Naive recursive approach without memoization.
+Explores all possible paths.
+
+Approach 5 (Greedy Backwards):
+Work backwards to find if position 0 can reach a "good" position.
+A position is good if it can reach the end.
+
+Approach 6 (BFS):
+Treat as graph problem where each position connects to reachable positions.
+Use BFS to find if end is reachable from start.
+
+Approach Comparison:
+
+1. Greedy (Best):
+   - Time: O(n), Space: O(1)
+   - Most efficient solution
+   - Single pass with constant space
+
+2. DP Bottom-up:
+   - Time: O(n²), Space: O(n)
+   - Systematic approach
+   - Good for understanding DP
+
+3. Memoization:
+   - Time: O(n²), Space: O(n)
+   - Top-down thinking
+   - Natural recursive approach
+
+4. Backtracking:
+   - Time: O(2^n), Space: O(n)
+   - Exponential time
+   - Only for educational purposes
+
+5. Greedy Backwards:
+   - Time: O(n), Space: O(1)
+   - Alternative greedy approach
+   - Works backwards instead of forwards
+
+6. BFS:
+   - Time: O(n²), Space: O(n)
+   - Graph-based thinking
+   - Explores level by level
+
+Key Insights:
+1. Greedy approach works because we only care
+ about reachability
+2. If we can reach position i, we can reach any position ≤ i
+3. Maximum reachable position is monotonically non-decreasing
+4. Early termination when we can reach the end
+
+Edge Cases:
+- Single element [0]: return true (already at end)
+- Array with zeros: might get stuck
+- Large jumps: might overshoot but still valid
+- Empty array: typically return true
+
+Common Mistakes:
+1. Not handling the case where current position > max reachable
+2. Incorrect loop bounds in DP approaches
+3. Not optimizing with early termination
+4. Confusing reachability with exact landing
+
+Optimization Techniques:
+1. Early termination when end is reachable
+2. Greedy approach instead of exploring all paths
+3. Working backwards to avoid redundant computation
+4. Pruning in recursive approaches
+
+Mathematical Insight:
+The problem has optimal substructure:
+- If position i can reach the end, and position j can reach position i,
+  then position j can reach the end
+- This enables both DP and greedy solutions
+
+Applications:
+- Path finding in games
+- Resource allocation problems
+- Reachability analysis in graphs
+- Optimization problems with constraints
+
+Follow-up Questions:
+1. Return minimum number of jumps to reach end
+2. Count total number of ways to reach end
+3. Find the actual path taken
+4. Handle negative jumps or obstacles
+
+Variations:
+- Jump Game II: minimum jumps needed
+- Jump Game with costs: minimize cost to reach end
+- 2D Jump Game: jumping in a grid
+- Jump Game with obstacles: some positions blocked
+
+Testing Strategy:
+- Basic cases: [2,3,1,1,4] -> true, [3,2,1,0,4] -> false
+- Edge cases: [1], [5], [0,1]
+- All zeros except last: [0,0,0,0]
+- Large jumps: [5,1,1,1,1]
+- Minimum jumps: [1,1,1,1,1]
+
+Performance Notes:
+- Greedy approach is optimal for this problem
+- DP approaches are overkill but educational
+- Space optimization is crucial for large inputs
+- Early termination significantly improves average case
+*/
+```
+
+
+
+## Dynamic Programming Problems Solutions (Continued)
+
+### 52. Jump Game
+
+```java
+/**
+ * Problem: Determine if you can reach the last index
+ * Each element represents maximum jump length from that position
+ * 
+ * Multiple approaches: Greedy, DP, Backtracking
+ */
+public class JumpGame {
+    
+    // Approach 1: Greedy - Most efficient
+    // Time: O(n), Space: O(1)
+    public boolean canJump1(int[] nums) {
+        int maxReach = 0;
+        
+        for (int i = 0; i < nums.length; i++) {
+            // If current position is beyond max reachable, return false
+            if (i > maxReach) {
+                return false;
+            }
+            
+            // Update max reachable position
+            maxReach = Math.max(maxReach, i + nums[i]);
+            
+            // Early termination: if we can reach the end
+            if (maxReach >= nums.length - 1) {
+                return true;
+            }
+        }
+        
+        return true;
+    }
+    
+    // Approach 2: DP - Bottom up
+    // Time: O(n²), Space: O(n)
+    public boolean canJump2(int[] nums) {
+        int n = nums.length;
+        boolean[] dp = new boolean[n];
+        dp[n - 1] = true; // Last position is always reachable
+        
+        // Work backwards from second last position
+        for (int i = n - 2; i >= 0; i--) {
+            int maxJump = Math.min(i + nums[i], n - 1);
+            
+            // Check if any position within jump range is reachable
+            for (int j = i + 1; j <= maxJump; j++) {
+                if (dp[j]) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[1];
+    }
+    
+    // Approach 3: Memoization (Top-down DP)
+    // Time: O(n²), Space: O(n)
+    public boolean canJump3(int[] nums) {
+        Boolean[] memo = new Boolean[nums.length];
+        return canJumpHelper(nums, 0, memo);
+    }
+    
+    private boolean canJumpHelper(int[] nums, int position, Boolean[] memo) {
+        if (position >= nums.length - 1) {
+            return true;
+        }
+        
+        if (memo[position] != null) {
+            return memo[position];
+        }
+        
+        int maxJump = Math.min(position + nums[position], nums.length - 1);
+        
+        for (int nextPosition = position + 1; nextPosition <= maxJump; nextPosition++) {
+            if (canJumpHelper(nums, nextPosition, memo)) {
+                memo[position] = true;
+                return true;
+            }
+        }
+        
+        memo[position] = false;
+        return false;
+    }
+    
+    // Approach 4: Backtracking (Naive recursion)
+    // Time: O(2^n), Space: O(n)
+    public boolean canJump4(int[] nums) {
+        return canJumpBacktrack(nums, 0);
+    }
+    
+    private boolean canJumpBacktrack(int[] nums, int position) {
+        if (position >= nums.length - 1) {
+            return true;
+        }
+        
+        int maxJump = Math.min(position + nums[position], nums.length - 1);
+        
+        for (int nextPosition = position + 1; nextPosition <= maxJump; nextPosition++) {
+            if (canJumpBacktrack(nums, nextPosition)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 5: Greedy with early termination optimization
+    // Time: O(n), Space: O(1)
+    public boolean canJump5(int[] nums) {
+        int n = nums.length;
+        int lastGoodIndex = n - 1;
+        
+        // Work backwards to find if position 0 can reach last good index
+        for (int i = n - 2; i >= 0; i--) {
+            if (i + nums[i] >= lastG
+oodIndex) {
+                lastGoodIndex = i;
+            }
+        }
+        
+        return lastGoodIndex == 0;
+    }
+    
+    // Approach 6: BFS approach
+    // Time: O(n²), Space: O(n)
+    public boolean canJump6(int[] nums) {
+        if (nums.length <= 1) return true;
+        
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] visited = new boolean[nums.length];
+        
+        queue.offer(0);
+        visited[1] = true;
+        
+        while (!queue.isEmpty()) {
+            int position = queue.poll();
+            
+            // Try all possible jumps from current position
+            for (int jump = 1; jump <= nums[position]; jump++) {
+                int nextPosition = position + jump;
+                
+                if (nextPosition >= nums.length - 1) {
+                    return true;
+                }
+                
+                if (nextPosition < nums.length && !visited[nextPosition]) {
+                    visited[nextPosition] = true;
+                    queue.offer(nextPosition);
+                }
+            }
+        }
+        
+        return false;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given array where each element represents max jump length,
+determine if you can reach the last index starting from index 0.
+
+Example 1: [2,3,1,1,4]
+- From index 0: can jump to index 1 or 2
+- From index 1: can jump to index 2, 3, or 4
+- Can reach index 4, so return true
+
+Example 2: [3,2,1,0,4]
+- From index 0: can jump to index 1, 2, or 3
+- From index 1: can jump to index 2 or 3
+- From index 2: can jump to index 3
+- From index 3: nums[2]=0, can't jump anywhere
+- Cannot reach index 4, so return false
+
+Approach 1 (Greedy - Optimal):
+Key insight: Track the maximum reachable position as we iterate.
+If current position > max reachable, we're stuck.
+
+Step-by-step for [2,3,1,1,4]:
+i=0: maxReach = max(0, 0+2) = 2
+i=1: maxReach = max(2, 1+3) = 4
+i=2: maxReach = max(4, 2+1) = 4
+Since maxReach >= 4 (last index), return true
+
+Approach 2 (DP Bottom-up):
+Work backwards from the end.
+dp[i] = true if position i can reach the end.
+
+For [2,3,1,1,4]:
+dp[3] = true (base case)
+dp[2]: can jump to 4, so dp[2] = true
+dp[4]: can jump to 3, so dp[4] = true
+dp[5]: can jump to 2,3,4, so dp[5] = true
+dp[1]: can jump to 1,2, so dp[1] = true
+
+Approach 3 (Memoization):
+Top-down approach with caching.
+For each position, try all possible jumps.
+
+Approach 4 (Backtracking):
+Naive recursive approach without memoization.
+Explores all possible paths.
+
+Approach 5 (Greedy Backwards):
+Work backwards to find if position 0 can reach a "good" position.
+A position is good if it can reach the end.
+
+Approach 6 (BFS):
+Treat as graph problem where each position connects to reachable positions.
+Use BFS to find if end is reachable from start.
+
+Approach Comparison:
+
+1. Greedy (Best):
+   - Time: O(n), Space: O(1)
+   - Most efficient solution
+   - Single pass with constant space
+
+2. DP Bottom-up:
+   - Time: O(n²), Space: O(n)
+   - Systematic approach
+   - Good for understanding DP
+
+3. Memoization:
+   - Time: O(n²), Space: O(n)
+   - Top-down thinking
+   - Natural recursive approach
+
+4. Backtracking:
+   - Time: O(2^n), Space: O(n)
+   - Exponential time
+   - Only for educational purposes
+
+5. Greedy Backwards:
+   - Time: O(n), Space: O(1)
+   - Alternative greedy approach
+   - Works backwards instead of forwards
+
+6. BFS:
+   - Time: O(n²), Space: O(n)
+   - Graph-based thinking
+   - Explores level by level
+
+Key Insights:
+1. Greedy approach works because we only care
+ about reachability
+2. If we can reach position i, we can reach any position ≤ i
+3. Maximum reachable position is monotonically non-decreasing
+4. Early termination when we can reach the end
+
+Edge Cases:
+- Single element [0]: return true (already at end)
+- Array with zeros: might get stuck
+- Large jumps: might overshoot but still valid
+- Empty array: typically return true
+
+Common Mistakes:
+1. Not handling the case where current position > max reachable
+2. Incorrect loop bounds in DP approaches
+3. Not optimizing with early termination
+4. Confusing reachability with exact landing
+
+Optimization Techniques:
+1. Early termination when end is reachable
+2. Greedy approach instead of exploring all paths
+3. Working backwards to avoid redundant computation
+4. Pruning in recursive approaches
+
+Mathematical Insight:
+The problem has optimal substructure:
+- If position i can reach the end, and position j can reach position i,
+  then position j can reach the end
+- This enables both DP and greedy solutions
+
+Applications:
+- Path finding in games
+- Resource allocation problems
+- Reachability analysis in graphs
+- Optimization problems with constraints
+
+Follow-up Questions:
+1. Return minimum number of jumps to reach end
+2. Count total number of ways to reach end
+3. Find the actual path taken
+4. Handle negative jumps or obstacles
+
+Variations:
+- Jump Game II: minimum jumps needed
+- Jump Game with costs: minimize cost to reach end
+- 2D Jump Game: jumping in a grid
+- Jump Game with obstacles: some positions blocked
+
+Testing Strategy:
+- Basic cases: [2,3,1,1,4] -> true, [3,2,1,0,4] -> false
+- Edge cases: [1], [5], [0,1]
+- All zeros except last: [0,0,0,0]
+- Large jumps: [5,1,1,1,1]
+- Minimum jumps: [1,1,1,1,1]
+
+Performance Notes:
+- Greedy approach is optimal for this problem
+- DP approaches are overkill but educational
+- Space optimization is crucial for large inputs
+- Early termination significantly improves average case
+*/
+```
+
+That completes the Dynamic Programming section! The DP problems covered important patterns like:
+
+- **Basic DP** (Climbing Stairs, Coin Change)
+- **Optimization Problems** (House Robber series)
+- **String DP** (Word Break, Decode Ways)
+- **Sequence DP** (Longest Increasing Subsequence)
+- **Path DP** (Unique Paths, Jump Game)
+- **Combinatorial DP** (Combination Sum)
+
+Would you like me to continue with the **Graph Problems** next? The graph category includes 6 problems covering graph traversal, topological sorting, and connectivity problems.
+
+--------------------------------------------------------------
+
+
+## Graph Problems Solutions
+
+### 53. Clone Graph
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Clone an undirected graph (deep copy)
+ * 
+ * Multiple approaches: DFS, BFS with HashMap for node mapping
+ */
+public class CloneGraph {
+    
+    // Definition for a Node
+    class Node {
+        public int val;
+        public List<Node> neighbors;
+        public Node() {
+            val = 0;
+            neighbors = new ArrayList<Node>();
+        }
+        public Node(int _val) {
+            val = _val;
+            neighbors = new ArrayList<Node>();
+        }
+        public Node(int _val, ArrayList<Node> _neighbors) {
+            val = _val;
+            neighbors = _neighbors;
+        }
+    }
+    
+    // Approach 1: DFS with HashMap - Most intuitive
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph1(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        return dfsClone(node, visited);
+    }
+    
+    private Node dfsClone(Node node, Map<Node, Node> visited) {
+        // If already cloned, return the clone
+        if (visited.containsKey(node)) {
+            return visited.get(node);
+        }
+        
+        // Create clone of current node
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        
+        // Clone all neighbors
+        for (Node neighbor : node.neighbors) {
+            clone.neighbors.add(dfsClone(neighbor, visited));
+        }
+        
+        return clone;
+    }
+    
+    // Approach 2: BFS with HashMap
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph2(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        
+        // Create clone of starting node
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        queue.offer(node);
+        
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+            
+            for (Node neighbor : current.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    // Create clone of neighbor
+                    visited.put(neighbor, new Node(neighbor.val));
+                    queue.offer(neighbor);
+                }
+                
+                // Add neighbor clone to current clone's neighbors
+                visited.get(current).neighbors.add(visited.get(neighbor));
+            }
+        }
+        
+        return clone;
+    }
+    
+    // Approach 3: DFS without explicit visited map (using node modification)
+    // Time: O(V + E), Space: O(V)
+    // Note: This modifies the original graph temporarily
+    public Node cloneGraph3(Node node) {
+        if (node == null) return null;
+        
+        Map<Integer, Node> clones = new HashMap<>();
+        return dfsCloneWithMap(node, clones);
+    }
+    
+    private Node dfsCloneWithMap(Node node, Map<Integer, Node> clones) {
+        if (clones.containsKey(node.val)) {
+            return clones.get(node.val);
+        }
+        
+        Node clone = new Node(node.val);
+        clones.put(node.val, clone);
+        
+        for (Node neighbor : node.neighbors) {
+            clone.neighbors.add(dfsCloneWithMap(neighbor, clones));
+        }
+        
+        return clone;
+    }
+    
+    // Approach 4: Iterative DFS using Stack
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph4(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        Stack<Node> stack = new Stack<>();
+        
+        // Create clone of starting node
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        stack.push(node);
+        
+        while (!stack.isEmpty()) {
+            Node current = stack.pop();
+            
+            for (Node neighbor : current.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    // Create clone of neighbor
+                    visited.put(neighbor, new Node(neighbor.val));
+                    stack.push(neighbor);
+                }
+                
+                // Add neighbor clone to current clone's neighbors
+                visited.get(current).neighbors.add(visited.get(neighbor));
+            }
+        }
+        
+        return clone;
+    }
+    
+    // Approach 5: Two-pass approach (first create nodes, then connect)
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph5(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> nodeMap = new HashMap<>();
+        Set<Node> visited = new HashSet<>();
+        
+        // First pass: create all nodes
+        createNodes(node, nodeMap, visited);
+        
+        // Second pass: connect neighbors
+        visited.clear();
+        connectNeighbors(node, nodeMap, visited);
+        
+        return nodeMap.get(node);
+    }
+    
+    private void createNodes(Node node, Map<Node, Node> nodeMap, Set
+<Node> visited) {
+        if (visited.contains(node)) return;
+        
+        visited.add(node);
+        nodeMap.put(node, new Node(node.val));
+        
+        for (Node neighbor : node.neighbors) {
+            createNodes(neighbor, nodeMap, visited);
+        }
+    }
+    
+    private void connectNeighbors(Node node, Map<Node, Node> nodeMap, Set<Node> visited) {
+        if (visited.contains(node)) return;
+        
+        visited.add(node);
+        Node clone = nodeMap.get(node);
+        
+        for (Node neighbor : node.neighbors) {
+            clone.neighbors.add(nodeMap.get(neighbor));
+            connectNeighbors(neighbor, nodeMap, visited);
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Create a deep copy of an undirected graph.
+Each node has a value and a list of neighbors.
+
+Key Challenge: Handle cycles in the graph without infinite recursion.
+
+Example Graph:
+Node 1 -- Node 2
+|          |
+Node 4 -- Node 3
+
+Adjacency representation:
+1: [2, 4]
+2: [1, 3]  
+3: [2, 4]
+4: [1, 3]
+
+Approach 1 (DFS with HashMap):
+Use HashMap to track original -> clone mapping.
+This prevents infinite recursion and ensures each node is cloned exactly once.
+
+Step-by-step for above graph starting from node 1:
+1. Clone node 1, add to map: {1 -> 1'}
+2. Process neighbor 2:
+   - Clone node 2, add to map: {1 -> 1', 2 -> 2'}
+   - Process neighbor 1: already in map, return 1'
+   - Process neighbor 3:
+     - Clone node 3, add to map: {1 -> 1', 2 -> 2', 3 -> 3'}
+     - Process neighbor 2: already in map, return 2'
+     - Process neighbor 4:
+       - Clone node 4, add to map: {1 -> 1', 2 -> 2', 3 -> 3', 4 -> 4'}
+       - Process neighbors 1 and 3: both in map, return clones
+3. Process neighbor 4: already in map, return 4'
+
+Approach 2 (BFS with HashMap):
+Use queue for level-by-level traversal.
+Same mapping concept but breadth-first exploration.
+
+BFS process:
+1. Start with node 1, create clone, add to queue
+2. Process node 1: clone neighbors 2 and 4, add to queue
+3. Process node 2: neighbor 1 already cloned, clone neighbor 3, add to queue
+4. Process node 4: neighbors 1 and 3 already cloned
+5. Process node 3: neighbors 2 and 4 already cloned
+
+Approach 3 (Value-based mapping):
+Assumes node values are unique.
+Uses value as key instead of node reference.
+Simpler but only works if values are unique.
+
+Approach 4 (Iterative DFS):
+Uses explicit stack instead of recursion.
+Same logic as recursive DFS but iterative.
+
+Approach 5 (Two-pass):
+Separates node creation from edge connection.
+First pass: create all nodes
+Second pass: connect all edges
+Clearer separation of concerns.
+
+Approach Comparison:
+
+1. DFS with HashMap (Most common):
+   - Time: O(V + E), Space: O(V)
+   - Natural recursive approach
+   - Easy to understand and implement
+
+2. BFS with HashMap:
+   - Time: O(V + E), Space: O(V)
+   - Level-by-level processing
+   - Good for understanding graph structure
+
+3. Value-based mapping:
+   - Time: O(V + E), Space: O(V)
+   - Simpler if values are unique
+   - Less general than node-based mapping
+
+4. Iterative DFS:
+   - Time: O(V + E), Space: O(V)
+   - Avoids recursion overhead
+   - Good for very deep graphs
+
+5. Two-pass approach:
+   - Time: O(V + E), Space: O(V)
+   - Clear separation of concerns
+   - Easier to debug and understand
+
+Key Insights:
+1. HashMap prevents infinite loops in cyclic graphs
+2. Each node should be cloned exactly once
+3. Neighbors must
+ be cloned before connecting
+4. Both DFS and BFS work equally well
+
+Edge Cases:
+- Null input: return null
+- Single node with no neighbors: clone the node
+- Self-loop: node points to itself
+- Disconnected components: only reachable nodes are cloned
+- Empty neighbor list: valid scenario
+
+Common Mistakes:
+1. Not handling cycles (infinite recursion)
+2. Cloning nodes multiple times
+3. Not maintaining proper neighbor relationships
+4. Forgetting to handle null input
+5. Modifying original graph during cloning
+
+Optimization Techniques:
+1. Use HashMap for O(1) lookup of cloned nodes
+2. Early termination when node already cloned
+3. Iterative approach for very deep graphs
+4. Two-pass for clearer code structure
+
+Memory Considerations:
+- HashMap stores mapping for all nodes: O(V) space
+- Recursion stack depth: O(V) in worst case
+- Clone graph has same structure as original: O(V + E) space
+
+Applications:
+- Graph serialization/deserialization
+- Creating backup copies of data structures
+- Graph algorithms that modify structure
+- Distributed systems (copying graph across nodes)
+
+Follow-up Questions:
+1. Clone directed graph
+2. Clone graph with weighted edges
+3. Clone graph with additional node properties
+4. Serialize and deserialize graph
+5. Compare two graphs for equality
+
+Testing Strategy:
+- Single node: Node(1, [])
+- Two connected nodes: 1-2
+- Triangle: 1-2-3-1
+- Disconnected components: 1-2, 3-4
+- Self-loop: 1 points to itself
+- Complex graph with multiple cycles
+
+Performance Notes:
+- All approaches have same time complexity O(V + E)
+- Space complexity dominated by clone storage O(V + E)
+- HashMap operations are O(1) average case
+- DFS may have better cache locality than BFS
+
+Verification:
+To verify correctness:
+1. Check all nodes are cloned with correct values
+2. Verify neighbor relationships are preserved
+3. Ensure no shared references between original and clone
+4. Test that modifying clone doesn't affect original
+*/
+```
+
+### 54. Course Schedule
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Determine if you can finish all courses given prerequisites
+ * This is a cycle detection problem in directed graph
+ * 
+ * Multiple approaches: DFS, BFS (Kahn's Algorithm), Union-Find
+ */
+public class CourseSchedule {
+    
+    // Approach 1: DFS with cycle detection - Most intuitive
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish1(int numCourses, int[][] prerequisites) {
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[2]); // prereq[1] -> prereq[2]
+        }
+        
+        // 0: unvisited, 1: visiting, 2: visited
+        int[] state = new int[numCourses];
+        
+        // Check each course for cycles
+        for (int i = 0; i < numCourses; i++) {
+            if (state[i] == 0 && hasCycle(graph, i, state)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean hasCycle(List<List<Integer>> graph, int course, int[] state) {
+        if (state[course] == 1) {
+            return true; // Back edge found - cycle detected
+        }
+        
+        if (state[course] == 2) {
+            return false; // Already processe
+d
+        }
+        
+        state[course] = 1; // Mark as visiting
+        
+        for (int neighbor : graph.get(course)) {
+            if (hasCycle(graph, neighbor, state)) {
+                return true;
+            }
+        }
+        
+        state[course] = 2; // Mark as visited
+        return false;
+    }
+    
+    // Approach 2: BFS with Kahn's Algorithm (Topological Sort)
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish2(int numCourses, int[][] prerequisites) {
+        // Build adjacency list and calculate in-degrees
+        List<List<Integer>> graph = new ArrayList<>();
+        int[] inDegree = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[2]);
+            inDegree[prereq[2]]++;
+        }
+        
+        // Start with courses that have no prerequisites
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (inDegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        
+        int processedCourses = 0;
+        
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            processedCourses++;
+            
+            // Remove this course and update in-degrees
+            for (int neighbor : graph.get(course)) {
+                inDegree[neighbor]--;
+                if (inDegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+        
+        return processedCourses == numCourses;
+    }
+    
+    // Approach 3: DFS with colors (White, Gray, Black)
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish3(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> graph = buildGraph(numCourses, prerequisites);
+        
+        // 0: white (unvisited), 1: gray (visiting), 2: black (visited)
+        int[] color = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (color[i] == 0 && dfsHasCycle(graph, i, color)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean dfsHasCycle(List<List<Integer>> graph, int node, int[] color) {
+        color[node] = 1; // Mark as gray (visiting)
+        
+        for (int neighbor : graph.get(node)) {
+            if (color[neighbor] == 1) {
+                return true; // Back edge - cycle found
+            }
+            if (color[neighbor] == 0 && dfsHasCycle(graph, neighbor, color)) {
+                return true;
+            }
+        }
+        
+        color[node] = 2; // Mark as black (visited)
+        return false;
+    }
+    
+    // Approach 4: Union-Find (less efficient for this problem)
+    // Time: O(E * α(V)), Space: O(V)
+    public boolean canFinish4(int numCourses, int[][] prerequisites) {
+        UnionFind uf = new UnionFind(numCourses);
+        
+        // Build adjacency list for cycle detection
+        List<List<Integer>> graph = buildGraph(numCourses, prerequisites);
+        boolean[] visited = new boolean[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (!visited[i] && hasDirectedCycle(graph, i, visited, new boolean[numCourses])) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean hasDirectedCycle(List<List<Integer>> graph, int node, 
+                                   boolean[] visited, boolean[] recStack) {
+        visited[node] = true;
+        recStack[node] = true;
+        
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor] && hasDirectedCycle(graph, neighbor, visited, recStack)) {
+                return true;
+            } else if (recStack[neighbor]) {
+                return true;
+            }
+        }
+        
+        recStack[node] = false;
+        return false;
+    }
+    
+    // Helper method to build adjacency list
+    private List<List<Integer>> buildGraph(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[2]);
+        }
+        
+        return graph;
+    }
+    
+    // Union-Find data structure
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+        
+        public boolean union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX == rootY) {
+                return false; // Already in same set
+            }
+            
+            if (rank[rootX] < rank[rootY]) {
+                parent[rootX] = rootY;
+            } else if (rank[rootX] > rank[rootY]) {
+                parent[rootY] = rootX;
+            } else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+            
+            return true;
+        }
+    }
+    
+    // Approach 5: Iterative DFS with explicit stack
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish5(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> graph = buildGraph(numCourses,
+ prerequisites);
+        
+        // 0: unvisited, 1: visiting, 2: visited
+        int[] state = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (state[i] == 0 && iterativeDFSHasCycle(graph, i, state)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean iterativeDFSHasCycle(List<List<Integer>> graph, int start, int[] state) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(start);
+        
+        while (!stack.isEmpty()) {
+            int node = stack.peek();
+            
+            if (state[node] == 2) {
+                stack.pop();
+                continue;
+            }
+            
+            if (state[node] == 1) {
+                state[node] = 2;
+                stack.pop();
+                continue;
+            }
+            
+            state[node] = 1;
+            
+            for (int neighbor : graph.get(node)) {
+                if (state[neighbor] == 1) {
+                    return true; // Cycle detected
+                }
+                if (state[neighbor] == 0) {
+                    stack.push(neighbor);
+                }
+            }
+        }
+        
+        return false;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given numCourses and prerequisites array where prerequisites[i] = [ai, bi]
+indicates that you must take course bi before course ai.
+Determine if you can finish all courses.
+
+This is equivalent to detecting cycles in a directed graph:
+- Courses are vertices
+- Prerequisites are directed edges
+- If there's a cycle, some courses depend on each other circularly
+
+Example 1: numCourses = 2, prerequisites = [[1,0]]
+Course 1 requires course 0. No cycle, so return true.
+
+Example 2: numCourses = 2, prerequisites = [[1,0],[0,1]]
+Course 1 requires course 0, and course 0 requires course 1.
+This creates a cycle: 0 -> 1 -> 0, so return false.
+
+Approach 1 (DFS Cycle Detection):
+Use three states for each node:
+- 0 (white): unvisited
+- 1 (gray): currently being processed (in recursion stack)
+- 2 (black): completely processed
+
+If we encounter a gray node during DFS, we found a back edge (cycle).
+
+Approach 2 (Kahn's Algorithm - Topological Sort):
+1. Calculate in-degree for each course
+2. Start with courses having in-degree 0 (no prerequisites)
+3. Remove these courses and update in-degrees of dependent courses
+4. If we can process all courses, no cycle exists
+
+Step-by-step for [[1,0],[0,2],[2,1]]:
+Initial in-degrees: [1, 1, 1]
+No course has in-degree 0, so we can't start -> cycle exists
+
+Approach 3 (DFS with Colors):
+Similar to approach 1 but uses more descriptive color names.
+White = unvisited, Gray = visiting, Black = visited.
+
+Approach 4 (Union-Find):
+Less efficient for this specific problem.
+Still needs DFS for directed cycle detection.
+
+Approach 5 (Iterative DFS):
+Uses explicit stack instead of recursion.
+Same logic as recursive DFS but iterative.
+
+Approach Comparison:
+
+1. DFS Cycle Detection (Most intuitive):
+   - Time: O(V + E), Space: O(V + E)
+   - Direct cycle detection
+   - Easy to understand
+
+2. Kahn's Algorithm (Most elegant):
+   - Time: O(V + E), Space: O(V + E)
+   - Topological sort approach
+   - Natural for scheduling problems
+
+3. DFS with Colors:
+   - Time: O(V + E), Space: O(V + E)
+   - Same as approach 1 with clearer naming
+   - Good for educational purposes
+
+4. Union-Find:
+   - Time: O(E * α(V)), Space: O(V)
+   - Overkill for this problem
+   - Better for undirected cycle detection
+
+5. Iterative DFS:
+   - Time: O(V + E), Space: O(V + E)
+   - Avoids recursion overhead
+   - Good for very deep graphs
+
+Key Insights:
+1. Course scheduling is cycle detection in directed graph
+2. DFS and BFS both work effectively
+3. Topological sort naturally solves the problem
+4. Three-state DFS prevents infinite loops
+
+Edge Cases:
+- No prerequisites: always possible
+- Self-prerequisite: [0,0
+] creates immediate cycle
+- Disconnected components: check all components
+- Empty prerequisites: all courses can be finished
+
+Common Mistakes:
+1. Treating as undirected graph
+2. Not handling disconnected components
+3. Incorrect state management in DFS
+4. Wrong direction of edges in graph construction
+5. Not resetting visited state between components
+
+Graph Construction:
+For prerequisite [a, b]: b -> a (b must be taken before a)
+This represents the dependency relationship correctly.
+
+Applications:
+- Course scheduling in universities
+- Task scheduling with dependencies
+- Build systems (compile order)
+- Project management (task dependencies)
+- Deadlock detection in operating systems
+
+Follow-up Questions:
+1. Return the actual course order (Course Schedule II)
+2. Find minimum semesters needed
+3. Handle course capacities and time slots
+4. Multiple prerequisite paths
+5. Optional prerequisites
+
+Optimization Techniques:
+1. Early termination when cycle found
+2. Skip already processed components
+3. Use iterative approach for deep graphs
+4. Optimize graph representation for sparse graphs
+
+Testing Strategy:
+- No prerequisites: numCourses=3, prerequisites=[]
+- Simple chain: [[1,0],[2,1]]
+- Simple cycle: [[1,0],[0,1]]
+- Complex cycle: [[1,0],[2,1],[0,2]]
+- Disconnected: [[1,0],[3,2]]
+- Self-loop: [[0,0]]
+
+Performance Notes:
+- Both DFS and BFS have same time complexity
+- Space complexity dominated by graph storage
+- Kahn's algorithm often preferred for its intuitive nature
+- DFS may have better cache locality
+*/
+```
+
+### 55. Pacific Atlantic Water Flow
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find cells where water can flow to both Pacific and Atlantic oceans
+ * Water flows from higher or equal height to lower height
+ * 
+ * Optimal Approach: DFS/BFS from ocean boundaries
+ * Time: O(m*n), Space: O(m*n)
+ */
+public class PacificAtlanticWaterFlow {
+    
+    // Approach 1: DFS from ocean boundaries - Most efficient
+    // Time: O(m*n), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic1(int[][] heights) {
+        if (heights == null || heights.length == 0 || heights[2].length == 0) {
+            return new ArrayList<>();
+        }
+        
+        int m = heights.length;
+        int n = heights[2].length;
+        
+        // Track cells reachable from each ocean
+        boolean[][] pacificReachable = new boolean[m][n];
+        boolean[][] atlanticReachable = new boolean[m][n];
+        
+        // DFS from Pacific boundaries (top and left edges)
+        for (int i = 0; i < m; i++) {
+            dfs(heights, pacificReachable, i, 0, heights[i][2]);
+        }
+        for (int j = 0; j < n; j++) {
+            dfs(heights, pacificReachable, 0, j, heights[2][j]);
+        }
+        
+        // DFS from Atlantic boundaries (bottom and right edges)
+        for (int i = 0; i < m; i++) {
+            dfs(heights, atlanticReachable, i, n - 1, heights[i][n - 1]);
+        }
+        for (int j = 0; j < n; j++) {
+            dfs(heights, atlanticReachable, m - 1, j, heights[m - 1][j]);
+        }
+        
+        // Find cells reachable from both oceans
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pacificReachable[i][j] && atlanticReachable[i][j]) {
+
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private void dfs(int[][] heights, boolean[][] reachable, int row, int col, int prevHeight) {
+        int m = heights.length;
+        int n = heights[2].length;
+        
+        // Check bounds and conditions
+        if (row < 0 || row >= m || col < 0 || col >= n || 
+            reachable[row][col] || heights[row][col] < prevHeight) {
+            return;
+        }
+        
+        reachable[row][col] = true;
+        
+        // Explore all 4 directions
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] dir : directions) {
+            dfs(heights, reachable, row + dir[2], col + dir[1], heights[row][col]);
+        }
+    }
+    
+    // Approach 2: BFS from ocean boundaries
+    // Time: O(m*n), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic2(int[][] heights) {
+        if (heights == null || heights.length == 0) return new ArrayList<>();
+        
+        int m = heights.length;
+        int n = heights[2].length;
+        
+        boolean[][] pacificReachable = new boolean[m][n];
+        boolean[][] atlanticReachable = new boolean[m][n];
+        
+        Queue<int[]> pacificQueue = new LinkedList<>();
+        Queue<int[]> atlanticQueue = new LinkedList<>();
+        
+        // Add Pacific boundary cells to queue
+        for (int i = 0; i < m; i++) {
+            pacificQueue.offer(new int[]{i, 0});
+            pacificReachable[i][2] = true;
+        }
+        for (int j = 1; j < n; j++) {
+            pacificQueue.offer(new int[]{0, j});
+            pacificReachable[2][j] = true;
+        }
+        
+        // Add Atlantic boundary cells to queue
+        for (int i = 0; i < m; i++) {
+            atlanticQueue.offer(new int[]{i, n - 1});
+            atlanticReachable[i][n - 1] = true;
+        }
+        for (int j = 0; j < n - 1; j++) {
+            atlanticQueue.offer(new int[]{m - 1, j});
+            atlanticReachable[m - 1][j] = true;
+        }
+        
+        // BFS from Pacific
+        bfs(heights, pacificQueue, pacificReachable);
+        
+        // BFS from Atlantic
+        bfs(heights, atlanticQueue, atlanticReachable);
+        
+        // Find intersection
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pacificReachable[i][j] && atlanticReachable[i][j]) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private void bfs(int[][] heights, Queue<int[]> queue, boolean[][] reachable) {
+        int m = heights.length;
+        int n = heights[2].length;
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            int row = cell[2];
+            int col = cell[1];
+            
+            for (int[] dir : directions) {
+                int newRow = row + dir[2];
+                int newCol = col + dir[1];
+                
+                if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                    !reachable[newRow][newCol] && 
+                    heights[newRow][newCol] >= heights[row][col]) {
+                    
+                    reachable[newRow][newCol] = true;
+                    queue.offer(new int[]{newRow, newCol});
+                }
+            }
+        }
+    }
+    
+    // Approach 3: DFS from each cell (less efficient)
+    // Time: O(m*n*4^(m*n)), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic3(int[][] heights) {
+        if (heights == null || heights.length == 0) return new ArrayList<>();
+        
+        int m = heights.length;
+        int n = heights[2].length;
+        List<List<Integer>> result = new ArrayList<>();
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                boolean canReachPacific = canReachOcean(heights, i, j, new boolean[m][n], true);
+                boolean canReachAtlantic = canReachOcean(heights, i, j, new boolean[m][n], false);
+                
+                if (canReachPacific && canReachAtlantic) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private boolean canReachOcean(int[][] heights, int row, int col, 
+                                 boolean[][] visited, boolean isPacific) {
+        int m = heights.length;
+        int n = heights[2].length;
+        
+        // Check if reached ocean boundary
+        if (isPacific && (row == 0 || col == 0)) return true;
+        if (!isPacific && (row == m - 1 || col == n - 1)) return true;
+        
+        visited[row][col] = true;
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int[] dir : directions) {
+            int newRow = row + dir[2];
+            int newCol = col + dir[1];
+            
+            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                !visited[newRow][newCol] && 
+                heights[newRow][newCol] <= heights[row][col]) {
+                
+                if (can
+ReachOcean(heights, newRow, newCol, visited, isPacific)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 4: Union-Find approach (complex for this problem)
+    // Time: O(m*n*α(m*n)), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic4(int[][] heights) {
+        if (heights == null || heights.length == 0) return new ArrayList<>();
+        
+        int m = heights.length;
+        int n = heights[2].length;
+        
+        // Create virtual nodes for oceans
+        int pacificNode = m * n;
+        int atlanticNode = m * n + 1;
+        
+        UnionFind uf = new UnionFind(m * n + 2);
+        
+        // Connect boundary cells to respective oceans
+        for (int i = 0; i < m; i++) {
+            uf.union(i * n, pacificNode); // Left edge to Pacific
+            uf.union(i * n + (n - 1), atlanticNode); // Right edge to Atlantic
+        }
+        for (int j = 0; j < n; j++) {
+            uf.union(j, pacificNode); // Top edge to Pacific
+            uf.union((m - 1) * n + j, atlanticNode); // Bottom edge to Atlantic
+        }
+        
+        // Connect adjacent cells with valid flow
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int[] dir : directions) {
+                    int newRow = i + dir[2];
+                    int newCol = j + dir[1];
+                    
+                    if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                        heights[newRow][newCol] >= heights[i][j]) {
+                        
+                        uf.union(i * n + j, newRow * n + newCol);
+                    }
+                }
+            }
+        }
+        
+        // Find cells connected to both oceans
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int cellId = i * n + j;
+                if (uf.connected(cellId, pacificNode) && uf.connected(cellId, atlanticNode)) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    // Union-Find implementation
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+        
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX != rootY) {
+                if (rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                } else if (rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
+                }
+            }
+        }
+        
+        public boolean connected(int x, int y) {
+            return find(x) == find(y);
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given a 2D grid representing heights, find all cells where water can flow to both Pacific (top/left edges) and Atlantic (bottom/right edges) oceans.
+
+Water flows from higher or equal height to adjacent cells with lower or equal height.
+
+Key Insight: Instead of checking from each cell whether it can reach both oceans, start from ocean boundaries and find all reachable cells. Then find the intersection.
+
+Example:
+Pacific ~   ~   ~   ~   ~ 
+       ~  1   2   2   3  (5) *
+       ~  3   2   3  (4) (4) *
+       ~  2   4  (5)  3   1  *
+       ~ (6) (7)  1   4   5  *
+       ~ (5)  1   1   2   4  *
+          *   *   *   *   * Atlantic
+
+Cells in parentheses can reach both oceans.
+
+Approach 1 (DFS from Boundaries - Optimal):
+1. Start DFS from all Pacific boundary
+ cells (top and left edges)
+2. Mark all cells reachable from Pacific
+3. Start DFS from all Atlantic boundary cells (bottom and right edges)  
+4. Mark all cells reachable from Atlantic
+5. Find intersection of both sets
+
+Why this works:
+- If water can flow from cell A to ocean, then water can flow from ocean to cell A
+- We reverse the flow direction: start from ocean and go uphill
+- This avoids redundant computation
+
+Approach 2 (BFS from Boundaries):
+Same logic as DFS but uses BFS for traversal.
+Might be preferred for very deep grids to avoid stack overflow.
+
+Approach 3 (DFS from Each Cell):
+For each cell, check if it can reach both oceans.
+Much less efficient due to repeated computation.
+
+Approach 4 (Union-Find):
+Create virtual nodes for oceans and connect cells based on flow rules.
+Overkill for this problem but demonstrates alternative thinking.
+
+Approach Comparison:
+
+1. DFS from Boundaries (Best):
+   - Time: O(m*n), Space: O(m*n)
+   - Most efficient approach
+   - Each cell visited at most twice
+
+2. BFS from Boundaries:
+   - Time: O(m*n), Space: O(m*n)
+   - Same efficiency as DFS
+   - Better for very deep recursion
+
+3. DFS from Each Cell:
+   - Time: O(m*n*4^(m*n)), Space: O(m*n)
+   - Exponential time complexity
+   - Only for educational purposes
+
+4. Union-Find:
+   - Time: O(m*n*α(m*n)), Space: O(m*n)
+   - Complex implementation
+   - Not natural for this problem
+
+Key Insights:
+1. Reverse thinking: start from oceans, not from cells
+2. Water flow is bidirectional for reachability
+3. Intersection of two reachable sets gives answer
+4. Boundary conditions define ocean access
+
+Edge Cases:
+- Single cell: check if it's on boundary
+- All same height: all cells can reach both oceans
+- Strictly increasing/decreasing: only some cells reachable
+- Empty grid: return empty result
+
+Common Mistakes:
+1. Wrong flow direction (should be from lower to higher when reversing)
+2. Not handling boundary conditions correctly
+3. Inefficient approach checking from each cell
+4. Incorrect boundary definitions for oceans
+
+Optimization Techniques:
+1. Start from boundaries to avoid redundant computation
+2. Use visited array to prevent revisiting cells
+3. Early termination when both oceans reached
+4. Choose DFS vs BFS based on grid characteristics
+
+Flow Direction Logic:
+Original: water flows from high to low
+Reversed: we go from low to high (uphill)
+In code: heights[newRow][newCol] >= heights[row][col]
+
+Applications:
+- Watershed analysis in geography
+- Network flow problems
+- Drainage system design
+- Flood modeling
+- Terrain analysis
+
+Follow-up Questions:
+1. Find shortest path to both oceans
+2. Handle multiple oceans
+3. Add obstacles or barriers
+4. 3D version with height layers
+5. Dynamic height changes
+
+Testing Strategy:
+- Single cell grids
+- All same height
+- Monotonic increasing/decreasing
+- Complex terrain with
+ peaks and valleys
+- Edge cases with boundaries
+
+Performance Notes:
+- DFS and BFS have same time complexity
+- Space complexity dominated by visited arrays
+- DFS may have better cache locality
+- BFS better for very deep grids (stack overflow prevention)
+
+Visual Understanding:
+Think of it as two flood-fill operations:
+1. Pacific flood starts from top/left edges
+2. Atlantic flood starts from bottom/right edges
+3. Areas reached by both floods are the answer
+
+Memory Optimization:
+- Can use single array with bit manipulation for two boolean arrays
+- In-place marking if input modification allowed
+- Streaming approach for very large grids
+*/
+```
+
+### 56. Number of Islands
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Count number of islands in 2D grid
+ * '1' represents land, '0' represents water
+ * Islands are connected horizontally or vertically
+ * 
+ * Multiple approaches: DFS, BFS, Union-Find
+ */
+public class NumberOfIslands {
+    
+    // Approach 1: DFS - Most intuitive and efficient
+    // Time: O(m*n), Space: O(m*n) in worst case for recursion stack
+    public int numIslands1(char[][] grid) {
+        if (grid == null || grid.length == 0 || grid[2].length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length;
+        int n = grid[2].length;
+        int count = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    private void dfs(char[][] grid, int row, int col) {
+        int m = grid.length;
+        int n = grid[2].length;
+        
+        // Check bounds and if current cell is water or already visited
+        if (row < 0 || row >= m || col < 0 || col >= n || grid[row][col] == '0') {
+            return;
+        }
+        
+        // Mark current cell as visited by changing '1' to '0'
+        grid[row][col] = '0';
+        
+        // Explore all 4 directions
+        dfs(grid, row - 1, col); // up
+        dfs(grid, row + 1, col); // down
+        dfs(grid, row, col - 1); // left
+        dfs(grid, row, col + 1); // right
+    }
+    
+    // Approach 2: BFS - Alternative traversal method
+    // Time: O(m*n), Space: O(min(m,n)) for queue
+    public int numIslands2(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        
+        int m = grid.length;
+        int n = grid[2].length;
+        int count = 0;
+        
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    
+                    // BFS to mark all connected land
+                    Queue<int[]> queue = new LinkedList<>();
+                    queue.offer(new int[]{i, j});
+                    grid[i][j] = '0'; // Mark as visited
+                    
+                    while (!queue.isEmpty()) {
+                        int[] cell = queue.poll();
+                        int row = cell[2];
+                        int col = cell[1];
+                        
+                        for (int[] dir : directions) {
+                            int newRow = row + dir[2];
+                            int newCol = col + dir[1];
+                            
+                            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                                grid[newRow][newCol] == '1') {
+                                
+                                grid[newRow][newCol] = '0'; // Mark as visited
+                                queue.offer(new int[]{newRow, newCol});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    // Approach 3: DFS without modifying input grid
+    // Time: O(m*n), Space: O(m*n)
+    public int numIslands3(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        
+        int m = grid.length;
+        int n = grid[2].length;
+        boolean[][] visited = new boolean[m][n];
+        int count = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1' && !visited[i][j]) {
+                    count++;
+                    dfsWithVisited(grid, visited, i, j);
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    private void dfsWithVisited(char[][] grid,
+ boolean[][] visited, int row, int col) {
+        int m = grid.length;
+        int n = grid[2].length;
+        
+        if (row < 0 || row >= m || col < 0 || col >= n || 
+            visited[row][col] || grid[row][col] == '0') {
+            return;
+        }
+        
+        visited[row][col] = true;
+        
+        // Explore all 4 directions
+        dfsWithVisited(grid, visited, row - 1, col);
+        dfsWithVisited(grid, visited, row + 1, col);
+        dfsWithVisited(grid, visited, row, col - 1);
+        dfsWithVisited(grid, visited, row, col + 1);
+    }
+    
+    // Approach 4: Union-Find - Good for dynamic connectivity
+    // Time: O(m*n*α(m*n)), Space: O(m*n)
+    public int numIslands4(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        
+        int m = grid.length;
+        int n = grid[2].length;
+        
+        UnionFind uf = new UnionFind(grid);
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    for (int[] dir : directions) {
+                        int newRow = i + dir[2];
+                        int newCol = j + dir[1];
+                        
+                        if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                            grid[newRow][newCol] == '1') {
+                            
+                            uf.union(i * n + j, newRow * n + newCol);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return uf.getCount();
+    }
+    
+    // Union-Find implementation
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        private int count;
+        
+        public UnionFind(char[][] grid) {
+            int m = grid.length;
+            int n = grid[2].length;
+            parent = new int[m * n];
+            rank = new int[m * n];
+            count = 0;
+            
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (grid[i][j] == '1') {
+                        int id = i * n + j;
+                        parent[id] = id;
+                        count++;
+                    }
+                }
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]); // Path compression
+            }
+            return parent[x];
+        }
+        
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX != rootY) {
+                // Union by rank
+                if (rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                } else if (rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
+                }
+                count--; // Decrease count when two components merge
+            }
+        }
+        
+        public int getCount() {
+            return count;
+        }
+    }
+    
+    // Approach 5: Iterative DFS using Stack
+    // Time: O(m*n), Space: O(m*n)
+    public int numIslands5(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        
+        int m = grid.length;
+        int n = grid[2].length;
+        int count = 0;
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    
+                    // Iterative DFS using stack
+                    Stack<int[]> stack = new Stack<>();
+                    stack.push(new int[]{i, j});
+                    grid[i][j] = '0';
+                    
+                    while (!stack.isEmpty()) {
+                        int[] cell = stack.pop();
+                        int row = cell[2];
+                        int col = cell[1];
+                        
+                        for (int[] dir : directions) {
+                            int newRow = row + dir[2];
+                            int newCol = col + dir[1];
+                            
+                            if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n &&
+                                grid[newRow][newCol] == '1') {
+                                
+                                grid[newRow][newCol] = '0';
+                                stack.push(new int[]{newRow, newCol});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return count;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Count the number of islands in a 2D binary grid.
+An island is surrounded by water and formed by connecting adjacent lands horizontally or vertically.
+
+Example:
+Input: grid = [
+  ["1","1","1","1","0"],
+  ["1","1","0","1","0"],
+  ["1","1","0","0","0"],
+  ["0","0","0","0","0"]
+]
+Output: 1 (one large island)
+
+Input: grid = [
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+Output: 3 (three separate islands)
+
+Approach 1 (DFS - Most Common):
+1. Iterate through each cell in the grid
+2. When we find a '1' (land), increment island count
+3. Use DFS to mark all connected land cells as visited (change to '0')
+4. This ensures each island is counted exactly once
+
+Why
+ it works:
+- Each connected component of '1's represents one island
+- DFS explores the entire connected component
+- Marking visited cells prevents double counting
+
+Approach 2 (BFS):
+Same logic as DFS but uses queue for breadth-first exploration.
+Good alternative when recursion depth might be too large.
+
+Approach 3 (DFS with Visited Array):
+Preserves original grid by using separate visited array.
+Useful when input modification is not allowed.
+
+Approach 4 (Union-Find):
+Treats each land cell as a node and connects adjacent land cells.
+Number of connected components = number of islands.
+Good for dynamic scenarios where grid changes frequently.
+
+Approach 5 (Iterative DFS):
+Uses explicit stack instead of recursion.
+Avoids potential stack overflow for very large islands.
+
+Approach Comparison:
+
+1. DFS (Best for most cases):
+   - Time: O(m*n), Space: O(m*n) worst case
+   - Most intuitive and commonly used
+   - Modifies input grid
+
+2. BFS:
+   - Time: O(m*n), Space: O(min(m,n))
+   - Good for very deep islands
+   - Level-by-level exploration
+
+3. DFS with Visited:
+   - Time: O(m*n), Space: O(m*n)
+   - Preserves original grid
+   - Extra space for visited array
+
+4. Union-Find:
+   - Time: O(m*n*α(m*n)), Space: O(m*n)
+   - Good for dynamic connectivity
+   - Overkill for static problem
+
+5. Iterative DFS:
+   - Time: O(m*n), Space: O(m*n)
+   - Avoids recursion overhead
+   - Explicit stack management
+
+Key Insights:
+1. Each island is a connected component
+2. DFS/BFS can explore entire connected component
+3. Mark visited cells to avoid double counting
+4. Only 4-directional connectivity (not diagonal)
+
+Edge Cases:
+- Empty grid: return 0
+- All water ('0'): return 0
+- All land ('1'): return 1
+- Single cell: return 1 if land, 0 if water
+- Diagonal connections: not considered connected
+
+Common Mistakes:
+1. Including diagonal connections
+2. Not marking visited cells
+3. Incorrect boundary checks
+4. Modifying grid when preservation required
+5. Stack overflow with deep recursion
+
+Optimization Techniques:
+1. Early termination when all cells processed
+2. Iterative approach for very large grids
+3. Union-Find for dynamic scenarios
+4. Bit manipulation for space optimization
+
+Space Complexity Analysis:
+- DFS: O(m*n) worst case when entire grid is one island
+- BFS: O(min(m,n)) for queue size
+- Visited array: O(m*n) additional space
+- Union-Find: O(m*n) for parent array
+
+Applications:
+- Image processing (connected components)
+- Geographic information systems
+- Network connectivity analysis
+- Cluster analysis in data mining
+- Game development (terrain analysis)
+
+Follow-up Questions:
+1. Count islands of specific size
+2. Find largest island
+3. Handle diagonal connections
+4. Dynamic island updates (add/remove land)
+5. 3D version with height layers
+
+Variations:
+- Number of Islands II (dynamic updates)
+- Max Area of Island
+- Island Perimeter
+- Number of Distinct Islands
+- Making A Large Island
+
+Testing Strategy:
+- Empty grid: []
+- Single cell: [["1"]], [["0"]]
+- All water: [["0","0"],["0","0"]]
+- All land: [["1","1"],["1","1"]]
+- Multiple islands: complex patterns
+- Large single island: stress test recursion
+
+Performance Notes:
+- DFS and BFS have same time complexity
+- BFS generally uses
+ less space
+- Iterative approaches avoid stack overflow
+- Union-Find has slight overhead but good for dynamic scenarios
+
+Memory Optimization:
+- Modify input grid to save space (if allowed)
+- Use bit manipulation for visited tracking
+- Streaming approach for very large grids
+- Compress sparse grids
+*/
+```
+
+### 57. Longest Consecutive Sequence
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find length of longest consecutive elements sequence
+ * Must run in O(n) time
+ * 
+ * Optimal Approach: HashSet with smart iteration
+ * Time: O(n), Space: O(n)
+ */
+public class LongestConsecutiveSequence {
+    
+    // Approach 1: HashSet with smart iteration - Optimal
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive1(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        int longestStreak = 0;
+        
+        for (int num : numSet) {
+            // Only start counting from the beginning of a sequence
+            if (!numSet.contains(num - 1)) {
+                int currentNum = num;
+                int currentStreak = 1;
+                
+                // Count consecutive numbers
+                while (numSet.contains(currentNum + 1)) {
+                    currentNum++;
+                    currentStreak++;
+                }
+                
+                longestStreak = Math.max(longestStreak, currentStreak);
+            }
+        }
+        
+        return longestStreak;
+    }
+    
+    // Approach 2: Sorting - Simple but not optimal time complexity
+    // Time: O(n log n), Space: O(1)
+    public int longestConsecutive2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Arrays.sort(nums);
+        
+        int longestStreak = 1;
+        int currentStreak = 1;
+        
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != nums[i - 1]) { // Skip duplicates
+                if (nums[i] == nums[i - 1] + 1) {
+                    currentStreak++;
+                } else {
+                    longestStreak = Math.max(longestStreak, currentStreak);
+                    currentStreak = 1;
+                }
+            }
+        }
+        
+        return Math.max(longestStreak, currentStreak);
+    }
+    
+    // Approach 3: HashMap with memoization
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive3(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Map<Integer, Integer> lengthMap = new HashMap<>();
+        Set<Integer> numSet = new HashSet<>();
+        
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        int maxLength = 0;
+        
+        for (int num : numSet) {
+            maxLength = Math.max(maxLength, getSequenceLength(num, numSet, lengthMap));
+        }
+        
+        return maxLength;
+    }
+    
+    private int getSequenceLength(int num, Set<Integer> numSet, Map<Integer, Integer> lengthMap) {
+        if (lengthMap.containsKey(num)) {
+            return lengthMap.get(num);
+        }
+        
+        if (!numSet.contains(num)) {
+            lengthMap.put(num, 0);
+            return 0;
+        }
+        
+        int length = 1 + getSequenceLength(num + 1, numSet, lengthMap);
+        lengthMap.put(num, length);
+        return length;
+    }
+    
+    // Approach 4: Union-Find - Overkill but demonstrates concept
+    // Time: O(n*α(n)), Space: O(n)
+    public int longestConsecutive4(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        UnionFind uf = new UnionFind();
+        Set<Integer> numSet = new HashSet<>();
+        
+        // Add all numbers to set and union-find
+        for (int num : nums) {
+            if (!numSet.contains(num)) {
+                numSet.add(num);
+                uf.makeSet(num);
+                
+                // Union with adjacent numbers if they exist
+                if (numSet.contains(num - 1)) {
+                    uf.union(num, num - 1);
+                }
+                if (numSet.contains(num + 1)) {
+                    uf.union(num, num + 1);
+                }
+            }
+        }
+        
+        return uf.getMaxComponentSize();
+    }
+    
+    // Union-Find implementation
+    class UnionFind {
+        private Map<Integer, Integer> parent;
+        private Map<Integer, Integer> size;
+        
+        public UnionFind() {
+            parent = new HashMap<>();
+            size = new HashMap<>();
+        }
+        
+        public void makeSet(int x) {
+            parent.put(x, x);
+            size.put(x, 1);
+        }
+        
+        public int find(int x) {
+            if (parent.get(x) != x) {
+                parent.put(x, find(parent.get(x))); // Path compression
+            }
+
+            return parent.get(x);
+        }
+        
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX != rootY) {
+                // Union by size
+                if (size.get(rootX) < size.get(rootY)) {
+                    parent.put(rootX, rootY);
+                    size.put(rootY, size.get(rootY) + size.get(rootX));
+                } else {
+                    parent.put(rootY, rootX);
+                    size.put(rootX, size.get(rootX) + size.get(rootY));
+                }
+            }
+        }
+        
+        public int getMaxComponentSize() {
+            return size.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+        }
+    }
+    
+    // Approach 5: Two-pass HashSet approach
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive5(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        Set<Integer> visited = new HashSet<>();
+        int maxLength = 0;
+        
+        for (int num : nums) {
+            if (!visited.contains(num)) {
+                int length = exploreSequence(num, numSet, visited);
+                maxLength = Math.max(maxLength, length);
+            }
+        }
+        
+        return maxLength;
+    }
+    
+    private int exploreSequence(int start, Set<Integer> numSet, Set<Integer> visited) {
+        // Find the actual start of the sequence
+        while (numSet.contains(start - 1)) {
+            start--;
+        }
+        
+        int length = 0;
+        while (numSet.contains(start)) {
+            visited.add(start);
+            start++;
+            length++;
+        }
+        
+        return length;
+    }
+    
+    // Approach 6: HashMap with range merging
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive6(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        // Map: number -> length of sequence ending at this number
+        Map<Integer, Integer> ranges = new HashMap<>();
+        int maxLength = 0;
+        
+        for (int num : nums) {
+            if (!ranges.containsKey(num)) {
+                int leftLength = ranges.getOrDefault(num - 1, 0);
+                int rightLength = ranges.getOrDefault(num + 1, 0);
+                int totalLength = leftLength + rightLength + 1;
+                
+                ranges.put(num, totalLength);
+                
+                // Update the boundaries of the merged sequence
+                ranges.put(num - leftLength, totalLength);
+                ranges.put(num + rightLength, totalLength);
+                
+                maxLength = Math.max(maxLength, totalLength);
+            }
+        }
+        
+        return maxLength;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Find the length of the longest consecutive elements sequence.
+Must run in O(n) time complexity.
+
+Example:
+Input: [100,4,200,1,3,2]
+Output: 4 (sequence: 1,2,3,4)
+
+Input: [0,3,7,2,5,8,4,6,0,1]
+Output: 9 (sequence: 0,1,2,3,4,5,6,7,8)
+
+Approach 1 (HashSet with Smart Iteration - Optimal):
+Key insight: Only start counting from the beginning of each sequence.
+
+Algorithm:
+1. Put all numbers in HashSet for O(1) lookup
+2. For each number, check if it's the start of a sequence (num-1 not in set)
+3. If it's a start, count consecutive numbers
+4. Track maximum length found
+
+Why O(n) time:
+- Each number is visited at most twice (once in outer loop, once in inner while loop)
+- HashSet operations are O(1)
+- Total time: O(n)
+
+Example trace for [100,4,200,1,3,2]:
+- num=100: 99 not in set, start sequence. 100->101 not in set. Length=1
+- num=4: 3 in set, skip (not start of sequence)
+- num=200: 199 not in set, start sequence. 200->201 not in set. Length=1
+- num=1: 0 not in set, start sequence. 1->2->3->4->5 not in set. Length=4
+- num=3: 2 in set, skip
+- num=2: 1 in set, skip
+Maximum length = 4
+
+Approach 2 (Sorting):
+Simple approach but O(n log n) time.
+Sort array and count consecutive sequences.
+
+Approach 3 (HashMap with Memoization):
+Use memoization to avoid recomputing sequence lengths.
+Each number's length = 1 + length of (number + 1).
+
+Approach 4 (Union-Find):
+Treat consecutive numbers as connected components.
+Union adjacent numbers and fin
+d largest component.
+
+Approach 5 (Two-pass HashSet):
+Similar to approach 1 but uses visited set to avoid reprocessing.
+
+Approach 6 (HashMap with Range Merging):
+Maintain ranges and merge them when adding new numbers.
+More complex but demonstrates different thinking.
+
+Approach Comparison:
+
+1. HashSet with Smart Iteration (Best):
+   - Time: O(n), Space: O(n)
+   - Optimal and intuitive
+   - Most commonly used solution
+
+2. Sorting:
+   - Time: O(n log n), Space: O(1)
+   - Simple but not optimal
+   - Good when space is limited
+
+3. HashMap with Memoization:
+   - Time: O(n), Space: O(n)
+   - Recursive approach
+   - Good for understanding DP concepts
+
+4. Union-Find:
+   - Time: O(n*α(n)), Space: O(n)
+   - Overkill for this problem
+   - Good for dynamic scenarios
+
+5. Two-pass HashSet:
+   - Time: O(n), Space: O(n)
+   - Alternative implementation
+   - Uses visited set for clarity
+
+6. Range Merging:
+   - Time: O(n), Space: O(n)
+   - Complex but efficient
+   - Good for understanding range operations
+
+Key Insights:
+1. HashSet enables O(1) lookup for consecutive checking
+2. Only start counting from sequence beginnings
+3. Each element processed at most constant times
+4. Avoid redundant work by smart iteration
+
+Edge Cases:
+- Empty array: return 0
+- Single element: return 1
+- All same elements: return 1
+- No consecutive elements: return 1
+- Negative numbers: algorithm works the same
+
+Common Mistakes:
+1. Starting count from every number (leads to O(n²))
+2. Not handling duplicates properly
+3. Incorrect boundary conditions
+4. Not optimizing for sequence starts
+
+Optimization Techniques:
+1. Only process sequence starts
+2. Use HashSet for O(1) lookup
+3. Early termination when possible
+4. Avoid redundant computations
+
+Applications:
+- Data analysis (finding patterns)
+- Time series analysis
+- Genomics (DNA sequence analysis)
+- Network analysis (consecutive IDs)
+- Game development (combo detection)
+
+Follow-up Questions:
+1. Find all longest consecutive sequences
+2. Handle duplicates differently
+3. Find longest arithmetic progression
+4. 2D version (consecutive in matrix)
+5. Stream processing version
+
+Testing Strategy:
+- Empty array: []
+- Single element: [3]
+- Duplicates: [1,2,2,3]
+- No consecutive: [1,3,5,7]
+- All consecutive: [1,2,3,4,5]
+- Negative numbers: [-1,0,1,2]
+- Large gaps: [1,100,2,200,3]
+
+Performance Notes:
+- Approach 1 is optimal for this problem
+- HashSet operations are O(1) average case
+- Space-time tradeoff: O(n) space for O(n) time
+- Sorting approach uses O(1) extra space but O(n log n) time
+
+Memory Optimization:
+- Can't do better than O(n) space for O(n) time
+- Sorting approach if space is critical
+- Streaming approach for very large datasets
+- Bit manipulation for limited range numbers
+*/
+```
+
+
+### 58. Graph Valid Tree
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Determine if edges form a valid tree
+ * A valid tree has exactly n-1 edges and is connected with no cycles
+ * 
+ * Multiple approaches: DFS, BFS, Union-Find
+ */
+public class GraphValidTree {
+    
+    // Approach 1: DFS with cycle detection - Most intuitive
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree1(int n, int[][] edges) {
+        // A tree must have exactly n-1 edges
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[1]).add(edge[2]);
+            graph.get(edge[2]).add(edge[1]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        
+        // Check for cycles using DFS
+        if (hasCycle(graph, 0, -1, visited)) {
+            return false;
+        }
+        
+        // Check if all nodes are visited (connected)
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+    
+    private boolean hasCycle(List<List<Integer>> graph, int node, int parent, boolean[] visited) {
+        visited[node] = true;
+        
+        for (int neighbor : graph.get(node)) {
+            if (neighbor == parent) continue; // Skip parent to avoid false cycle
+            
+            if (visited[neighbor] || hasCycle(graph, neighbor, node, visited)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 2: BFS with cycle detection
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree2(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[1]).add(edge[2]);
+            graph.get(edge[2]).add(edge[1]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+        int[] parent = new int[n];
+        Arrays.fill(parent, -1);
+        
+        queue.offer(0);
+        visited[1] = true;
+        
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            
+            for (int neighbor : graph.get(node)) {
+                if (neighbor == parent[node]) continue;
+                
+                if (visited[neighbor]) {
+                    return false; // Cycle detected
+                }
+                
+                visited[neighbor] = true;
+                parent[neighbor] = node;
+                queue.offer(neighbor);
+            }
+        }
+        
+        // Check if all nodes are visited
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+    
+    // Approach 3: Union-Find - Most efficient for this problem
+    // Time: O(E * α(V)), Space: O(V)
+    public boolean validTree3(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        UnionFind uf = new UnionFind(n);
+        
+        for (int[] edge : edges) {
+            if (!uf.union(edge[1], edge[2])) {
+                return false; // Cycle detected
+            }
+        }
+        
+        return true; // No cycles and correct number of edges
+    }
+    
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                rank[i] = 0;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]); // Path compression
+            }
+            return parent[x];
+        }
+        
+        public boolean union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX == rootY) {
+                return false; // Already connected, adding edge creates cycle
+            }
+            
+            // Union by rank
+            if (rank[rootX] < rank[rootY]) {
+                parent[rootX] = rootY;
+            } else if (rank[rootX] > rank[rootY]) {
+                parent[rootY] = rootX;
+            } else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+            
+            return true;
+        }
+    }
+    
+    // Approach 4: Simple connectivity check (since we know edge count)
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree
+4(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // If we have exactly n-1 edges, we just need to check connectivity
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[1]).add(edge[2]);
+            graph.get(edge[2]).add(edge[1]);
+        }
+        
+        // DFS to count reachable nodes
+        boolean[] visited = new boolean[n];
+        int reachableNodes = dfsCount(graph, 0, visited);
+        
+        return reachableNodes == n;
+    }
+    
+    private int dfsCount(List<List<Integer>> graph, int node, boolean[] visited) {
+        visited[node] = true;
+        int count = 1;
+        
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor]) {
+                count += dfsCount(graph, neighbor, visited);
+            }
+        }
+        
+        return count;
+    }
+    
+    // Approach 5: Iterative DFS with explicit stack
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree5(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[1]).add(edge[2]);
+            graph.get(edge[2]).add(edge[1]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        Stack<Integer> stack = new Stack<>();
+        Map<Integer, Integer> parent = new HashMap<>();
+        
+        stack.push(0);
+        parent.put(0, -1);
+        
+        while (!stack.isEmpty()) {
+            int node = stack.pop();
+            
+            if (visited[node]) {
+                return false; // Cycle detected
+            }
+            
+            visited[node] = true;
+            
+            for (int neighbor : graph.get(node)) {
+                if (neighbor == parent.get(node)) continue;
+                
+                if (visited[neighbor]) {
+                    return false; // Back edge found
+                }
+                
+                stack.push(neighbor);
+                parent.put(neighbor, node);
+            }
+        }
+        
+        // Check connectivity
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+A valid tree must satisfy two conditions:
+1. Connected: all nodes are reachable from any node
+2. Acyclic: no cycles exist
+
+Additionally, a tree with n nodes must have exactly n-1 edges.
+
+Example 1: n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]
+This forms a tree:
+    0
+   /|\
+  1 2 3
+  |
+  4
+
+Example 2: n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]
+This has a cycle: 1-2-3-1
+
+Approach 1 (DFS with Cycle Detection):
+1. Check if edges.length == n-1 (necessary condition)
+2. Build undirected graph
+3. Use DFS to detect cycles
+4. Check if all nodes are visited (connectivity)
+
+Key insight for cycle detection in undirected graph:
+- If we visit a node that's already visited AND it's not our parent,
+  then we found a cycle
+
+Approach 2 (BFS with Cycle Detection):
+Similar to DFS but uses BFS traversal.
+Maintains parent information to avoid false cycle detection.
+
+Approach 3 (Union-Find):
+Most elegant for this problem:
+1. Check edge count
+2. For each edge, try to union the nodes
+3. If nodes are already connected, adding edge creates cycle
+4. If all edges processed successfully, it's a valid tree
+
+Union-Find is perfect because:
+- It naturally detects cycles
+- With exactly n-1 edges, connectivity is guaranteed if no cycles
+
+Approach 4 (Simple Connectivity Check):
+Since we know there are exactly n-1 edges:
+- If connected, it must be a tree (no cycles possible with n-1 edges)
+- Just check if all nodes are reachable
+
+Approach 5 (Iterative DFS):
+Same logic as recursive DFS but using explicit stack.
+Good for avoiding stack overflow on large graphs.
+
+Approach Comparison:
+
+1. DFS with Cycle Detection:
+   - Time: O(V + E), Space: O(V + E)
+   - Most
+ intuitive approach
+   - Clear cycle detection logic
+
+2. BFS with Cycle Detection:
+   - Time: O(V + E), Space: O(V + E)
+   - Level-by-level processing
+   - Alternative to DFS
+
+3. Union-Find (Best for this problem):
+   - Time: O(E * α(V)), Space: O(V)
+   - Most efficient and elegant
+   - Natural fit for cycle detection
+
+4. Simple Connectivity Check:
+   - Time: O(V + E), Space: O(V + E)
+   - Leverages tree property
+   - Simplest when edge count is correct
+
+5. Iterative DFS:
+   - Time: O(V + E), Space: O(V + E)
+   - Avoids recursion overhead
+   - Good for large graphs
+
+Key Insights:
+1. Tree with n nodes has exactly n-1 edges
+2. Union-Find naturally detects cycles
+3. With correct edge count, connectivity implies tree
+4. Parent tracking prevents false cycles in undirected graphs
+
+Edge Cases:
+- n = 1, edges = []: valid tree (single node)
+- n = 2, edges = [[0,1]]: valid tree
+- n = 2, edges = []: invalid (disconnected)
+- Self-loops: invalid tree
+- Multiple edges between same nodes: invalid
+
+Common Mistakes:
+1. Not checking edge count first
+2. False cycle detection due to parent node
+3. Not checking connectivity after cycle detection
+4. Incorrect Union-Find implementation
+5. Not handling undirected graph properly
+
+Optimization Techniques:
+1. Early termination on wrong edge count
+2. Union-Find with path compression and union by rank
+3. Using connectivity check when edge count is correct
+4. Avoiding unnecessary graph construction
+
+Applications:
+- Network topology validation
+- Minimum spanning tree verification
+- Social network analysis
+- Dependency graph validation
+
+Follow-up Questions:
+1. Find the redundant edge that makes it not a tree
+2. Count number of trees in forest
+3. Build minimum spanning tree
+4. Detect all cycles in graph
+
+Testing Strategy:
+- Valid tree: n=4, edges=[[0,1],[0,2],[0,3]]
+- Cycle: n=4, edges=[[0,1],[1,2],[2,3],[3,0]]
+- Disconnected: n=4, edges=[[0,1],[2,3]]
+- Wrong edge count: n=3, edges=[[0,1]]
+- Self-loop: n=2, edges=[[0,0]]
+
+Performance Notes:
+- Union-Find is most efficient for large graphs
+- DFS/BFS have same time complexity but different space usage
+- Early edge count check saves computation
+- Path compression in Union-Find is crucial for performance
+*/
+```
+
+That completes all the Graph problems! The graph problems covered important patterns like:
+
+- **Graph Traversal** (DFS, BFS)
+- **Cycle Detection** (Course Schedule, Valid Tree)
+- **Topological Sorting** (Course Schedule)
+- **Connected Components** (Number of Islands, Graph Valid Tree)
+- **Graph Cloning** (Deep copy with cycle handling)
+- **Union-Find** (Efficient cycle detection and connectivity)
+
+--------------------------------------------------
+

@@ -8352,3 +8352,5361 @@ The linked list problems covered important patterns like:
 - **Space-Time Tradeoffs** (In-place vs extra space solutions)
 
 ----------------------------------------------------------
+
+
+
+## Linked List Problems Solutions
+
+### 36. Reverse Linked List
+
+```java
+/**
+ * Problem: Reverse a singly linked list
+ * 
+ * Multiple approaches: Iterative, Recursive, Stack-based
+ */
+public class ReverseLinkedList {
+    
+    // Definition for singly-linked list
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+    
+    // Approach 1: Iterative - Most efficient and commonly used
+    // Time: O(n), Space: O(1)
+    public ListNode reverseList1(ListNode head) {
+        ListNode prev = null;
+        ListNode current = head;
+        
+        while (current != null) {
+            ListNode nextTemp = current.next; // Store next node
+            current.next = prev;               // Reverse the link
+            prev = current;                    // Move prev forward
+            current = nextTemp;                // Move current forward
+        }
+        
+        return prev; // prev is now the new head
+    }
+    
+    // Approach 2: Recursive - Elegant but uses O(n) space
+    // Time: O(n), Space: O(n)
+    public ListNode reverseList2(ListNode head) {
+        // Base case: empty list or single node
+        if (head == null || head.next == null) {
+            return head;
+        }
+        
+        // Recursively reverse the rest of the list
+        ListNode newHead = reverseList2(head.next);
+        
+        // Reverse the current connection
+        head.next.next = head;
+        head.next = null;
+        
+        return newHead;
+    }
+    
+    // Approach 3: Using Stack - Intuitive but less efficient
+    // Time: O(n), Space: O(n)
+    public ListNode reverseList3(ListNode head) {
+        if (head == null) return null;
+        
+        Stack<ListNode> stack = new Stack<>();
+        
+        // Push all nodes onto stack
+        ListNode current = head;
+        while (current != null) {
+            stack.push(current);
+            current = current.next;
+        }
+        
+        // Pop nodes and rebuild list
+        ListNode newHead = stack.pop();
+        current = newHead;
+        
+        while (!stack.isEmpty()) {
+            current.next = stack.pop();
+            current = current.next;
+        }
+        
+        current.next = null; // Important: terminate the list
+        return newHead;
+    }
+    
+    // Approach 4: Recursive with helper function
+    // Time: O(n), Space: O(n)
+    public ListNode reverseList4(ListNode head) {
+        return reverseHelper(head, null);
+    }
+    
+    private ListNode reverseHelper(ListNode current, ListNode prev) {
+        if (current == null) {
+            return prev;
+        }
+        
+        ListNode next = current.next;
+        current.next = prev;
+        
+        return reverseHelper(next, current);
+    }
+    
+    // Approach 5: Two-pass approach (educational)
+    // Time: O(
+n), Space: O(n)
+    public ListNode reverseList5(ListNode head) {
+        if (head == null) return null;
+        
+        // First pass: collect all values
+        List<Integer> values = new ArrayList<>();
+        ListNode current = head;
+        while (current != null) {
+            values.add(current.val);
+            current = current.next;
+        }
+        
+        // Second pass: create new list in reverse order
+        ListNode newHead = new ListNode(values.get(values.size() - 1));
+        current = newHead;
+        
+        for (int i = values.size() - 2; i >= 0; i--) {
+            current.next = new ListNode(values.get(i));
+            current = current.next;
+        }
+        
+        return newHead;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Original list: 1 -> 2 -> 3 -> 4 -> 5 -> null
+Reversed list: 5 -> 4 -> 3 -> 2 -> 1 -> null
+
+Approach 1 (Iterative):
+Key idea: Maintain three pointers (prev, current, next) and reverse links one by one.
+
+Step-by-step trace:
+Initial: prev=null, current=1->2->3->4->5->null
+
+Step 1: nextTemp=2->3->4->5->null
+        current.next=null (1->null)
+        prev=1->null, current=2->3->4->5->null
+
+Step 2: nextTemp=3->4->5->null
+        current.next=1->null (2->1->null)
+        prev=2->1->null, current=3->4->5->null
+
+Step 3: nextTemp=4->5->null
+        current.next=2->1->null (3->2->1->null)
+        prev=3->2->1->null, current=4->5->null
+
+Step 4: nextTemp=5->null
+        current.next=3->2->1->null (4->3->2->1->null)
+        prev=4->3->2->1->null, current=5->null
+
+Step 5: nextTemp=null
+        current.next=4->3->2->1->null (5->4->3->2->1->null)
+        prev=5->4->3->2->1->null, current=null
+
+Return prev = 5->4->3->2->1->null
+
+Approach 2 (Recursive):
+Key idea: Recursively reverse the tail, then fix the current node's connections.
+
+For list 1->2->3->4->5:
+1. reverseList(1): calls reverseList(2)
+2. reverseList(2): calls reverseList(3)
+3. reverseList(3): calls reverseList(4)
+4. reverseList(4): calls reverseList(5)
+5. reverseList(5): returns 5 (base case)
+6. Back to reverseList(4): 
+   - newHead = 5
+   - 4.next.next = 4 (so 5->4)
+   - 4.next = null
+   - return 5
+7. Continue unwinding...
+
+Approach 3 (Stack):
+1. Push all nodes onto stack (LIFO structure naturally reverses)
+2. Pop nodes and reconnect them
+3. Simple but uses extra space
+
+Approach 4 (Recursive Helper):
+Tail recursion version that mimics iterative approach.
+Passes previous node as parameter.
+
+Approach 5 (Two-pass):
+1. Extract all values into array
+2. Create new list from array in reverse order
+3. Inefficient but educational
+
+Approach Comparison:
+
+1. Iterative (Best for production):
+   - Time: O(n), Space: O(1)
+   - Most efficient and preferred
+   - No risk of stack overflow
+
+2. Recursive (Elegant):
+   - Time: O(n), Space: O(n)
+   - Clean and intuitive
+   - Risk of stack overflow for large lists
+
+3. Stack-based:
+   - Time: O(n), Space: O(n)
+   - Easy to understand
+   - Extra space overhead
+
+4. Recursive Helper:
+   - Time: O(n), Space: O(n)
+   - Tail recursion style
+   - Similar to iterative logic
+
+5. Two-pass:
+   - Time: O(n), Space: O(n)
+   - Creates new nodes
+   - Not recommended for production
+
+Key Insights:
+1. Need to store next pointer before breaking the link
+2. Three pointers technique is fundamental
+3. Recursive solution works backwards from the end
+4. Always handle
+ empty list edge case
+
+Visual Representation:
+Before: [prev] -> null    1 -> 2 -> 3 -> null
+                         [curr]
+
+After:  [prev] -> null <- 1    2 -> 3 -> null
+                              [curr]
+
+Edge Cases:
+- Empty list (null): return null
+- Single node: return same node
+- Two nodes: 1->2 becomes 2->1
+
+Common Mistakes:
+1. Losing reference to next node before reversing link
+2. Not updating all three pointers correctly
+3. Forgetting to set last node's next to null
+4. Not handling empty list case
+5. Stack overflow with recursive approach on large lists
+
+Optimization Notes:
+- Iterative approach is optimal for space and time
+- Recursive approach is good for understanding
+- Always prefer iterative for production code
+- Consider tail recursion optimization if available
+
+Applications:
+- Undo operations in text editors
+- Browser back button functionality
+- Reversing data streams
+- Algorithm building blocks (merge sort, etc.)
+- Stack implementation using linked list
+
+Follow-up Questions:
+1. Reverse only part of the list (between positions m and n)
+2. Reverse in groups of k nodes
+3. Reverse alternate nodes
+4. Check if list is palindrome (using reversal)
+
+Memory Management:
+- Iterative: O(1) extra space
+- Recursive: O(n) call stack space
+- Stack: O(n) for explicit stack
+- All approaches modify original list in-place (except two-pass)
+
+Testing Strategy:
+- Empty list: null -> null
+- Single node: 1 -> 1
+- Two nodes: 1->2 -> 2->1
+- Multiple nodes: 1->2->3 -> 3->2->1
+- Large list: test for stack overflow with recursive
+*/
+```
+
+### 37. Detect Cycle in Linked List
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Detect if linked list has a cycle
+ * 
+ * Multiple approaches: Floyd's Algorithm, HashSet, Marking
+ */
+public class LinkedListCycle {
+    
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode(int x) {
+            val = x;
+            next = null;
+        }
+    }
+    
+    // Approach 1: Floyd's Cycle Detection (Tortoise and Hare) - Optimal
+    // Time: O(n), Space: O(1)
+    public boolean hasCycle1(ListNode head) {
+        if (head == null || head.next == null) {
+            return false;
+        }
+        
+        ListNode slow = head;      // Tortoise: moves 1 step
+        ListNode fast = head.next; // Hare: moves 2 steps
+        
+        while (slow != fast) {
+            // If fast reaches end, no cycle
+            if (fast == null || fast.next == null) {
+                return false;
+            }
+            
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        return true; // Slow and fast met, cycle detected
+    }
+    
+    // Approach 2: HashSet to track visited nodes
+    // Time: O(n), Space: O(n)
+    public boolean hasCycle2(ListNode head) {
+        Set<ListNode> visited = new HashSet<>();
+        
+        ListNode current = head;
+        while (current != null) {
+            if (visited.contains(current)) {
+                return true; // Found a node we've seen before
+            }
+            visited.add(current);
+            current = current.next;
+        }
+        
+        return false; // Reached end without finding cycle
+    }
+    
+    // Approach 3: Marking nodes (modifies original list)
+    // Time: O(n), Space: O(1)
+    public boolean hasCycle3(ListNode head) {
+        ListNode current = head;
+        
+        while (current != null) {
+            // If we've seen this node before (marked with special
+ value)
+            if (current.val == Integer.MIN_VALUE) {
+                return true;
+            }
+            
+            // Mark current node as visited
+            current.val = Integer.MIN_VALUE;
+            current = current.next;
+        }
+        
+        return false;
+    }
+    
+    // Approach 4: Limit-based detection (not reliable but educational)
+    // Time: O(n), Space: O(1)
+    public boolean hasCycle4(ListNode head) {
+        int limit = 10000; // Assume list won't be longer than this
+        ListNode current = head;
+        
+        for (int i = 0; i < limit && current != null; i++) {
+            current = current.next;
+        }
+        
+        // If we haven't reached end after limit steps, assume cycle
+        return current != null;
+    }
+    
+    // Approach 5: Floyd's with same starting position
+    // Time: O(n), Space: O(1)
+    public boolean hasCycle5(ListNode head) {
+        if (head == null) return false;
+        
+        ListNode slow = head;
+        ListNode fast = head;
+        
+        // Move pointers until they meet or fast reaches end
+        do {
+            if (fast == null || fast.next == null) {
+                return false;
+            }
+            slow = slow.next;
+            fast = fast.next.next;
+        } while (slow != fast);
+        
+        return true;
+    }
+    
+    // Bonus: Find the start of the cycle (Floyd's extended algorithm)
+    // Time: O(n), Space: O(1)
+    public ListNode detectCycle(ListNode head) {
+        if (head == null || head.next == null) {
+            return null;
+        }
+        
+        // Phase 1: Detect if cycle exists
+        ListNode slow = head;
+        ListNode fast = head;
+        
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            
+            if (slow == fast) {
+                break; // Cycle detected
+            }
+        }
+        
+        // No cycle found
+        if (fast == null || fast.next == null) {
+            return null;
+        }
+        
+        // Phase 2: Find start of cycle
+        // Move one pointer to head, keep other at meeting point
+        // Move both at same speed until they meet
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        
+        return slow; // Start of cycle
+    }
+}
+
+/*
+Algorithm Explanation:
+
+A cycle exists if a node's next pointer points to a previously visited node,
+creating a loop in the linked list.
+
+Example with cycle:
+1 -> 2 -> 3 -> 4
+     ^         |
+     |_________|
+
+Example without cycle:
+1 -> 2 -> 3 -> 4 -> null
+
+Approach 1 (Floyd's Cycle Detection):
+Use two pointers moving at different speeds:
+- Slow pointer: moves 1 step at a time
+- Fast pointer: moves 2 steps at a time
+
+If there's a cycle, fast pointer will eventually catch up to slow pointer.
+If no cycle, fast pointer will reach the end.
+
+Mathematical proof:
+- Let's say cycle length is C
+- When slow enters cycle, fast is already inside
+- Fast gains 1 position on slow each iteration
+- They will meet within C iterations
+
+Step-by-step trace for cyclic list:
+1 -> 2 -> 3 -> 4 -> 2 (cycle back to 2)
+
+Initial: slow=1, fast=2
+Step 1:  slow=2, fast=4
+Step 2:  slow=3, fast=3 (met! cycle detected)
+
+Approach 2 (HashSet):
+Store every visited node in a set.
+If we encounter a node already in the set, there's a cycle.
+
+Approach 3 (Marking):
+Modify node values to mark them as visited.
+If we see a marked node again, there's a cycle.
+Note: This destroys original data.
+
+Approach 4 (Limit-based):
+Assume if we traverse more than a
+ certain number of nodes,
+there must be a cycle. Not reliable for general use.
+
+Approach 5 (Floyd's variant):
+Same as Approach 1 but both pointers start at head.
+Use do-while loop to handle the initial equality.
+
+Approach Comparison:
+
+1. Floyd's Algorithm (Best):
+   - Time: O(n), Space: O(1)
+   - No extra space needed
+   - Doesn't modify original list
+   - Industry standard
+
+2. HashSet:
+   - Time: O(n), Space: O(n)
+   - Easy to understand
+   - Uses extra memory
+   - Good for debugging
+
+3. Marking:
+   - Time: O(n), Space: O(1)
+   - Destroys original data
+   - Not practical for most cases
+   - Only works if values can be modified
+
+4. Limit-based:
+   - Time: O(n), Space: O(1)
+   - Unreliable and not recommended
+   - Educational purpose only
+
+5. Floyd's variant:
+   - Time: O(n), Space: O(1)
+   - Same efficiency as approach 1
+   - Slightly different implementation
+
+Extended Algorithm (Cycle Start Detection):
+
+Phase 1: Detect cycle using Floyd's algorithm
+Phase 2: Find start of cycle
+
+Mathematical insight:
+- Let distance from head to cycle start = a
+- Let distance from cycle start to meeting point = b
+- Let cycle length = c
+
+When pointers meet:
+- Slow traveled: a + b
+- Fast traveled: a + b + c (one extra cycle)
+- Since fast travels twice as fast: 2(a + b) = a + b + c
+- Solving: a = c - b
+
+This means: distance from head to cycle start = 
+           distance from meeting point to cycle start
+
+So if we move one pointer to head and keep other at meeting point,
+moving both at same speed, they'll meet at cycle start.
+
+Time Complexity Analysis:
+- Floyd's: O(n) - each node visited at most twice
+- HashSet: O(n) - each node visited once
+- Marking: O(n) - each node visited once
+
+Space Complexity:
+- Floyd's: O(1) - only two pointers
+- HashSet: O(n) - store up to n nodes
+- Marking: O(1) - no extra space
+
+Key Insights:
+1. Floyd's algorithm is optimal for cycle detection
+2. Two pointers at different speeds will meet if cycle exists
+3. Mathematical relationship enables finding cycle start
+4. Constant space solution is always preferred
+
+Edge Cases:
+- Empty list: no cycle
+- Single node pointing to itself: cycle
+- Single node pointing to null: no cycle
+- Two nodes forming cycle: cycle
+- Long list with cycle at end: cycle
+
+Common Mistakes:
+1. Not checking for null pointers in fast pointer movement
+2. Starting both pointers at same position without proper loop
+3. Not handling empty list or single node cases
+4. Infinite loop when cycle exists (in naive approaches)
+5. Off-by-one errors in pointer movements
+
+Applications:
+- Memory leak detection
+- Infinite loop detection in algorithms
+- Graph cycle detection (using similar principles)
+- Deadlock detection in operating systems
+- Validation of data structures
+
+Follow-up Questions:
+1. Find the start of the cycle
+2. Find the length of the cycle
+3. Remove the cycle from the list
+4. Detect cycle in a graph
+5. Find if two linke
+d lists intersect
+
+Optimization Notes:
+- Floyd's algorithm is already optimal
+- Can optimize constant factors but not asymptotic complexity
+- Early termination when fast reaches null
+- Consider using fast.next.next directly to avoid extra null checks
+
+Testing Strategy:
+- No cycle: 1->2->3->null
+- Self loop: 1->1
+- Two node cycle: 1->2->1
+- Cycle at end: 1->2->3->2
+- Cycle at beginning: 1->2->1->2->...
+- Large cycle: test performance
+*/
+```
+
+### 38. Merge Two Sorted Lists
+
+```java
+/**
+ * Problem: Merge two sorted linked lists into one sorted list
+ * 
+ * Multiple approaches: Iterative, Recursive, In-place
+ */
+public class MergeTwoSortedLists {
+    
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+    
+    // Approach 1: Iterative with dummy head - Most efficient
+    // Time: O(m + n), Space: O(1)
+    public ListNode mergeTwoLists1(ListNode list1, ListNode list2) {
+        // Create dummy head to simplify edge cases
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        // Merge while both lists have nodes
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                current.next = list1;
+                list1 = list1.next;
+            } else {
+                current.next = list2;
+                list2 = list2.next;
+            }
+            current = current.next;
+        }
+        
+        // Append remaining nodes (at most one list has remaining nodes)
+        current.next = (list1 != null) ? list1 : list2;
+        
+        return dummy.next; // Return head of merged list
+    }
+    
+    // Approach 2: Recursive - Elegant but uses O(m + n) space
+    // Time: O(m + n), Space: O(m + n)
+    public ListNode mergeTwoLists2(ListNode list1, ListNode list2) {
+        // Base cases
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        
+        // Choose smaller head and recursively merge rest
+        if (list1.val <= list2.val) {
+            list1.next = mergeTwoLists2(list1.next, list2);
+            return list1;
+        } else {
+            list2.next = mergeTwoLists2(list1, list2.next);
+            return list2;
+        }
+    }
+    
+    // Approach 3: Iterative without dummy head
+    // Time: O(m + n), Space: O(1)
+    public ListNode mergeTwoLists3(ListNode list1, ListNode list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        
+        // Determine head of merged list
+        ListNode head, current;
+        if (list1.val <= list2.val) {
+            head = current = list1;
+            list1 = list1.next;
+        } else {
+            head = current = list2;
+            list2 = list2.next;
+        }
+        
+        // Merge remaining nodes
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                current.next = list1;
+                list1 = list1.next;
+            } else {
+                current.next = list2;
+                list2 = list2.next;
+            }
+            current = current.next;
+        }
+        
+        // Append remaining nodes
+        current.next = (list1 != null) ? list1 : list2;
+        
+        return head;
+    }
+    
+    // Approach 4: Using priority queue (overkill but educational)
+    // Time: O((m + n) log(m + n)), Space: O(m + n)
+    public ListNode mergeTwoLists4(ListNode list1, ListNode list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        
+        // Priority queue to maintain sorted order
+        PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);
+        
+        // Add all nodes to priority queue
+        while (list1 != null) {
+            pq.offer(list1);
+            list1 = list1.next;
+        }
+        while (list2 != null) {
+            pq.offer(list2);
+            list2 = list2.next;
+        }
+        
+        // Build result list from priority queue
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        while (!pq.isEmpty()) {
+            current.next = pq.poll();
+            current = current.next;
+        }
+        
+        current.next = null; // Important: terminate the list
+        return dummy.next;
+    }
+    
+    // Approach 5: In-place merge (modifies input lists)
+    // Time: O(m + n), Space: O(1)
+    public ListNode mergeTwoLists5(ListNode list1, ListNode list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        
+        // Ensure list1 starts
+ with smaller value
+        if (list1.val > list2.val) {
+            ListNode temp = list1;
+            list1 = list2;
+            list2 = temp;
+        }
+        
+        ListNode current = list1;
+        
+        while (current.next != null && list2 != null) {
+            if (current.next.val <= list2.val) {
+                current = current.next;
+            } else {
+                // Insert list2 node between current and current.next
+                ListNode temp = list2.next;
+                list2.next = current.next;
+                current.next = list2;
+                current = list2;
+                list2 = temp;
+            }
+        }
+        
+        // Append remaining nodes from list2
+        if (list2 != null) {
+            current.next = list2;
+        }
+        
+        return list1;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Merge two sorted lists by comparing heads and choosing smaller one.
+Continue until one list is exhausted, then append the other.
+
+Example:
+list1: 1 -> 2 -> 4
+list2: 1 -> 3 -> 4
+
+Step-by-step merge (Approach 1):
+1. dummy -> null, current = dummy
+2. Compare 1 and 1: choose list1, current.next = 1
+   dummy -> 1, current = 1, list1 = 2->4
+3. Compare 2 and 1: choose list2, current.next = 1
+   dummy -> 1 -> 1, current = 1, list2 = 3->4
+4. Compare 2 and 3: choose list1, current.next = 2
+   dummy -> 1 -> 1 -> 2, current = 2, list1 = 4
+5. Compare 4 and 3: choose list2, current.next = 3
+   dummy -> 1 -> 1 -> 2 -> 3, current = 3, list2 = 4
+6. Compare 4 and 4: choose list1, current.next = 4
+   dummy -> 1 -> 1 -> 2 -> 3 -> 4, current = 4, list1 = null
+7. list1 is null, append list2: current.next = 4
+   Final: 1 -> 1 -> 2 -> 3 -> 4 -> 4
+
+Approach 1 (Iterative with Dummy):
+- Use dummy head to avoid special cases for empty result
+- Compare heads of both lists and choose smaller
+- Advance pointer in chosen list
+- Continue until one list is empty
+- Append remaining list
+
+Approach 2 (Recursive):
+- Base cases: if one list is empty, return the other
+- Choose smaller head and recursively merge rest
+- Clean and elegant but uses call stack space
+
+Approach 3 (Iterative without Dummy):
+- Handle head selection separately
+- Same logic as approach 1 but more complex head handling
+- Slightly more efficient (no dummy node)
+
+Approach 4 (Priority Queue):
+- Add all nodes to priority queue
+- Extract nodes in sorted order
+- Overkill for two lists but generalizes to k lists
+
+Approach 5 (In-place):
+- Modify one of the input lists to create result
+- More complex pointer manipulation
+- Saves space by reusing existing nodes
+
+Approach Comparison:
+
+1. Iterative with Dummy (Best for interviews):
+   - Time: O(m + n), Space: O(1)
+   - Clean and easy to understand
+   - Handles edge cases elegantly
+
+2. Recursive (Most elegant):
+   - Time: O(m + n), Space: O(m + n)
+   - Very clean code
+   - Risk of stack overflow for large lists
+
+3. Iterative without Dummy:
+   - Time: O(m + n), Space: O(1)
+   - Slightly more efficient
+   - More complex edge case handling
+
+4. Priority Queue:
+   - Time: O((m + n) log(m + n)), Space: O(m + n)
+   - Overkill for two lists
+   - Good foundation for k-way merge
+
+5. In-place:
+   - Time: O(m + n), Space: O(1)
+   - Most space efficient
+   - Complex implementation
+
+Key Insights:
+1. Dummy head simpl
+ifies edge case handling
+2. Only need to compare current heads of both lists
+3. When one list is exhausted, append the other entirely
+4. Maintain sorted order by always choosing smaller element
+
+Edge Cases:
+- Both lists empty: return null
+- One list empty: return the other
+- Lists of different lengths: append remaining
+- All elements in one list smaller: simple append
+- Duplicate values: maintain stability (keep relative order)
+
+Common Mistakes:
+1. Not handling empty lists properly
+2. Forgetting to append remaining nodes
+3. Not advancing pointers correctly
+4. Creating cycles in the result list
+5. Not terminating the result list properly
+
+Optimization Techniques:
+1. Use dummy head to simplify code
+2. Early termination when one list is empty
+3. Avoid unnecessary comparisons
+4. Reuse existing nodes instead of creating new ones
+
+Applications:
+- Merge sort implementation
+- Database join operations
+- Merging sorted files
+- Combining sorted streams
+- Priority queue operations
+
+Follow-up Questions:
+1. Merge k sorted lists
+2. Merge in descending order
+3. Merge with custom comparator
+4. Merge and remove duplicates
+5. Merge with size constraints
+
+Memory Considerations:
+- Approaches 1, 3, 5: O(1) extra space
+- Approach 2: O(m + n) call stack space
+- Approach 4: O(m + n) for priority queue
+- All approaches reuse existing nodes (no new node creation)
+
+Testing Strategy:
+- Empty lists: [], [] -> []
+- One empty: [1,2], [] -> [1,2]
+- Same length: [1,3], [2,4] -> [1,2,3,4]
+- Different lengths: [1], [2,3,4] -> [1,2,3,4]
+- Duplicates: [1,1], [1,2] -> [1,1,1,2]
+- All elements in one list smaller: [1,2], [3,4] -> [1,2,3,4]
+
+Performance Notes:
+- Linear time complexity is optimal (must examine all elements)
+- Constant space is achievable and preferred
+- Iterative approach avoids recursion overhead
+- Dummy head technique is widely applicable
+*/
+```
+
+### 39. Merge k Sorted Lists
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Merge k sorted linked lists into one sorted list
+ * 
+ * Multiple approaches: Divide & Conquer, Priority Queue, Sequential Merge
+ */
+public class MergeKSortedLists {
+    
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+    
+    // Approach 1: Divide and Conquer - Most efficient
+    // Time: O(N log k) where N is total nodes, k is number of lists
+    // Space: O(log k) for recursion stack
+    public ListNode mergeKLists1(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+        
+        return mergeKListsHelper(lists, 0, lists.length - 1);
+    }
+    
+    private ListNode mergeKListsHelper(ListNode[] lists, int start, int end) {
+        if (start == end) {
+            return lists[start];
+        }
+        
+        if (start + 1 == end) {
+            return mergeTwoLists(lists[start], lists[end]);
+        }
+        
+        int mid = start + (end - start) / 2;
+        ListNode left = mergeKListsHelper(lists, start, mid);
+        ListNode right = mergeKListsHelper(lists, mid + 1, end);
+        
+        return mergeTwoLists(left, right);
+    }
+    
+    // Helper method to merge two sorted lists
+    private ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        while (l1 != null && l2 != null) {
+            if (l1.val <= l2.val) {
+                current.next = l1;
+                l1 = l1.next;
+            } else {
+                current.next = l2;
+                l2 = l2.next;
+            }
+            current = current.next;
+        }
+        
+        current.next = (l1 != null) ? l1 : l2;
+        return dummy.next;
+    }
+    
+    // Approach 2: Priority Queue (Min Heap) - Intuitive
+    // Time: O(N log k), Space: O(k)
+    public ListNode mergeKLists2(ListNode[] lists) {
+        if (lists == null || lists.length ==
+ 0) {
+            return null;
+        }
+        
+        // Priority queue to maintain k smallest elements
+        PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);
+        
+        // Add head of each non-empty list to priority queue
+        for (ListNode list : lists) {
+            if (list != null) {
+                pq.offer(list);
+            }
+        }
+        
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        while (!pq.isEmpty()) {
+            // Get the smallest element
+            ListNode smallest = pq.poll();
+            current.next = smallest;
+            current = current.next;
+            
+            // Add next element from the same list
+            if (smallest.next != null) {
+                pq.offer(smallest.next);
+            }
+        }
+        
+        return dummy.next;
+    }
+    
+    // Approach 3: Sequential merge - Simple but less efficient
+    // Time: O(N * k), Space: O(1)
+    public ListNode mergeKLists3(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+        
+        ListNode result = null;
+        
+        for (ListNode list : lists) {
+            result = mergeTwoLists(result, list);
+        }
+        
+        return result;
+    }
+    
+    // Approach 4: Iterative divide and conquer - Space optimized
+    // Time: O(N log k), Space: O(1)
+    public ListNode mergeKLists4(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+        
+        int interval = 1;
+        
+        while (interval < lists.length) {
+            for (int i = 0; i + interval < lists.length; i += interval * 2) {
+                lists[i] = mergeTwoLists(lists[i], lists[i + interval]);
+            }
+            interval *= 2;
+        }
+        
+        return lists[1];
+    }
+    
+    // Approach 5: Convert to array, sort, and rebuild - Different perspective
+    // Time: O(N log N), Space: O(N)
+    public ListNode mergeKLists5(ListNode[] lists) {
+        List<Integer> values = new ArrayList<>();
+        
+        // Collect all values
+        for (ListNode list : lists) {
+            ListNode current = list;
+            while (current != null) {
+                values.add(current.val);
+                current = current.next;
+            }
+        }
+        
+        // Sort values
+        Collections.sort(values);
+        
+        // Build result list
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        
+        for (int val : values) {
+            current.next = new ListNode(val);
+            current = current.next;
+        }
+        
+        return dummy.next;
+    }
+    
+    // Approach 6: Using merge sort concept with lists
+    // Time: O(N log k), Space: O(log k)
+    public ListNode mergeKLists6(ListNode[] lists) {
+        if (lists == null || lists.length == 0) return null;
+        
+        List<ListNode> listCollection = new ArrayList<>();
+        for (ListNode list : lists) {
+            if (list != null) {
+                listCollection.add(list);
+            }
+        }
+        
+        while (listCollection.size() > 1) {
+            List<ListNode> mergedLists = new ArrayList<>();
+            
+            for (int i = 0; i < listCollection.size(); i += 2) {
+                ListNode l1 = listCollection.get(i);
+                ListNode l2 = (i + 1 < listCollection.size()) ? listCollection.get(i + 1) : null;
+                mergedLists.add(mergeTwoLists(l1, l2));
+            }
+            
+            listCollection = mergedLists;
+        }
+        
+        return listCollection.get(0);
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given k sorted linked lists, merge them into one sorted list.
+
+Example:
+Input: [
+  1->4->5,
+  1->3->4,
+  2->6
+]
+Output: 1->1->2->3->4->4->5->6
+
+Approach 1 (Divide and Conquer):
+Recursively divide the k lists into two halves and merge them.
+Similar to merge sort but for linked lists.
+
+Tree structure for k=4 lists:
+       merge(0,3)
+      /          \
+  merge(0,1)    merge(2,3)
+   /    \        /    \
+list0 list1   list2 list3
+
+Time complexity: O(N log k)
+- log k levels in recursion tree
+- Each level processes all N nodes
+- Each merge operation is O(length of lists being merged)
+
+Approach 2 (Priority Queue):
+Maintain a min-heap of size k containing the current
+ smallest element from each list.
+Extract minimum, add to result, and insert next element from same list.
+
+Step-by-step for example:
+1. PQ: [1(list0), 1(list1), 2(list2)]
+2. Extract 1(list0), add 4: PQ: [1(list1), 2(list2), 4(list0)]
+3. Extract 1(list1), add 3: PQ: [2(list2), 3(list1), 4(list0)]
+4. Extract 2(list2), add 6: PQ: [3(list1), 4(list0), 6(list2)]
+5. Continue...
+
+Approach 3 (Sequential Merge):
+Merge lists one by one: result = merge(result, list[i])
+Simple but inefficient for large k.
+
+Time analysis:
+- Merge 1st and 2nd: O(n1 + n2)
+- Merge result with 3rd: O(n1 + n2 + n3)
+- ...
+- Total: O(N * k) where N is total nodes
+
+Approach 4 (Iterative Divide and Conquer):
+Bottom-up approach, merge pairs iteratively.
+Space-optimized version of approach 1.
+
+Iteration pattern:
+Round 1: merge(0,1), merge(2,3), merge(4,5), ...
+Round 2: merge(0,2), merge(4,6), ...
+Round 3: merge(0,4), ...
+
+Approach 5 (Sort Array):
+Extract all values, sort, and rebuild list.
+Different approach but less efficient.
+
+Approach 6 (List-based Merge Sort):
+Similar to approach 1 but using list operations.
+More intuitive for some developers.
+
+Approach Comparison:
+
+1. Divide and Conquer (Best overall):
+   - Time: O(N log k), Space: O(log k)
+   - Optimal time complexity
+   - Recursive implementation
+
+2. Priority Queue (Most intuitive):
+   - Time: O(N log k), Space: O(k)
+   - Easy to understand and implement
+   - Good for streaming scenarios
+
+3. Sequential Merge (Simplest):
+   - Time: O(N * k), Space: O(1)
+   - Simple but inefficient for large k
+   - Good for small k
+
+4. Iterative Divide and Conquer:
+   - Time: O(N log k), Space: O(1)
+   - Space-optimized version of approach 1
+   - No recursion overhead
+
+5. Sort Array:
+   - Time: O(N log N), Space: O(N)
+   - Creates new nodes
+   - Not optimal but educational
+
+6. List-based Merge Sort:
+   - Time: O(N log k), Space: O(log k)
+   - Alternative implementation
+   - More memory for intermediate lists
+
+Key Insights:
+1. Divide and conquer achieves optimal O(N log k) time
+2. Priority queue provides intuitive O(N log k) solution
+3. Sequential merge is O(N * k) - avoid for large k
+4. Space can be optimized to O(1) with iterative approach
+
+Time Complexity Analysis:
+- N = total number of nodes across all lists
+- k = number of lists
+- Optimal: O(N log k)
+- Naive: O(N * k)
+
+Space Complexity:
+- Recursive: O(log k) for call stack
+- Priority Queue: O(k) for heap
+- Iterative: O(1) constant space
+
+Edge Cases:
+- Empty array: return null
+- Array with nulls: filter out nulls
+- Single list: return that list
+- All empty lists: return null
+- Lists of very different sizes: algorithm handles naturally
+
+Common Mistakes:
+1. Not handling null lists in input array
+2. Incorrect priority queue comparator
+3. Forgetting to add next element to priority queue
+4. Off-by-one errors in divide and conquer
+5. Not terminating result list properly
+
+Optimization Techniques:
+1. Filter out null lists before processing
+2. Use iterative approach to save stack space
+3. Early termination when priority
+ queue is empty
+4. Reuse existing nodes instead of creating new ones
+
+Applications:
+- Database merge operations
+- External sorting
+- Merging sorted files
+- Distributed system data aggregation
+- Stream processing
+
+Follow-up Questions:
+1. What if lists are not sorted?
+2. How to handle very large k (memory constraints)?
+3. Merge with custom comparator
+4. Remove duplicates while merging
+5. Find kth smallest element across all lists
+
+Performance Considerations:
+- For small k: sequential merge might be faster due to simplicity
+- For large k: divide and conquer or priority queue
+- Memory constraints: prefer iterative approaches
+- Real-time processing: priority queue for streaming
+*/
+```
+
+### 40. Remove Nth Node From End of List
+
+```java
+/**
+ * Problem: Remove the nth node from the end of linked list
+ * 
+ * Multiple approaches: Two-pass, One-pass with two pointers, Stack-based
+ */
+public class RemoveNthNodeFromEnd {
+    
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+    
+    // Approach 1: Two-pass solution - Simple and intuitive
+    // Time: O(L), Space: O(1) where L is length of list
+    public ListNode removeNthFromEnd1(ListNode head, int n) {
+        // First pass: calculate length
+        int length = 0;
+        ListNode current = head;
+        while (current != null) {
+            length++;
+            current = current.next;
+        }
+        
+        // Handle edge case: remove head
+        if (n == length) {
+            return head.next;
+        }
+        
+        // Second pass: find node before the one to remove
+        current = head;
+        for (int i = 0; i < length - n - 1; i++) {
+            current = current.next;
+        }
+        
+        // Remove the nth node from end
+        current.next = current.next.next;
+        
+        return head;
+    }
+    
+    // Approach 2: One-pass with two pointers - Most efficient
+    // Time: O(L), Space: O(1)
+    public ListNode removeNthFromEnd2(ListNode head, int n) {
+        // Use dummy head to handle edge cases
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        
+        ListNode first = dummy;
+        ListNode second = dummy;
+        
+        // Move first pointer n+1 steps ahead
+        for (int i = 0; i <= n; i++) {
+            first = first.next;
+        }
+        
+        // Move both pointers until first reaches end
+        while (first != null) {
+            first = first.next;
+            second = second.next;
+        }
+        
+        // Remove the nth node from end
+        second.next = second.next.next;
+        
+        return dummy.next;
+    }
+    
+    // Approach 3: Using stack - Alternative approach
+    // Time: O(L), Space: O(L)
+    public ListNode removeNthFromEnd3(ListNode head, int n) {
+        Stack<ListNode> stack = new Stack<>();
+        
+        // Push all nodes onto stack
+        ListNode current = head;
+        while (current != null) {
+            stack.push(current);
+            current = current.next;
+        }
+        
+        // Pop n nodes to reach the node to remove
+        for (int i = 0; i < n; i++) {
+            stack.pop();
+        }
+        
+        // Handle edge case: remove head
+        if (stack.isEmpty()) {
+            return head.next;
+        }
+        
+        // Remove the nth node from end
+        ListNode prev = stack.peek();
+        prev.next = prev.next.next;
+        
+        return head;
+    }
+    
+    // Approach 4: Recursive approach - Elegant but uses call stack
+    // Time: O(L), Space: O(L)
+    public ListNode removeNthFromEnd4(ListNode head, int n) {
+        int[] count = new int[2]; // Use array to pass by reference
+        return removeNthHelper(head, n, count);
+    }
+    
+    private ListNode removeNthHelper(ListNode node, int n, int[] count) {
+        if (node == null) {
+            return null;
+        }
+        
+        node.next = removeNthHelper(node.next, n, count);
+        count[1]++;
+        
+        // If this is the nth node from end, remove it
+        if (count[1] == n) {
+            return node.next;
+        }
+        
+        return node;
+    }
+    
+    // Approach 5: Convert to array and rebuild - Educational
+    // Time: O(L), Space: O(L)
+    public ListNode removeNthFromEnd5(ListNode head, int n) {
+        // Convert to array
+        List<ListNode> nodes = new ArrayList<>();
+        ListNode current = head;
+        while (current != null) {
+            nodes.add(current);
+            current = current.next;
+        }
+        
+        int length = nodes.size();
+        
+        // Handle
+ edge case: remove head
+        if (n == length) {
+            return head.next;
+        }
+        
+        // Remove nth node from end
+        int indexToRemove = length - n;
+        if (indexToRemove > 0) {
+            nodes.get(indexToRemove - 1).next = nodes.get(indexToRemove).next;
+        }
+        
+        return head;
+    }
+    
+    // Approach 6: Two pointers with explicit gap - Clearer logic
+    // Time: O(L), Space: O(1)
+    public ListNode removeNthFromEnd6(ListNode head, int n) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        
+        ListNode slow = dummy;
+        ListNode fast = dummy;
+        
+        // Create gap of n+1 between slow and fast
+        for (int i = 0; i <= n; i++) {
+            if (fast == null) {
+                // n is larger than list length
+                return head;
+            }
+            fast = fast.next;
+        }
+        
+        // Move both pointers until fast reaches end
+        while (fast != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        
+        // slow.next is the node to remove
+        slow.next = slow.next.next;
+        
+        return dummy.next;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Remove the nth node from the end of a linked list.
+Note: n is 1-indexed (1st from end is the last node).
+
+Example:
+Input: 1->2->3->4->5, n=2
+Output: 1->2->3->5 (removed 4, which is 2nd from end)
+
+Approach 1 (Two-pass):
+1. First pass: count total length L
+2. Second pass: go to (L-n)th node from beginning
+3. Remove the next node
+
+For example above:
+- Length = 5
+- Node to remove is at position 5-2 = 3 (0-indexed)
+- Go to position 2, remove position 3
+
+Approach 2 (One-pass with two pointers):
+Use two pointers with a gap of n+1 between them.
+When fast pointer reaches end, slow pointer is at the node before the one to remove.
+
+Step-by-step for example:
+1. dummy->1->2->3->4->5, n=2
+2. Move fast n+1=3 steps: fast at 3, slow at dummy
+3. Move both until fast reaches end:
+   - fast at 4, slow at 1
+   - fast at 5, slow at 2  
+   - fast at null, slow at 3
+4. slow.next (4) is the node to remove
+5. Set slow.next = slow.next.next
+
+Approach 3 (Stack):
+1. Push all nodes onto stack
+2. Pop n nodes to reach the node to remove
+3. The top of stack is the previous node
+4. Remove the target node
+
+Approach 4 (Recursive):
+1. Recursively traverse to end
+2. Count nodes on the way back
+3. When count equals n, remove that node
+
+Approach 5 (Array conversion):
+1. Convert linked list to array
+2. Calculate index to remove
+3. Update pointers accordingly
+
+Approach 6 (Explicit gap):
+Similar to approach 2 but with clearer gap creation logic.
+
+Approach Comparison:
+
+1. Two-pass (Simple):
+   - Time: O(L), Space: O(1)
+   - Easy to understand
+   - Requires two traversals
+
+2. One-pass Two Pointers (Optimal):
+   - Time: O(L), Space: O(1)
+   - Single traversal
+   - Most efficient approach
+
+3. Stack-based:
+   - Time: O(L), Space: O(L)
+   - Intuitive but uses extra space
+   - Good for understanding
+
+4. Recursive:
+   - Time: O(L), Space: O(L)
+   - Elegant but uses call stack
+   - Risk of stack overflow
+
+5. Array conversion:
+   - Time: O(L), Space: O(L)
+   - Educational but inefficient
+   - Creates extra data structure
+
+6. Explicit gap:
+   - Time: O(L), Space: O(1)
+   - Clearer version of approach 2
+   - Good for interviews
+
+Key Insights:
+1. Dummy head simplifies edge case
+ handling
+2. Two pointers with fixed gap is elegant solution
+3. nth from end = (length - n)th from beginning
+4. Always handle edge case where head is removed
+
+Edge Cases:
+- Remove head (n equals list length): return head.next
+- Single node list (n=1): return null
+- n larger than list length: return original list
+- Empty list: return null
+
+Common Mistakes:
+1. Not handling removal of head node
+2. Off-by-one errors in gap calculation
+3. Not using dummy head for edge cases
+4. Incorrect pointer advancement
+5. Not checking for null pointers
+
+Optimization Techniques:
+1. Use dummy head to avoid special cases
+2. Single pass with two pointers
+3. Early validation of n vs list length
+4. Reuse existing nodes instead of creating new ones
+
+Visual Representation (Two Pointers):
+Initial: dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> null, n=2
+         slow    fast (gap of n+1=3)
+
+Step 1:  dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> null
+         slow              fast
+
+Step 2:  dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> null
+                   slow         fast
+
+Step 3:  dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> null
+                          slow         fast
+
+Step 4:  dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> null
+                                 slow    fast
+
+Now slow.next (4) is the node to remove.
+
+Applications:
+- Undo operations (remove last n operations)
+- Buffer management (remove old entries)
+- Sliding window algorithms
+- List manipulation in general
+
+Follow-up Questions:
+1. Remove nth node from beginning
+2. Remove all nodes from position m to n
+3. Remove nodes with specific values
+4. Remove duplicates while maintaining order
+
+Performance Analysis:
+- Best approach: One-pass with two pointers
+- Time: O(L) - must traverse list at least once
+- Space: O(1) - only need a few pointers
+- Single traversal is optimal
+
+Testing Strategy:
+- Normal case: [1,2,3,4,5], n=2 -> [1,2,3,5]
+- Remove head: [1,2], n=2 -> [2]
+- Single node: [1], n=1 -> []
+- Remove tail: [1,2,3], n=1 -> [1,2]
+- Large n: [1,2], n=3 -> [1,2] (no change)
+*/
+```
+
+### 41. Reorder List
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Reorder list L0→L1→…→Ln-1→Ln to L0→Ln→L1→Ln-1→L2→Ln-2→…
+ * 
+ * Multiple approaches: Stack, Array, Two pointers with reversal
+ */
+public class ReorderList {
+    
+    public class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+    
+    // Approach 1: Find middle + Reverse + Merge - Most efficient
+    // Time: O(n), Space: O(1)
+    public void reorderList1(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        // Step 1: Find the middle of the list
+        ListNode slow = head;
+        ListNode fast = head;
+        
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        
+        // Step 2: Reverse the second half
+        ListNode secondHalf = reverseList(slow.next);
+        slow.next = null; // Cut the list into two hal
+ves
+        
+        // Step 3: Merge the two halves alternately
+        ListNode first = head;
+        ListNode second = secondHalf;
+        
+        while (second != null) {
+            ListNode temp1 = first.next;
+            ListNode temp2 = second.next;
+            
+            first.next = second;
+            second.next = temp1;
+            
+            first = temp1;
+            second = temp2;
+        }
+    }
+    
+    // Helper method to reverse a linked list
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode current = head;
+        
+        while (current != null) {
+            ListNode next = current.next;
+            current.next = prev;
+            prev = current;
+            current = next;
+        }
+        
+        return prev;
+    }
+    
+    // Approach 2: Using Stack - Intuitive but uses extra space
+    // Time: O(n), Space: O(n)
+    public void reorderList2(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        // Push all nodes onto stack
+        Stack<ListNode> stack = new Stack<>();
+        ListNode current = head;
+        while (current != null) {
+            stack.push(current);
+            current = current.next;
+        }
+        
+        // Reorder by alternating between start and end
+        current = head;
+        int count = 0;
+        int totalNodes = stack.size();
+        
+        while (count < totalNodes / 2) {
+            ListNode next = current.next;
+            ListNode last = stack.pop();
+            
+            current.next = last;
+            last.next = next;
+            current = next;
+            count++;
+        }
+        
+        current.next = null; // Important: terminate the list
+    }
+    
+    // Approach 3: Convert to array and rebuild - Simple but inefficient
+    // Time: O(n), Space: O(n)
+    public void reorderList3(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        // Convert to array
+        List<ListNode> nodes = new ArrayList<>();
+        ListNode current = head;
+        while (current != null) {
+            nodes.add(current);
+            current = current.next;
+        }
+        
+        // Rebuild with reordered connections
+        int left = 0;
+        int right = nodes.size() - 1;
+        
+        while (left < right) {
+            nodes.get(left).next = nodes.get(right);
+            left++;
+            
+            if (left < right) {
+                nodes.get(right).next = nodes.get(left);
+                right--;
+            }
+        }
+        
+        nodes.get(left).next = null; // Terminate the list
+    }
+    
+    // Approach 4: Recursive approach - Elegant but uses call stack
+    // Time: O(n), Space: O(n)
+    public void reorderList4(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        int length = getLength(head);
+        reorderHelper(head, length);
+    }
+    
+    private ListNode reorderHelper(ListNode head, int length) {
+        if (length == 1) {
+            ListNode tail = head.next;
+            head.next = null;
+            return tail;
+        }
+        
+        if (length == 2) {
+            ListNode tail = head.next.next;
+            head.next.next = null;
+            return tail;
+        }
+        
+        ListNode tail = reorderHelper(head.next, length - 2);
+        ListNode nextTail = tail.next;
+        tail.next = head.next;
+        head.next = tail;
+        
+        return nextTail;
+    }
+    
+    private int getLength(ListNode head) {
+        int length = 0;
+        while (head != null) {
+            length++;
+            head = head.next;
+        }
+        return length;
+    }
+    
+    // Approach 5: Two pointers with deque simulation
+    // Time: O(n), Space: O(n)
+    public void reorderList5(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        // Collect all nodes in deque
+        Deque<ListNode> deque = new ArrayDeque<>();
+        ListNode current = head;
+        while (current != null) {
+            deque.addLast(current);
+            current = current.next;
+        }
+        
+        // Remove head from deque since it's already positioned
+        deque.removeFirst();
+        
+        current = head;
+        boolean takeFromEnd = true;
+        
+        while (!deque.isEmpty()) {
+            if (takeFromEnd) {
+                current.next = deque.removeLast();
+            } else {
+                current.next = deque.removeFirst();
+            }
+            current = current.next;
+            takeFromEnd = !takeFromEnd;
+        }
+        
+        current.next = null; // Terminate the list
+    }
+    
+    // Approach 6: Iterative with length calculation
+    // Time: O(n), Space: O(1)
+    public void reorderList6(ListNode head) {
+        if (head == null || head.next == null) {
+            return;
+        }
+        
+        // Calculate length
+        int length = 0;
+        ListNode current = head;
+        while (current != null) {
+            length++;
+            current = current.next;
+        }
+        
+        // Find middle
+        current = head;
+        for (int i = 0; i < (length - 1) / 2; i++) {
+            current = current.next;
+        }
+        
+        // Reverse second half
+        ListNode secondHalf = reverseList(current.next);
+        current.next = null;
+        
+        // Merge altern
+ately
+        ListNode first = head;
+        ListNode second = secondHalf;
+        
+        while (second != null) {
+            ListNode temp1 = first.next;
+            ListNode temp2 = second.next;
+            
+            first.next = second;
+            second.next = temp1;
+            
+            first = temp1;
+            second = temp2;
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Reorder linked list from L0→L1→…→Ln-1→Ln to L0→Ln→L1→Ln-1→L2→Ln-2→…
+
+Example:
+Input:  1->2->3->4->5
+Output: 1->5->2->4->3
+
+Input:  1->2->3->4
+Output: 1->4->2->3
+
+Approach 1 (Find Middle + Reverse + Merge):
+This is the optimal solution with three main steps:
+
+Step 1: Find the middle of the list
+- Use slow/fast pointers (Floyd's algorithm)
+- Slow moves 1 step, fast moves 2 steps
+- When fast reaches end, slow is at middle
+
+Step 2: Reverse the second half
+- Cut the list at middle
+- Reverse the second half using standard reversal
+
+Step 3: Merge alternately
+- Take nodes alternately from first and second half
+- Connect them in the required pattern
+
+Detailed trace for [1,2,3,4,5]:
+
+Step 1 - Find middle:
+slow=1, fast=1: fast.next=2, fast.next.next=3, continue
+slow=2, fast=3: fast.next=4, fast.next.next=5, continue  
+slow=3, fast=5: fast.next=null, stop
+Middle found at slow=3
+
+Step 2 - Reverse second half:
+Original: 1->2->3->4->5
+Cut: 1->2->3, 4->5
+Reverse second: 1->2->3, 5->4
+
+Step 3 - Merge:
+first=1->2->3, second=5->4
+Merge: 1->5->2->4->3
+
+Approach 2 (Stack):
+1. Push all nodes onto stack
+2. Alternate between taking from beginning and popping from stack
+3. Stack naturally gives us nodes from the end
+
+Approach 3 (Array):
+1. Convert linked list to array for random access
+2. Use two pointers (left, right) to access from both ends
+3. Rebuild connections in required order
+
+Approach 4 (Recursive):
+1. Recursively process the middle portion
+2. Connect current node with tail node
+3. Return the new tail for parent call
+
+Approach 5 (Deque):
+1. Use deque for efficient access to both ends
+2. Alternate between removing from front and back
+3. Rebuild connections as we go
+
+Approach 6 (Iterative with Length):
+Similar to approach 1 but calculates length explicitly instead of using fast/slow pointers.
+
+Approach Comparison:
+
+1. Find Middle + Reverse + Merge (Best):
+   - Time: O(n), Space: O(1)
+   - Optimal solution
+   - Three clear phases
+
+2. Stack-based:
+   - Time: O(n), Space: O(n)
+   - Intuitive but uses extra space
+   - Good for understanding
+
+3. Array conversion:
+   - Time: O(n), Space: O(n)
+   - Simple but inefficient
+   - Easy to implement
+
+4. Recursive:
+   - Time: O(n), Space: O(n)
+   - Elegant but complex
+   - Risk of stack overflow
+
+5. Deque-based:
+   - Time: O(n), Space: O(n)
+   - Clean implementation
+   - Uses standard data structure
+
+6. Iterative with Length:
+   - Time: O(n), Space: O(1)
+   - Alternative to approach 1
+   - Explicit length calculation
+
+Key Insights:
+1. Problem requires accessing both ends efficiently
+2. Reversing second half enables easy merging
+3. Finding middle is crucial for splitting
+4. In-place solution is possible and optimal
+
+Edge Cases:
+- Empty list: no change needed
+- Single node: no change needed
+- Two nodes: 1->2 becomes 1->2 
+(no change)
+- Three nodes: 1->2->3 becomes 1->3->2
+- Even vs odd length: algorithm handles both
+
+Common Mistakes:
+1. Not terminating the reordered list properly
+2. Losing references during pointer manipulation
+3. Incorrect middle finding for even-length lists
+4. Not handling edge cases (empty, single node)
+5. Creating cycles in the reordered list
+
+Optimization Techniques:
+1. Use slow/fast pointers to find middle in one pass
+2. In-place reversal to save space
+3. Careful pointer manipulation to avoid extra traversals
+4. Early termination for small lists
+
+Visual Representation:
+Original: 1 -> 2 -> 3 -> 4 -> 5
+
+Step 1 (Find middle):
+1 -> 2 -> 3 -> 4 -> 5
+          ^
+        middle
+
+Step 2 (Split and reverse):
+First half:  1 -> 2 -> 3
+Second half: 5 -> 4
+
+Step 3 (Merge alternately):
+1 -> 5 -> 2 -> 4 -> 3
+
+Applications:
+- Data structure manipulation
+- Algorithm interview questions
+- List processing in functional programming
+- Memory-efficient data reorganization
+
+Follow-up Questions:
+1. Reorder in different patterns (e.g., L0→L2→L4→...→L1→L3→L5→...)
+2. Reorder only part of the list
+3. Reorder multiple lists simultaneously
+4. Maintain original list while creating reordered copy
+
+Performance Analysis:
+- Optimal time: O(n) - must visit each node at least once
+- Optimal space: O(1) - in-place manipulation
+- Approach 1 achieves both optimal time and space
+- Other approaches trade space for simplicity
+
+Testing Strategy:
+- Empty list: [] -> []
+- Single node: [1] -> [1]
+- Two nodes: [1,2] -> [1,2]
+- Odd length: [1,2,3] -> [1,3,2]
+- Even length: [1,2,3,4] -> [1,4,2,3]
+- Longer list: [1,2,3,4,5,6] -> [1,6,2,5,3,4]
+*/
+```
+
+That completes all 6 Linked List problems! Each solution includes:
+
+1. **Multiple approaches** from basic to optimal
+2. **Detailed algorithm explanations** with step-by-step examples
+3. **Time and space complexity analysis** for each approach
+4. **Key insights** and problem-solving strategies
+5. **Edge case handling** and common mistakes
+6. **Visual representations** and trace examples
+
+The linked list problems covered important patterns like:
+- **Two Pointers** (Fast/Slow for cycle detection, gap for nth from end)
+- **List Reversal** (Iterative and recursive approaches)
+- **List Merging** (Two lists, k lists with different strategies)
+- **List Manipulation** (Reordering, removing nodes)
+- **Space-Time Tradeoffs** (In-place vs extra space solutions)
+
+---------------------------------------------------------------------
+
+
+
+## Dynamic Programming Problems Solutions
+
+### 42. Climbing Stairs
+
+```java
+/**
+ * Problem: Count ways to climb n stairs (1 or 2 steps at a time)
+ * 
+ * Multiple approaches from naive to optimal
+ */
+public class ClimbingStairs {
+    
+    // Approach 1: Optimized DP - Most efficient
+    // Time: O(n), Space: O(1)
+    public int climbStairs1(int n) {
+        if (n <= 2) return n;
+        
+        int prev2 = 1; // ways to reach step 1
+        int prev1 = 2; // ways to reach step 2
+        
+        for (int i = 3; i <= n; i++) {
+            int current = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return prev1;
+    }
+    
+    // Approach 2: DP with array
+    // Time: O(n), Space: O(n)
+    public int climbStairs2(int n) {
+        if (n <= 2) return n;
+        
+        int[] dp = new int[n + 1];
+        dp[1] = 1;
+        dp[2] = 2;
+        
+        for (int i = 3; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        
+        return dp[n];
+    }
+    
+    // Approach 3: Memoization (Top-down)
+    // Time: O(n), Space: O(n)
+    public int climbStairs3(int n) {
+        return climbStairsHelper(n, new int[n + 1]);
+    }
+    
+    private int climbStairsHelper(int n, int[] memo) {
+        if (n <= 2) return n;
+        if (memo[n] != 0) return memo[n];
+        
+        memo[n] = climbStairsHelper(n - 1, memo) + climbStairsHelper(n - 2, memo);
+        return memo[n];
+    }
+    
+    // Approach 4: Pure recursion (exponential - for comparison)
+    // Time: O(2^n), Space: O(n)
+    public int climbStairs4(int n) {
+        if (n <= 2) return n;
+        return climbStairs4(n - 1) + climbStairs4(n - 2);
+    }
+    
+    // Approach 5: Matrix exponentiation - Advanced
+    // Time: O(log n), Space: O(1)
+    public int climbStairs5(int n) {
+        if (n <= 2) return n;
+        
+        int[][] base = {{1, 1}, {1, 0}};
+        int[][] result = matrixPower(base, n);
+        
+        return result[0][0];
+    }
+    
+    private int[][] matrixPower(int[][] matrix, int n) {
+        int[][] result = {{1, 0}, {0, 1}}; // Identity matrix
+        
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = multiplyMatrix(result, matrix);
+            }
+            matrix = multiplyMatrix(matrix, matrix);
+            n /= 2;
+        }
+        
+        return result;
+    }
+    
+    private int[][] multiplyMatrix(int[][] a, int[][] b) {
+        return new int[][]{
+            {a[0][0] * b[0][0] + a[0][1] * b[1][0], a[0][0] * b[0][1] + a[0][1] * b[1][1]},
+            {a[1][0] * b[0][0] + a[1][1] * b[1][0], a[1][0] * b[0][1] + a[1][1] * b[1][1]}
+        };
+    }
+    
+    // Approach 6: Mathematical formula (Fibonacci closed form)
+    // Time: O(1), Space: O(1)
+    public int climbStairs6(int n) {
+        if (n <= 2) return n;
+        
+        double sqrt5 = Math.sqrt(5);
+        double phi = (1 + sqrt5) / 2;
+        double psi = (1 - sqrt5) / 2;
+        
+        // Fibonacci formula: F(n) = (phi^n - psi^n) / sqrt5
+        // But for climbing stairs, we need F(n+1)
+        return (int) Math.round((Math.pow(phi, n + 1) - Math.pow(psi, n + 1)) / sqrt5);
+    }
+}
+
+/*
+Algorithm Explanation:
+
+This is essentially the Fibonacci sequence!
+
+Base
+ cases:
+- 1 stair: 1 way (1 step)
+- 2 stairs: 2 ways (1+1 or 2)
+
+Recurrence relation:
+To reach stair n, we can come from:
+- Stair (n-1) with 1 step
+- Stair (n-2) with 2 steps
+
+So: ways(n) = ways(n-1) + ways(n-2)
+
+Example: n = 5
+ways(1) = 1
+ways(2) = 2  
+ways(3) = ways(2) + ways(1) = 2 + 1 = 3
+ways(4) = ways(3) + ways(2) = 3 + 2 = 5
+ways(5) = ways(4) + ways(3) = 5 + 3 = 8
+
+The 8 ways for n=5:
+1. 1+1+1+1+1
+2. 1+1+1+2
+3. 1+1+2+1  
+4. 1+2+1+1
+5. 2+1+1+1
+6. 1+2+2
+7. 2+1+2
+8. 2+2+1
+
+Approach 1 (Space-Optimized DP):
+Since we only need previous two values, use two variables instead of array.
+
+Approach 2 (Standard DP):
+Build up solution using array to store all intermediate results.
+
+Approach 3 (Memoization):
+Top-down approach with caching to avoid recomputation.
+
+Approach 4 (Pure Recursion):
+Naive recursive solution - exponential time due to overlapping subproblems.
+
+Approach 5 (Matrix Exponentiation):
+Advanced technique using matrix multiplication for logarithmic time.
+Based on: [F(n+1)] = [1 1]^n [F(1)]
+          [F(n)  ]   [1 0]   [F(0)]
+
+Approach 6 (Mathematical Formula):
+Direct calculation using Fibonacci closed form (Binet's formula).
+
+Approach Comparison:
+
+1. Space-Optimized DP (Best for most cases):
+   - Time: O(n), Space: O(1)
+   - Optimal balance of simplicity and efficiency
+   - Most commonly used in interviews
+
+2. Standard DP:
+   - Time: O(n), Space: O(n)
+   - Easy to understand and extend
+   - Good for learning DP concepts
+
+3. Memoization:
+   - Time: O(n), Space: O(n)
+   - Top-down thinking
+   - Natural recursive structure
+
+4. Pure Recursion:
+   - Time: O(2^n), Space: O(n)
+   - Exponential time - avoid in practice
+   - Good for understanding the problem
+
+5. Matrix Exponentiation:
+   - Time: O(log n), Space: O(1)
+   - Most efficient for very large n
+   - Complex implementation
+
+6. Mathematical Formula:
+   - Time: O(1), Space: O(1)
+   - Fastest but precision issues with large n
+   - Requires mathematical insight
+
+Recursion Tree (for n=5):
+                    f(5)
+                   /    \
+                f(4)    f(3)
+               /  \     /  \
+            f(3) f(2) f(2) f(1)
+           /  \
+        f(2) f(1)
+
+Notice overlapping subproblems: f(3) computed twice, f(2) computed three times.
+
+Key Insights:
+1. This is Fibonacci sequence in disguise
+2. Overlapping subproblems make DP applicable
+3. Only need previous two values for optimal space
+4. Can be solved in multiple ways with different trade-offs
+
+Edge Cases:
+- n = 0: typically return 1 (one way to stay at ground)
+- n = 1: return 1
+- n = 2: return 2
+- Large n: consider integer overflow
+
+Common Mistakes:
+1. Not recognizing this as Fibonacci
+2. Using exponential recursive solution
+3. Off
+-by-one errors in base cases
+4. Integer overflow for large n
+5. Not optimizing space when possible
+
+Optimization Notes:
+- Space optimization is crucial for large n
+- Memoization vs tabulation trade-offs
+- Matrix exponentiation for very large n
+- Consider modular arithmetic for overflow
+
+Applications:
+- Step counting problems
+- Path counting in grids
+- Sequence generation
+- Resource allocation problems
+
+Follow-up Questions:
+1. What if you can take 1, 2, or 3 steps?
+2. What if some steps are blocked?
+3. Find the actual paths, not just count
+4. Minimum cost to reach top with step costs
+5. Climbing stairs with variable step sizes
+
+Variations:
+- Min cost climbing stairs
+- Climbing stairs with obstacles
+- 2D grid path counting
+- Tribonacci sequence (3 steps allowed)
+
+Mathematical Insight:
+The nth Fibonacci number grows exponentially: F(n) ≈ φ^n/√5
+where φ = (1+√5)/2 ≈ 1.618 (golden ratio)
+
+This explains why naive recursion is O(2^n) - the recursion tree grows exponentially.
+
+Performance for large n:
+- DP approaches: practical for n up to 10^6
+- Matrix exponentiation: practical for n up to 10^18
+- Mathematical formula: fastest but floating point precision limits
+*/
+```
+
+### 43. Coin Change
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find minimum coins needed to make amount
+ * 
+ * Optimal Approach: Bottom-up DP
+ * Time: O(amount * coins.length), Space: O(amount)
+ */
+public class CoinChange {
+    
+    // Approach 1: Bottom-up DP - Most efficient
+    // Time: O(amount * coins.length), Space: O(amount)
+    public int coinChange1(int[] coins, int amount) {
+        // dp[i] = minimum coins needed to make amount i
+        int[] dp = new int[amount + 1];
+        
+        // Initialize with impossible value (amount + 1)
+        Arrays.fill(dp, amount + 1);
+        
+        // Base case: 0 coins needed to make amount 0
+        dp[0] = 0;
+        
+        // Fill dp array for each amount from 1 to target
+        for (int i = 1; i <= amount; i++) {
+            // Try each coin
+            for (int coin : coins) {
+                if (coin <= i) {
+                    // Update minimum coins needed
+                    dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+        
+        // Return result or -1 if impossible
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+    
+    // Approach 2: Top-down memoization
+    // Time: O(amount * coins.length), Space: O(amount)
+    public int coinChange2(int[] coins, int amount) {
+        return coinChangeHelper(coins, amount, new int[amount + 1]);
+    }
+    
+    private int coinChangeHelper(int[] coins, int amount, int[] memo) {
+        if (amount == 0) return 0;
+        if (amount < 0) return -1;
+        if (memo[amount] != 0) return memo[amount];
+        
+        int min = Integer.MAX_VALUE;
+        for (int coin : coins) {
+            int result = coinChangeHelper(coins, amount - coin, memo);
+            if (result >= 0 && result < min) {
+                min = result + 1;
+            }
+        }
+        
+        memo[amount] = (min == Integer.MAX_VALUE) ? -1 : min;
+        return memo[amount];
+    }
+    
+    // Approach 3: BFS approach - Alternative perspective
+    // Time: O(amount * coins.length), Space: O(amount)
+    public int coinChange3(int[] coins, int amount) {
+        if (amount == 0) return 0;
+        
+        Queue<Integer> queue = new LinkedList<>();
+        Set<Integer> visited = new HashSet<>();
+        
+        queue.offer(0);
+        visited.add(0);
+        int level = 0;
+        
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            level++;
+            
+            for (int i = 0; i < size; i++) {
+                int current = queue.poll();
+                
+                for (int coin : coins) {
+                    int next = current + coin;
+                    
+
+                    if (next == amount) {
+                        return level;
+                    }
+                    
+                    if (next < amount && !visited.contains(next)) {
+                        visited.add(next);
+                        queue.offer(next);
+                    }
+                }
+            }
+        }
+        
+        return -1;
+    }
+    
+    // Approach 4: DFS with pruning
+    // Time: O(amount^coins.length) worst case, Space: O(amount)
+    public int coinChange4(int[] coins, int amount) {
+        // Sort coins in descending order for better pruning
+        Arrays.sort(coins);
+        for (int i = 0; i < coins.length / 2; i++) {
+            int temp = coins[i];
+            coins[i] = coins[coins.length - 1 - i];
+            coins[coins.length - 1 - i] = temp;
+        }
+        
+        int[] result = {Integer.MAX_VALUE};
+        dfs(coins, amount, 0, 0, result);
+        
+        return result[0] == Integer.MAX_VALUE ? -1 : result[0];
+    }
+    
+    private void dfs(int[] coins, int amount, int index, int count, int[] result) {
+        if (amount == 0) {
+            result[0] = Math.min(result[0], count);
+            return;
+        }
+        
+        if (index >= coins.length || count >= result[0]) {
+            return; // Pruning
+        }
+        
+        // Try using current coin as many times as possible
+        for (int i = amount / coins[index]; i >= 0; i--) {
+            dfs(coins, amount - i * coins[index], index + 1, count + i, result);
+        }
+    }
+    
+    // Approach 5: Space-optimized DP with coin iteration first
+    // Time: O(amount * coins.length), Space: O(amount)
+    public int coinChange5(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        
+        // Iterate through coins first, then amounts
+        for (int coin : coins) {
+            for (int i = coin; i <= amount; i++) {
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+        
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+    
+    // Bonus: Return actual coins used
+    public List<Integer> coinChangeWithPath(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        int[] parent = new int[amount + 1];
+        
+        Arrays.fill(dp, amount + 1);
+        Arrays.fill(parent, -1);
+        dp[0] = 0;
+        
+        for (int i = 1; i <= amount; i++) {
+            for (int coin : coins) {
+                if (coin <= i && dp[i - coin] + 1 < dp[i]) {
+                    dp[i] = dp[i - coin] + 1;
+                    parent[i] = coin;
+                }
+            }
+        }
+        
+        if (dp[amount] > amount) {
+            return new ArrayList<>(); // No solution
+        }
+        
+        // Reconstruct path
+        List<Integer> result = new ArrayList<>();
+        int current = amount;
+        while (current > 0) {
+            int coin = parent[current];
+            result.add(coin);
+            current -= coin;
+        }
+        
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+We build up solutions for smaller amounts to solve larger amounts.
+
+For each amount i, we try using each coin and take the minimum.
+dp[i] = min(dp[i - coin] + 1) for all valid coins
+
+Example: coins = [1,3,4], amount = 6
+dp[0] = 0
+
+dp[1]: Try coin 1: dp[1-1] + 1 = dp[0] + 1 = 1
+       Coins 3,4 too large
+       dp[1] = 1
+
+dp[2]: Try coin 1: dp[2-1] + 1 = dp[1] + 1 = 2
+       Coins 3,4 too large  
+       dp[2] = 2
+
+dp[3]: Try coin 1: dp[3-1] + 1 = dp[2] + 1 = 3
+       Try coin 3: dp[3-3] + 1 = dp[0] + 1 = 1
+       Coin 4 too large
+       dp[3] = min(3, 1) = 1
+
+dp[4]: Try coin 1: dp[4-1] + 1 = dp[3] + 1 = 2
+       Try coin 3: dp[4-3] + 1 = dp[1] + 1 = 2
+       Try coin 4: dp[4-4] + 1 = dp[0] + 1 = 1
+       dp[4] = min(2, 2, 1) = 1
+
+dp[5]: Try coin 1: dp[5-1] + 1 = dp[4] + 1 = 2
+       Try coin 3: dp[5-3] + 1 = dp[2] + 1 = 3
+       Try coin 4: dp[5-4] + 1 = dp[1] + 1 = 2
+       dp[5] = min(2, 3, 2) = 2
+
+dp[6]: Try coin 1: dp[6-1] + 1 = dp[5] + 1 = 3
+       Try coin 3: dp[6-3] + 1 = dp[3] + 1 = 2
+       Try coin 4: dp[6-4] + 1 = dp[2] + 1 = 3
+       dp
+[6] = min(3, 2, 3) = 2
+
+Answer: 2 coins (3 + 3 = 6)
+
+Approach 1 (Bottom-up DP):
+- Build solutions from amount 0 to target
+- For each amount, try all coins and take minimum
+- Most intuitive and commonly used
+
+Approach 2 (Top-down Memoization):
+- Start from target amount and work backwards
+- Cache results to avoid recomputation
+- Natural recursive thinking
+
+Approach 3 (BFS):
+- Treat as shortest path problem
+- Each level represents number of coins used
+- Find shortest path from 0 to target amount
+
+Approach 4 (DFS with Pruning):
+- Try all combinations with pruning
+- Sort coins for better pruning
+- Less efficient but shows different approach
+
+Approach 5 (Space-optimized):
+- Same as approach 1 but different iteration order
+- Can lead to better cache performance
+
+Approach Comparison:
+
+1. Bottom-up DP (Best for interviews):
+   - Time: O(amount * coins), Space: O(amount)
+   - Most intuitive and efficient
+   - Easy to understand and implement
+
+2. Top-down Memoization:
+   - Time: O(amount * coins), Space: O(amount)
+   - Natural recursive structure
+   - Good for understanding problem
+
+3. BFS:
+   - Time: O(amount * coins), Space: O(amount)
+   - Different perspective (graph problem)
+   - Good for shortest path thinking
+
+4. DFS with Pruning:
+   - Time: Exponential worst case
+   - Can be faster with good pruning
+   - More complex implementation
+
+5. Space-optimized:
+   - Time: O(amount * coins), Space: O(amount)
+   - Same complexity but different iteration
+   - Potential cache benefits
+
+Key Insights:
+1. This is an unbounded knapsack problem
+2. Optimal substructure: optimal solution contains optimal subsolutions
+3. Overlapping subproblems make DP applicable
+4. Greedy approach doesn't work (e.g., coins=[1,3,4], amount=6)
+
+Edge Cases:
+- amount = 0: return 0
+- No solution possible: return -1
+- Single coin type: amount / coin if divisible
+- Large amounts: consider integer overflow
+
+Common Mistakes:
+1. Using greedy approach (doesn't always work)
+2. Not handling impossible cases
+3. Integer overflow with large amounts
+4. Incorrect initialization of DP array
+5. Not considering all coin denominations
+
+Optimization Techniques:
+1. Sort coins for better pruning in DFS
+2. Early termination when solution found
+3. Use BFS for guaranteed shortest path
+4. Space optimization when only previous values needed
+
+Applications:
+- Currency exchange systems
+- Resource allocation problems
+- Knapsack variations
+- Change-making algorithms
+
+Follow-up Questions:
+1. Return the actual coins used
+2. Count number of ways to make amount
+3. Minimum coins with limited coin quantities
+4. Maximum amount with given coins
+5. Coin change with different denominations
+
+Complexity Analysis:
+- Time: O(amount * coins.length) for DP approaches
+- Space: O(amount) for memoization
+- Cannot do better than O(amount * coins) as we need to consider all combinations
+
+Mathematical Properties:
+- This is NP-complete in general case
+- Polynomial time solution exists for this specific variant
+- Related to Frobenius coin problem
+- Greedy works only for canonical coin systems
+
+Testing Strategy:
+- Basic case: coins=[1,2,5], amount=11 -> 3
+- No solution: coins=[2],
+ amount=3 -> -1
+- Zero amount: coins=[1], amount=0 -> 0
+- Single coin: coins=[1], amount=5 -> 5
+- Large denominations: coins=[1,3,4], amount=6 -> 2
+*/
+```
+
+### 44. Longest Increasing Subsequence
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find length of longest increasing subsequence
+ * 
+ * Multiple approaches from O(n²) DP to O(n log n) binary search
+ */
+public class LongestIncreasingSubsequence {
+    
+    // Approach 1: DP with binary search - Most efficient
+    // Time: O(n log n), Space: O(n)
+    public int lengthOfLIS1(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        // tails[i] = smallest ending element of all increasing subsequences of length i+1
+        List<Integer> tails = new ArrayList<>();
+        
+        for (int num : nums) {
+            // Binary search for the position to insert/replace
+            int pos = binarySearch(tails, num);
+            
+            if (pos == tails.size()) {
+                // num is larger than all elements in tails, extend the sequence
+                tails.add(num);
+            } else {
+                // Replace the element at pos with num
+                tails.set(pos, num);
+            }
+        }
+        
+        return tails.size();
+    }
+    
+    private int binarySearch(List<Integer> tails, int target) {
+        int left = 0, right = tails.size();
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (tails.get(mid) < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return left;
+    }
+    
+    // Approach 2: Standard DP - O(n²)
+    // Time: O(n²), Space: O(n)
+    public int lengthOfLIS2(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        int n = nums.length;
+        int[] dp = new int[n];
+        Arrays.fill(dp, 1); // Each element forms a subsequence of length 1
+        
+        int maxLength = 1;
+        
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            maxLength = Math.max(maxLength, dp[i]);
+        }
+        
+        return maxLength;
+    }
+    
+    // Approach 3: Memoization (Top-down)
+    // Time: O(n²), Space: O(n²)
+    public int lengthOfLIS3(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        int[][] memo = new int[nums.length][nums.length + 1];
+        return lisHelper(nums, 0, -1, memo);
+    }
+    
+    private int lisHelper(int[] nums, int index, int prevIndex, int[][] memo) {
+        if (index >= nums.length) return 0;
+        
+        int memoIndex = prevIndex + 1; // Shift by 1 to handle -1 index
+        if (memo[index][memoIndex] != 0) return memo[index][memoIndex];
+        
+        // Option 1: Don't include current element
+        int exclude = lisHelper(nums, index + 1, prevIndex, memo);
+        
+        // Option 2: Include current element (if valid)
+        int include = 0;
+        if (prevIndex == -1 || nums[index] > nums[prevIndex]) {
+            include = 1 + lisHelper(nums, index + 1, index, memo);
+        }
+        
+        memo[index][memoIndex] = Math.max(exclude, include);
+        return memo[index][memoIndex];
+    }
+    
+    // Approach 4: Using TreeMap for efficient search
+    // Time: O(n log n), Space: O(n)
+    public int lengthOfLIS4(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        // TreeMap: length -> smallest ending element for that length
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        
+        for (int num : nums) {
+            // Find the largest length where ending element < num
+            Integer floorKey = map.floorKey(num - 1);
+            int newLength = (floorKey == null) ? 1 : floorKey + 1;
+            
+            // Update or add the new length
+            map.put(newLength, num);
+            
+            // Remove all entries with length > newLength and ending element >= num
+            Iterator<Map.Entry<Integer, Integer>> it = map.tailMap(newLength + 1).entrySet().iterator();
+            
+while (it.hasNext()) {
+                Map.Entry<Integer, Integer> entry = it.next();
+                if (entry.getValue() >= num) {
+                    it.remove();
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        return map.isEmpty() ? 0 : map.lastKey();
+    }
+    
+    // Approach 5: Segment Tree approach (advanced)
+    // Time: O(n log n), Space: O(n)
+    public int lengthOfLIS5(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        // Coordinate compression
+        int[] sorted = nums.clone();
+        Arrays.sort(sorted);
+        Map<Integer, Integer> compress = new HashMap<>();
+        int idx = 0;
+        for (int num : sorted) {
+            if (!compress.containsKey(num)) {
+                compress.put(num, idx++);
+            }
+        }
+        
+        SegmentTree st = new SegmentTree(idx);
+        int maxLength = 0;
+        
+        for (int num : nums) {
+            int compressedNum = compress.get(num);
+            int currentLength = st.query(0, compressedNum - 1) + 1;
+            st.update(compressedNum, currentLength);
+            maxLength = Math.max(maxLength, currentLength);
+        }
+        
+        return maxLength;
+    }
+    
+    // Helper class for Segment Tree
+    class SegmentTree {
+        private int[] tree;
+        private int n;
+        
+        public SegmentTree(int size) {
+            n = size;
+            tree = new int[4 * n];
+        }
+        
+        public void update(int pos, int val) {
+            update(1, 0, n - 1, pos, val);
+        }
+        
+        private void update(int node, int start, int end, int pos, int val) {
+            if (start == end) {
+                tree[node] = Math.max(tree[node], val);
+            } else {
+                int mid = (start + end) / 2;
+                if (pos <= mid) {
+                    update(2 * node, start, mid, pos, val);
+                } else {
+                    update(2 * node + 1, mid + 1, end, pos, val);
+                }
+                tree[node] = Math.max(tree[2 * node], tree[2 * node + 1]);
+            }
+        }
+        
+        public int query(int l, int r) {
+            if (l > r) return 0;
+            return query(1, 0, n - 1, l, r);
+        }
+        
+        private int query(int node, int start, int end, int l, int r) {
+            if (r < start || end < l) return 0;
+            if (l <= start && end <= r) return tree[node];
+            
+            int mid = (start + end) / 2;
+            return Math.max(query(2 * node, start, mid, l, r),
+                           query(2 * node + 1, mid + 1, end, l, r));
+        }
+    }
+    
+    // Bonus: Return actual LIS sequence
+    public List<Integer> findLIS(int[] nums) {
+        if (nums == null || nums.length == 0) return new ArrayList<>();
+        
+        int n = nums.length;
+        int[] dp = new int[n];
+        int[] parent = new int[n];
+        Arrays.fill(dp, 1);
+        Arrays.fill(parent, -1);
+        
+        int maxLength = 1;
+        int maxIndex = 0;
+        
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i] && dp[j] + 1 > dp[i]) {
+                    dp[i] = dp[j] + 1;
+                    parent[i] = j;
+                }
+            }
+            if (dp[i] > maxLength) {
+                maxLength = dp[i];
+                maxIndex = i;
+            }
+        }
+        
+        // Reconstruct the sequence
+        List<Integer> lis = new ArrayList<>();
+        int current = maxIndex;
+        while (current != -1) {
+            lis.add(nums[current]);
+            current = parent[current];
+        }
+        
+        Collections.reverse(lis);
+        return lis;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+LIS Problem: Find the length of the longest subsequence where elements are in increasing order.
+
+Example: [10,9,2,5,3,7,101,18]
+LIS: [2,3,7,18] or [2,3,7,101] (length = 4)
+
+Approach 1 (Binary Search + DP):
+Key insight: For each length i, we only need to track the smallest possible ending element.
+
+tails[i] = smallest ending element of all increasing subsequences of length i+1
+
+For each number:
+1. Find position where it should be inserted in tails (binary search)
+2. If position == tails.size(), extend the sequence
+3. Otherwise, replace element at that position
+
+Example trace for [10,9,2,5,3,7,101,18]:
+num=10: tails=[10]
+num=9:  tails=[9] (replace 10 with 9)
+num=2:  tails=[2] (replace 9 with 2)
+num=5:  tails=[2,5] (extend)
+num=3:  tails=[2,3] (replace 5 with 3)
+num=7:  tails=[2,3,7] (extend)
+num=101: tails=[2,3,7,101] (extend)
+num=18: tails=[2,3,7,18
+] (replace 101 with 18)
+
+Length = 4
+
+Approach 2 (Standard DP):
+dp[i] = length of LIS ending at index i
+
+For each position i, check all previous positions j:
+If nums[j] < nums[i], then dp[i] = max(dp[i], dp[j] + 1)
+
+Approach 3 (Memoization):
+Top-down approach with two parameters:
+- Current index
+- Previous index (to ensure increasing order)
+
+Approach 4 (TreeMap):
+Use TreeMap to efficiently find the longest subsequence we can extend.
+
+Approach 5 (Segment Tree):
+Advanced approach using segment tree for range maximum queries.
+
+Approach Comparison:
+
+1. Binary Search DP (Best):
+   - Time: O(n log n), Space: O(n)
+   - Most efficient for large inputs
+   - Industry standard solution
+
+2. Standard DP:
+   - Time: O(n²), Space: O(n)
+   - Easy to understand and implement
+   - Good for small to medium inputs
+
+3. Memoization:
+   - Time: O(n²), Space: O(n²)
+   - Natural recursive thinking
+   - Higher space complexity
+
+4. TreeMap:
+   - Time: O(n log n), Space: O(n)
+   - Alternative O(n log n) solution
+   - More complex implementation
+
+5. Segment Tree:
+   - Time: O(n log n), Space: O(n)
+   - Advanced technique
+   - Overkill for this problem
+
+Key Insights:
+1. We don't need to store actual subsequences, just their lengths
+2. For each length, we only care about the smallest possible ending element
+3. Binary search enables O(log n) updates
+4. Greedy choice: always prefer smaller ending elements
+
+Why Binary Search Works:
+- tails array is always sorted
+- We want to find the leftmost position where tails[i] >= num
+- This gives us the longest subsequence we can extend
+
+Edge Cases:
+- Empty array: return 0
+- Single element: return 1
+- Strictly decreasing: return 1
+- Strictly increasing: return n
+- All same elements: return 1
+
+Common Mistakes:
+1. Confusing subsequence with subarray
+2. Not handling equal elements correctly
+3. Incorrect binary search implementation
+4. Off-by-one errors in DP transitions
+5. Not considering empty array case
+
+Optimization Techniques:
+1. Binary search for O(n log n) solution
+2. Space optimization when only length needed
+3. Early termination for sorted arrays
+4. Coordinate compression for large values
+
+Applications:
+- Patience sorting algorithm
+- Box stacking problems
+- Activity selection variants
+- Sequence analysis in bioinformatics
+
+Follow-up Questions:
+1. Return the actual LIS (not just length)
+2. Count number of LIS
+3. Longest decreasing subsequence
+4. LIS with at most k decreases allowed
+5. 2D version (longest increasing path in matrix)
+
+Variations:
+- Longest Common Subsequence (LCS)
+- Longest Bitonic Subsequence
+- Maximum sum increasing subsequence
+- Longest arithmetic progression
+
+Mathematical Properties:
+- LIS length ≤ √n for random permutations (expected)
+- Related to Robinson-Schensted correspondence
+- Connection to Young tableaux
+- Erdős–Szekeres theorem applications
+
+Performance Comparison:
+- Small arrays (n < 100): O(n²) DP is fine
+- Medium arrays (n < 10⁴): O(n²) still acceptable
+- Large arrays (n ≥ 10⁴): O(n log n) necessary
+- Very large arrays: Consider space optimizations
+*/
+```
+
+### 45. Longest Common Subsequence
+
+```java
+/**
+ * Problem: Find length of longest common subsequence between two strings
+ * 
+ * Multiple approaches: 2D DP, Space-optimized, Memoization
+ */
+public class LongestCommonSubsequence {
+    
+    // Approach 1: 2D DP - Most intu
+itive
+    // Time: O(m*n), Space: O(m*n)
+    public int longestCommonSubsequence1(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        // dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
+        int[][] dp = new int[m + 1][n + 1];
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    // Characters match, extend LCS
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    // Characters don't match, take maximum from either direction
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        
+        return dp[m][n];
+    }
+    
+    // Approach 2: Space-optimized DP - O(min(m,n)) space
+    // Time: O(m*n), Space: O(min(m,n))
+    public int longestCommonSubsequence2(String text1, String text2) {
+        // Ensure text1 is the shorter string for space optimization
+        if (text1.length() > text2.length()) {
+            return longestCommonSubsequence2(text2, text1);
+        }
+        
+        int m = text1.length();
+        int n = text2.length();
+        
+        // Only need previous and current row
+        int[] prev = new int[m + 1];
+        int[] curr = new int[m + 1];
+        
+        for (int j = 1; j <= n; j++) {
+            for (int i = 1; i <= m; i++) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    curr[i] = prev[i - 1] + 1;
+                } else {
+                    curr[i] = Math.max(prev[i], curr[i - 1]);
+                }
+            }
+            // Swap arrays for next iteration
+            int[] temp = prev;
+            prev = curr;
+            curr = temp;
+        }
+        
+        return prev[m];
+    }
+    
+    // Approach 3: Memoization (Top-down)
+    // Time: O(m*n), Space: O(m*n)
+    public int longestCommonSubsequence3(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        int[][] memo = new int[m][n];
+        
+        // Initialize memo with -1 to indicate uncomputed
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+        
+        return lcsHelper(text1, text2, 0, 0, memo);
+    }
+    
+    private int lcsHelper(String text1, String text2, int i, int j, int[][] memo) {
+        // Base cases
+        if (i >= text1.length() || j >= text2.length()) {
+            return 0;
+        }
+        
+        // Check memo
+        if (memo[i][j] != -1) {
+            return memo[i][j];
+        }
+        
+        int result;
+        if (text1.charAt(i) == text2.charAt(j)) {
+            // Characters match
+            result = 1 + lcsHelper(text1, text2, i + 1, j + 1, memo);
+        } else {
+            // Characters don't match, try both options
+            result = Math.max(
+                lcsHelper(text1, text2, i + 1, j, memo),
+                lcsHelper(text1, text2, i, j + 1, memo)
+            );
+        }
+        
+        memo[i][j] = result;
+        return result;
+    }
+    
+    // Approach 4: Further space optimization - O(min(m,n)) space
+    // Time: O(m*n), Space: O(min(m,n))
+    public int longestCommonSubsequence4(String text1, String text2) {
+        if (text1.length() > text2.length()) {
+            return longestCommonSubsequence4(text2, text1);
+        }
+        
+        int m = text1.length();
+        int n = text2.length();
+        
+        int[] dp = new int[m + 1];
+        
+        for (int j = 1; j <= n; j++) {
+            int prev = 0; // dp[i-1][j-1] for current iteration
+            for (int i = 1; i <= m; i++) {
+                int temp = dp[i]; // Store dp[i][j-1] for next iteration
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    dp[i] = prev + 1;
+                } else {
+                    dp[i] = Math.max(dp[i], dp[i - 1]);
+                }
+                prev = temp;
+            }
+        }
+        
+        return dp[m];
+    }
+    
+    // Bonus: Return actual LCS string
+    public String findLCS(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        
+        // Build DP table
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][
+j - 1]);
+                }
+            }
+        }
+        
+        // Backtrack to find actual LCS
+        StringBuilder lcs = new StringBuilder();
+        int i = m, j = n;
+        
+        while (i > 0 && j > 0) {
+            if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                // Character is part of LCS
+                lcs.append(text1.charAt(i - 1));
+                i--;
+                j--;
+            } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                // Move up
+                i--;
+            } else {
+                // Move left
+                j--;
+            }
+        }
+        
+        return lcs.reverse().toString();
+    }
+    
+    // Bonus: Count number of LCS
+    public int countLCS(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        int[][] dp = new int[m + 1][n + 1];
+        int[][] count = new int[m + 1][n + 1];
+        
+        // Initialize base cases
+        for (int i = 0; i <= m; i++) {
+            count[i][0] = 1;
+        }
+        for (int j = 0; j <= n; j++) {
+            count[0][j] = 1;
+        }
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                    count[i][j] = count[i - 1][j - 1];
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    count[i][j] = 0;
+                    
+                    if (dp[i - 1][j] == dp[i][j]) {
+                        count[i][j] += count[i - 1][j];
+                    }
+                    if (dp[i][j - 1] == dp[i][j]) {
+                        count[i][j] += count[i][j - 1];
+                    }
+                }
+            }
+        }
+        
+        return count[m][n];
+    }
+}
+
+/*
+Algorithm Explanation:
+
+LCS Problem: Find the longest subsequence common to both strings.
+A subsequence maintains relative order but doesn't need to be contiguous.
+
+Example:
+text1 = "abcde"
+text2 = "ace"
+LCS = "ace" (length = 3)
+
+DP Recurrence:
+If text1[i-1] == text2[j-1]:
+    dp[i][j] = dp[i-1][j-1] + 1
+Else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+DP Table for "abcde" and "ace":
+    ""  a  c  e
+""   0  0  0  0
+a    0  1  1  1
+b    0  1  1  1
+c    0  1  2  2
+d    0  1  2  2
+e    0  1  2  3
+
+Approach 1 (2D DP):
+Standard bottom-up DP approach.
+Build table row by row, column by column.
+
+Approach 2 (Space-optimized):
+Since we only need previous row, use two 1D arrays.
+Further optimize by making shorter string the "column" dimension.
+
+Approach 3 (Memoization):
+Top-down approach with recursion and caching.
+Natural recursive structure but uses more space.
+
+Approach 4 (Further space optimization):
+Use only one 1D array with careful variable management.
+Requires tracking diagonal value separately.
+
+Approach Comparison:
+
+1. 2D DP (Most intuitive):
+   - Time: O(m*n), Space: O(m*n)
+   - Easy to understand and implement
+   - Can easily reconstruct actual LCS
+
+2. Space-optimized (Best for length only):
+   - Time: O(m*n), Space: O(min(m,n))
+   - Significant space savings
+   - Cannot reconstruct LCS easily
+
+3. Memoization:
+   - Time: O(m*n), Space: O(m*n)
+   - Natural recursive thinking
+   - Higher constant factors
+
+4. Further optimized:
+   - Time: O(m*n), Space: O(min(m,n))
+   - Most space-efficient
+   - Complex implementation
+
+Key Insights:
+1. Optimal substructure: LCS of prefixes gives LCS of full strings
+2. Overlapping subproblems: same subproblems solved multiple times
+3. Two choices
+ when characters don't match: skip from either string
+4. When characters match, we must include them in LCS
+
+DP State Transition:
+- Match: extend LCS from both strings
+- No match: take maximum from either skipping current character
+
+Space Optimization Logic:
+- Only need previous row to compute current row
+- Can reduce from O(m*n) to O(min(m,n))
+- Further reduce to O(min(m,n)) with single array
+
+Edge Cases:
+- Empty strings: LCS length = 0
+- One empty string: LCS length = 0
+- Identical strings: LCS = entire string
+- No common characters: LCS length = 0
+- One string is subsequence of other: LCS = shorter string
+
+Common Mistakes:
+1. Confusing subsequence with substring
+2. Incorrect indexing in DP table
+3. Not handling empty string cases
+4. Wrong recurrence relation
+5. Space optimization bugs with array reuse
+
+Applications:
+- DNA sequence alignment
+- File diff algorithms (git diff)
+- Plagiarism detection
+- Version control systems
+- Text similarity measures
+
+Follow-up Questions:
+1. Return actual LCS string (not just length)
+2. Count number of different LCS
+3. Shortest common supersequence
+4. LCS of multiple strings
+5. Weighted LCS with character costs
+
+Variations:
+- Longest Common Substring (contiguous)
+- Edit Distance (Levenshtein distance)
+- Shortest Common Supersequence
+- LCS with at most k mismatches
+
+Optimization Techniques:
+1. Space optimization for large strings
+2. Early termination if one string much shorter
+3. Preprocessing for special cases
+4. Parallel computation for very large inputs
+
+Mathematical Properties:
+- LCS length ≤ min(m, n)
+- LCS is symmetric: LCS(A,B) = LCS(B,A)
+- Triangle inequality doesn't hold
+- Related to edit distance: edit_distance = m + n - 2*LCS
+
+Performance Considerations:
+- For very long strings: consider space-optimized versions
+- For multiple queries: precompute suffix arrays
+- For similar strings: early termination optimizations
+- Memory access patterns: row-wise vs column-wise iteration
+*/
+```
+
+### 46. Word Break Problem
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Check if string can be segmented into dictionary words
+ * 
+ * Multiple approaches: DP, Memoization, BFS, Trie
+ */
+public class WordBreak {
+    
+    // Approach 1: Bottom-up DP - Most efficient
+    // Time: O(n² + m*k) where n=string length, m=dict size, k=avg word length
+    // Space: O(n)
+    public boolean wordBreak1(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        int n = s.length();
+        
+        // dp[i] = true if s[0..i-1] can be segmented
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true; // Empty string can always be segmented
+        
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                // Check if s[0..j-1] can be segmented AND s[j..i-1] is in dictionary
+                if (dp[j] && wordSet.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break; // Early termination
+                }
+            }
+        }
+        
+        return dp[n];
+    }
+    
+    // Approach 2: Memoization (Top-down)
+    // Time: O(n² + m*k), Space: O(n)
+    public boolean wordBreak2(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        Boolean[] memo = new Boolean[s.length()];
+        return wordBreakHelper(s, 0, wordSet, memo);
+    }
+
+    
+    private boolean wordBreakHelper(String s, int start, Set<String> wordSet, Boolean[] memo) {
+        if (start >= s.length()) {
+            return true; // Reached end successfully
+        }
+        
+        if (memo[start] != null) {
+            return memo[start];
+        }
+        
+        for (int end = start + 1; end <= s.length(); end++) {
+            String word = s.substring(start, end);
+            if (wordSet.contains(word) && wordBreakHelper(s, end, wordSet, memo)) {
+                memo[start] = true;
+                return true;
+            }
+        }
+        
+        memo[start] = false;
+        return false;
+    }
+    
+    // Approach 3: BFS approach
+    // Time: O(n² + m*k), Space: O(n)
+    public boolean wordBreak3(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        Queue<Integer> queue = new LinkedList<>();
+        boolean[] visited = new boolean[s.length()];
+        
+        queue.offer(0);
+        
+        while (!queue.isEmpty()) {
+            int start = queue.poll();
+            
+            if (visited[start]) {
+                continue;
+            }
+            visited[start] = true;
+            
+            for (int end = start + 1; end <= s.length(); end++) {
+                if (wordSet.contains(s.substring(start, end))) {
+                    if (end == s.length()) {
+                        return true; // Reached end
+                    }
+                    queue.offer(end);
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 4: Optimized DP with max word length
+    // Time: O(n*L) where L is max word length, Space: O(n)
+    public boolean wordBreak4(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        
+        // Find maximum word length for optimization
+        int maxLen = 0;
+        for (String word : wordDict) {
+            maxLen = Math.max(maxLen, word.length());
+        }
+        
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        
+        for (int i = 1; i <= n; i++) {
+            // Only check words that can fit
+            for (int j = Math.max(0, i - maxLen); j < i; j++) {
+                if (dp[j] && wordSet.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[n];
+    }
+    
+    // Approach 5: Trie-based solution
+    // Time: O(n² + m*k), Space: O(m*k)
+    public boolean wordBreak5(String s, List<String> wordDict) {
+        TrieNode root = buildTrie(wordDict);
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        
+        for (int i = 1; i <= n; i++) {
+            TrieNode node = root;
+            for (int j = i - 1; j >= 0; j--) {
+                char c = s.charAt(j);
+                if (node.children[c - 'a'] == null) {
+                    break; // No word starts with this character sequence
+                }
+                node = node.children[c - 'a'];
+                if (node.isWord && dp[j]) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[n];
+    }
+    
+    private TrieNode buildTrie(List<String> wordDict) {
+        TrieNode root = new TrieNode();
+        for (String word : wordDict) {
+            TrieNode node = root;
+            // Insert word in reverse for easier lookup
+            for (int i = word.length() - 1; i >= 0; i--) {
+                char c = word.charAt(i);
+                if (node.children[c - 'a'] == null) {
+                    node.children[c - 'a'] = new TrieNode();
+                }
+                node = node.children[c - 'a'];
+            }
+            node.isWord = true;
+        }
+        return root;
+    }
+    
+    class TrieNode {
+        TrieNode[] children = new TrieNode[26];
+        boolean isWord = false;
+    }
+    
+    // Bonus: Return all possible word break combinations
+    public List<String> wordBreakII(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        Map<String, List<String>> memo = new HashMap<>();
+        return wordBreakHelper(s, wordSet, memo);
+    }
+    
+    private List<String> wordBreakHelper(String s, Set<String> wordSet, Map<String, List<String>> memo) {
+        if (memo.containsKey(s)) {
+            return memo.get(s);
+        }
+        
+        List<String> result = new ArrayList<>();
+        
+        if (s.isEmpty()) {
+            result.add("");
+            return result;
+        }
+        
+        for (String word : wordSet) {
+            if (s.startsWith(word)) {
+                List<String> sublist = wordBreakHelper(s.substring(word.length()), wordSet, memo);
+                for (String sub : sublist) {
+                    result.add(word + (sub.isEmpty() ? "" : " " + sub));
+                }
+            }
+        }
+        
+        memo.put(s, result);
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given a string s and dictionary of words, determine if s can be segmented 
+into a space-separated sequence of dictionary words.
+
+Example:
+s = "leetcode"
+wordDict = ["leet", "code"]
+
+Output: true (can be segmented as "leet code")
+
+s = "applepenapple"  
+wordDict = ["apple", "pen"]
+Output: true (can be segmented as "apple pen apple")
+
+Approach 1 (Bottom-up DP):
+dp[i] = true if s[0..i-1] can be segmented
+
+For each position i, check all possible previous positions j:
+- If dp[j] is true AND s[j..i-1] is in dictionary, then dp[i] = true
+
+Example trace for s="leetcode", dict=["leet","code"]:
+dp[0] = true (empty string)
+dp[1] = false (no word "l")
+dp[2] = false (no word "le") 
+dp[3] = false (no word "lee")
+dp[4] = true (dp[0]=true AND "leet" in dict)
+dp[5] = false (no valid segmentation ending at index 5)
+dp[6] = false (no valid segmentation ending at index 6)
+dp[7] = false (no valid segmentation ending at index 7)
+dp[8] = true (dp[4]=true AND "code" in dict)
+
+Approach 2 (Memoization):
+Top-down recursive approach with caching.
+For each starting position, try all possible words and recurse.
+
+Approach 3 (BFS):
+Treat as graph problem where each position is a node.
+Add edges when valid words are found.
+BFS to find path from start to end.
+
+Approach 4 (Optimized DP):
+Optimization: only check words up to maximum word length.
+Reduces inner loop iterations significantly.
+
+Approach 5 (Trie):
+Build trie of dictionary words (in reverse for easier lookup).
+Use trie to efficiently check valid word endings.
+
+Approach Comparison:
+
+1. Bottom-up DP (Best for most cases):
+   - Time: O(n² + m*k), Space: O(n)
+   - Most intuitive and commonly used
+   - Easy to implement and understand
+
+2. Memoization:
+   - Time: O(n² + m*k), Space: O(n)
+   - Natural recursive structure
+   - Good for sparse cases
+
+3. BFS:
+   - Time: O(n² + m*k), Space: O(n)
+   - Different perspective (graph traversal)
+   - Can find shortest segmentation
+
+4. Optimized DP:
+   - Time: O(n*L), Space: O(n)
+   - Best when max word length << n
+   - Significant speedup for long strings
+
+5. Trie-based:
+   - Time: O(n² + m*k), Space: O(m*k)
+   - Good when many words share prefixes
+   - More complex implementation
+
+Key Insights:
+1. Optimal substructure: if s[0..j-1] can be segmented and s[j..i-1] is a word, then s[0..i-1] can be segmented
+2. Overlapping subproblems: same prefixes checked multiple times
+3. Greedy doesn't work: need to try all possibilities
+4. HashSet lookup is crucial for efficiency
+
+Edge Cases:
+- Empty string: typically true
+- String not in any combination: false
+- Single character words: handle correctly
+- Very long strings: consider optimizations
+- Duplicate words in dictionary: use Set
+
+Common Mistakes:
+1. Not using HashSet for O(1) word lookup
+2. Incorrect substring indexing
+3. Not handling empty string case
+4. Inefficient string operations
+5. Not considering word length optimizations
+
+Optimization Techniques:
+1. Use HashSet instead of List for dictionary
+2. Early termination when dp[i] becomes true
+3. Limit search to maximum word length
+4. Trie for prefix-heavy dictionaries
+5. BFS for finding shortest segmentation
+
+Applications:
+- Text processing and NLP
+- Spell checkers
+- Word games and puzzles
+- DNA sequence analysis
+- Compiler design (tokenization)
+
+Follow-up Questions:
+1. Return all
+ possible segmentations (Word Break II)
+2. Find minimum number of words needed
+3. Word break with wildcards
+4. Word break with costs (minimum cost segmentation)
+5. Word break in 2D grid
+
+Variations:
+- Word Break II (return all combinations)
+- Minimum cuts for palindrome partitioning
+- Decode ways (similar DP pattern)
+- Perfect squares (similar structure)
+
+Performance Considerations:
+- For very long strings: use optimized DP with max word length
+- For large dictionaries: consider trie-based approach
+- For multiple queries: preprocess dictionary
+- Memory usage: bottom-up DP vs memoization trade-offs
+
+Mathematical Properties:
+- Problem is NP-complete in general case
+- Polynomial solution exists for this specific variant
+- Related to string matching and parsing problems
+- Dynamic programming reduces exponential to polynomial time
+*/
+```
+
+### 47. Combination Sum
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find all unique combinations that sum to target
+ * Numbers can be used multiple times
+ * 
+ * Multiple approaches: Backtracking, DP, BFS
+ */
+public class CombinationSum {
+    
+    // Approach 1: Backtracking - Most common and intuitive
+    // Time: O(N^(T/M)) where N=candidates.length, T=target, M=minimal candidate
+    // Space: O(T/M) for recursion depth
+    public List<List<Integer>> combinationSum1(int[] candidates, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(candidates); // Sort for optimization
+        backtrack(candidates, target, 0, new ArrayList<>(), result);
+        return result;
+    }
+    
+    private void backtrack(int[] candidates, int target, int start, 
+                          List<Integer> current, List<List<Integer>> result) {
+        if (target == 0) {
+            result.add(new ArrayList<>(current)); // Found valid combination
+            return;
+        }
+        
+        if (target < 0) {
+            return; // Invalid path
+        }
+        
+        for (int i = start; i < candidates.length; i++) {
+            // Early termination: if current candidate > target, all subsequent will be too
+            if (candidates[i] > target) {
+                break;
+            }
+            
+            current.add(candidates[i]);
+            // Allow reuse of same element: pass i (not i+1)
+            backtrack(candidates, target - candidates[i], i, current, result);
+            current.remove(current.size() - 1); // Backtrack
+        }
+    }
+    
+    // Approach 2: DP approach - Bottom-up
+    // Time: O(target * N * average_combination_length), Space: O(target * total_combinations)
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        // dp[i] = all combinations that sum to i
+        List<List<List<Integer>>> dp = new ArrayList<>();
+        
+        for (int i = 0; i <= target; i++) {
+            dp.add(new ArrayList<>());
+        }
+        
+        dp.get(0).add(new ArrayList<>()); // Base case: empty combination sums to 0
+        
+        for (int candidate : candidates) {
+            for (int amount = candidate; amount <= target; amount++) {
+                for (List<Integer> combination : dp.get(amount - candidate)) {
+                    List<Integer> newCombination = new ArrayList<>(combination);
+                    newCombination.add(candidate);
+                    dp.get(amount).add(newCombination);
+                }
+            }
+        }
+        
+        return dp.get(target);
+    }
+    
+    // Approach 3: BFS approach
+    // Time: O(N^(T/M)), Space: O(N^(T/M))
+    public List<List<Integer>> combinationSum3(int[] candidates, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        Queue<CombinationState> queue = new LinkedList<>();
+        
+        queue.offer(new CombinationState(new ArrayList<>(), target, 0));
+        
+        while (!queue.isEmpty()) {
+            CombinationState state = queue.poll();
+            
+            if (state.remaining == 0) {
+                result.add(state.combination);
+                continue;
+            }
+            
+            for (int i = state.startIndex; i < candidates.length; i++) {
+                if (candidates
+[i] <= state.remaining) {
+                    List<Integer> newCombination = new ArrayList<>(state.combination);
+                    newCombination.add(candidates[i]);
+                    queue.offer(new CombinationState(newCombination, 
+                                                   state.remaining - candidates[i], i));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    class CombinationState {
+        List<Integer> combination;
+        int remaining;
+        int startIndex;
+        
+        CombinationState(List<Integer> combination, int remaining, int startIndex) {
+            this.combination = combination;
+            this.remaining = remaining;
+            this.startIndex = startIndex;
+        }
+    }
+    
+    // Approach 4: Optimized backtracking with pruning
+    // Time: O(N^(T/M)), Space: O(T/M)
+    public List<List<Integer>> combinationSum4(int[] candidates, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(candidates);
+        backtrackOptimized(candidates, target, 0, new ArrayList<>(), result);
+        return result;
+    }
+    
+    private void backtrackOptimized(int[] candidates, int target, int start,
+                                   List<Integer> current, List<List<Integer>> result) {
+        if (target == 0) {
+            result.add(new ArrayList<>(current));
+            return;
+        }
+        
+        for (int i = start; i < candidates.length; i++) {
+            int candidate = candidates[i];
+            
+            // Pruning: if candidate > target, break (array is sorted)
+            if (candidate > target) {
+                break;
+            }
+            
+            // Calculate how many times we can use this candidate
+            int maxCount = target / candidate;
+            
+            for (int count = 1; count <= maxCount; count++) {
+                // Add 'count' instances of current candidate
+                for (int j = 0; j < count; j++) {
+                    current.add(candidate);
+                }
+                
+                // Recurse with reduced target and next candidates
+                backtrackOptimized(candidates, target - count * candidate, i + 1, current, result);
+                
+                // Remove 'count' instances (backtrack)
+                for (int j = 0; j < count; j++) {
+                    current.remove(current.size() - 1);
+                }
+            }
+        }
+    }
+    
+    // Approach 5: Memoization with state compression
+    // Time: O(N * T * average_combination_length), Space: O(T * total_combinations)
+    public List<List<Integer>> combinationSum5(int[] candidates, int target) {
+        Map<String, List<List<Integer>>> memo = new HashMap<>();
+        Arrays.sort(candidates);
+        return memoHelper(candidates, target, 0, memo);
+    }
+    
+    private List<List<Integer>> memoHelper(int[] candidates, int target, int start,
+                                          Map<String, List<List<Integer>>> memo) {
+        String key = target + "," + start;
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+        
+        List<List<Integer>> result = new ArrayList<>();
+        
+        if (target == 0) {
+            result.add(new ArrayList<>());
+            memo.put(key, result);
+            return result;
+        }
+        
+        for (int i = start; i < candidates.length; i++) {
+            if (candidates[i] > target) {
+                break;
+            }
+            
+            List<List<Integer>> subResults = memoHelper(candidates, target - candidates[i], i, memo);
+            for (List<Integer> subResult : subResults) {
+                List<Integer> newCombination = new ArrayList<>();
+                newCombination.add(candidates[i]);
+                newCombination.addAll(subResult);
+                result.add(newCombination);
+            }
+        }
+        
+        memo.put(key, result);
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Find all unique combinations in candidates where the candidate numbers sum to target.
+- Same number may be chosen unlimited times
+- All numbers are positive
+- Solution set must not contain duplicate combinations
+
+Example:
+candidates = [2,3,6,7], target = 7
+Output: [[2,2,3],[7]]
+
+candidates = [2,3,5], target = 8  
+Output: [[2,2,2,2],[2,3,3],[3,5]]
+
+Approach 1 (Backtracking):
+Classic backtracking template:
+1. Base case: target == 0 (found valid combination)
+2. Invalid case: target < 0 (exceeded target)
+3. For each candidate from current position:
+   - Add candidate to current combination
+   - Recurse with reduced target
+   - Remove candidate (backtrack)
+
+Key insight: Use start index to avoid duplicates
+- [2,3] and [3,2] are considered same combination
+- Always pick candidates in non-decreasing order
+
+Approach 2 (DP):
+Build combinations bottom-up:
+- dp[i] = all combinations that sum to i
+- For each candidate, update all reachable sums
+
+Approach 3 (BFS):
+
+Treat as graph traversal:
+- Each state: (current_combination, remaining_target, start_index)
+- Explore all possible next candidates
+- Queue-based exploration
+
+Approach 4 (Optimized Backtracking):
+Instead of adding one candidate at a time, try adding multiple instances:
+- For candidate c, try adding 1, 2, 3, ... instances
+- Reduces recursion depth
+- More complex but can be faster
+
+Approach 5 (Memoization):
+Cache results for (target, start_index) pairs:
+- Avoid recomputing same subproblems
+- Trade space for time
+- Useful when many overlapping subproblems
+
+Approach Comparison:
+
+1. Backtracking (Most common):
+   - Time: O(N^(T/M)), Space: O(T/M)
+   - Most intuitive and widely used
+   - Easy to understand and implement
+
+2. DP:
+   - Time: O(T * N * avg_length), Space: O(T * total_combinations)
+   - Bottom-up approach
+   - Can be memory-intensive
+
+3. BFS:
+   - Time: O(N^(T/M)), Space: O(N^(T/M))
+   - Different perspective
+   - Level-by-level exploration
+
+4. Optimized Backtracking:
+   - Time: O(N^(T/M)), Space: O(T/M)
+   - Can be faster with good pruning
+   - More complex implementation
+
+5. Memoization:
+   - Time: O(N * T * avg_length), Space: O(T * combinations)
+   - Good for overlapping subproblems
+   - Higher space complexity
+
+Time Complexity Analysis:
+- Worst case: O(N^(T/M))
+- N = number of candidates
+- T = target value  
+- M = minimal candidate value
+- In worst case, we might need T/M levels of recursion
+- At each level, we have up to N choices
+
+Space Complexity:
+- Recursion depth: O(T/M)
+- Result storage: O(number_of_combinations * average_length)
+
+Key Insights:
+1. Use start index to avoid duplicate combinations
+2. Sort candidates for early termination
+3. Backtracking is most natural approach
+4. Pruning is crucial for performance
+
+Edge Cases:
+- target = 0: return [[]]
+- No valid combinations: return []
+- Single candidate equals target: return [[target]]
+- All candidates > target: return []
+
+Common Mistakes:
+1. Not avoiding duplicate combinations
+2. Not using start index correctly
+3. Forgetting to backtrack (remove elements)
+4. Not handling target = 0 case
+5. Inefficient pruning or no pruning
+
+Optimization Techniques:
+1. Sort candidates for early termination
+2. Use start index to avoid duplicates
+3. Prune when candidate > remaining target
+4. Consider iterative vs recursive trade-offs
+
+Applications:
+- Coin change variations
+- Subset sum problems
+- Knapsack variations
+- Partition problems
+- Resource allocation
+
+Follow-up Questions:
+1. Combination Sum II (each number used at most once)
+2. Combination Sum III (exactly k numbers)
+3. Combination Sum IV (count combinations, order matters)
+4. Find minimum number of combinations
+5. Combination sum with negative numbers
+
+Variations:
+- Combination Sum II: no duplicate usage
+- Combination Sum III: fixed number of elements
+- Combination Sum IV: count ways (DP problem)
+- Target Sum: assign +/- to reach target
+
+Performance Tips:
+1. Sort input for better pruning
+2. Use early termination
+3. Consider memoization for overlapping subproblems
+4. Balance recursion depth vs branching factor
+5. Profile different approaches for specific inputs
+
+Testing Strategy:
+- Small targets: [2,3,6,7], target=7
+- Large targets: test performance
+
+- Edge cases: target=0, no solution
+- Single element: [5], target=5
+- Multiple solutions: [2,3,5], target=8
+*/
+```
+
+### 48. House Robber
+
+```java
+/**
+ * Problem: Rob houses to maximize money without robbing adjacent houses
+ * 
+ * Multiple approaches: DP, Space-optimized, Memoization
+ */
+public class HouseRobber {
+    
+    // Approach 1: Space-optimized DP - Most efficient
+    // Time: O(n), Space: O(1)
+    public int rob1(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        
+        int prev2 = nums[0];           // Max money up to house i-2
+        int prev1 = Math.max(nums[0], nums[1]); // Max money up to house i-1
+        
+        for (int i = 2; i < nums.length; i++) {
+            int current = Math.max(prev1, prev2 + nums[i]);
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return prev1;
+    }
+    
+    // Approach 2: Standard DP array
+    // Time: O(n), Space: O(n)
+    public int rob2(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        
+        int n = nums.length;
+        int[] dp = new int[n];
+        
+        dp[0] = nums[0];
+        dp[1] = Math.max(nums[0], nums[1]);
+        
+        for (int i = 2; i < n; i++) {
+            // Either rob current house + max from i-2, or don't rob (take i-1)
+            dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
+        }
+        
+        return dp[n - 1];
+    }
+    
+    // Approach 3: Memoization (Top-down)
+    // Time: O(n), Space: O(n)
+    public int rob3(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        int[] memo = new int[nums.length];
+        Arrays.fill(memo, -1);
+        return robHelper(nums, 0, memo);
+    }
+    
+    private int robHelper(int[] nums, int index, int[] memo) {
+        if (index >= nums.length) {
+            return 0; // No more houses
+        }
+        
+        if (memo[index] != -1) {
+            return memo[index];
+        }
+        
+        // Two choices: rob current house or skip it
+        int robCurrent = nums[index] + robHelper(nums, index + 2, memo);
+        int skipCurrent = robHelper(nums, index + 1, memo);
+        
+        memo[index] = Math.max(robCurrent, skipCurrent);
+        return memo[index];
+    }
+    
+    // Approach 4: Alternative space-optimized with clearer variables
+    // Time: O(n), Space: O(1)
+    public int rob4(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        int robPrev = 0;    // Max money if we rob previous house
+        int notRobPrev = 0; // Max money if we don't rob previous house
+        
+        for (int money : nums) {
+            int temp = robPrev;
+            robPrev = notRobPrev + money;  // Rob current house
+            notRobPrev = Math.max(temp, notRobPrev); // Don't rob current house
+        }
+        
+        return Math.max(robPrev, notRobPrev);
+    }
+    
+    // Approach 5: Recursive (for understanding - exponential time)
+    // Time: O(2^n), Space: O(n)
+    public int rob5(int[] nums) {
+        return robRecursive(nums, 0);
+    }
+    
+    private int robRecursive(int[] nums, int index) {
+        if (index >= nums.length) {
+            return 0;
+        }
+        
+        // Two choices: rob current or skip current
+        int robCurrent = nums[index] + robRecursive(nums, index + 2);
+        int skipCurrent = robRecursive(nums, index + 1);
+        
+        return Math.max(robCurrent, skipCurrent);
+    }
+    
+    // Bonus: Return which houses to rob (not just maximum amount)
+    public List<Integer> robHouses(int[] nums) {
+        if (nums == null || nums.length == 0) return new ArrayList<>();
+        if (nums.length == 1) return Arrays.asList(0);
+        
+        int n = nums.length;
+        int[] dp = new int[n];
+        boolean[] robbed = new boolean[n];
+        
+        dp[0] = nums[0];
+        robbed[0] = true;
+        
+        if (nums[1] > nums[0]) {
+            dp[1] = nums[1];
+            robbed[1] = true;
+        } else {
+            dp[1] = nums[0];
+            robbed[1]
+ = false;
+        }
+        
+        for (int i = 2; i < n; i++) {
+            if (dp[i - 2] + nums[i] > dp[i - 1]) {
+                dp[i] = dp[i - 2] + nums[i];
+                robbed[i] = true;
+            } else {
+                dp[i] = dp[i - 1];
+                robbed[i] = false;
+            }
+        }
+        
+        // Reconstruct which houses were robbed
+        List<Integer> result = new ArrayList<>();
+        for (int i = n - 1; i >= 0; i--) {
+            if (robbed[i]) {
+                result.add(i);
+                i--; // Skip next house (can't rob adjacent)
+            }
+        }
+        
+        Collections.reverse(result);
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: You are a robber planning to rob houses along a street. Each house has money.
+Constraint: Cannot rob two adjacent houses (security system will alert police).
+Goal: Maximize the amount of money you can rob.
+
+Example:
+nums = [1,2,3,1]
+Output: 4 (rob house 0 and 2: 1 + 3 = 4)
+
+nums = [2,7,9,3,1]  
+Output: 12 (rob house 0, 2, and 4: 2 + 9 + 1 = 12)
+
+DP Recurrence:
+For each house i, we have two choices:
+1. Rob house i: get nums[i] + max money from houses up to i-2
+2. Don't rob house i: get max money from houses up to i-1
+
+dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+Approach 1 (Space-optimized DP):
+Since we only need previous two values, use two variables instead of array.
+
+Example trace for [2,7,9,3,1]:
+prev2=2, prev1=max(2,7)=7
+i=2: current=max(7, 2+9)=11, prev2=7, prev1=11
+i=3: current=max(11, 7+3)=11, prev2=11, prev1=11  
+i=4: current=max(11, 11+1)=12, prev2=11, prev1=12
+Result: 12
+
+Approach 2 (Standard DP):
+Use array to store all intermediate results.
+Easier to understand and extend.
+
+Approach 3 (Memoization):
+Top-down recursive approach with caching.
+Natural recursive structure but uses more space.
+
+Approach 4 (Alternative variables):
+Use more descriptive variable names for clarity.
+Same logic but easier to understand.
+
+Approach 5 (Pure recursion):
+Naive recursive solution for understanding.
+Exponential time due to overlapping subproblems.
+
+Approach Comparison:
+
+1. Space-optimized DP (Best):
+   - Time: O(n), Space: O(1)
+   - Most efficient solution
+   - Industry standard
+
+2. Standard DP:
+   - Time: O(n), Space: O(n)
+   - Easy to understand and extend
+   - Good for learning DP
+
+3. Memoization:
+   - Time: O(n), Space: O(n)
+   - Natural recursive thinking
+   - Good for understanding problem structure
+
+4. Alternative variables:
+   - Time: O(n), Space: O(1)
+   - Same as approach 1 but clearer
+   - Good for interviews
+
+5. Pure recursion:
+   - Time: O(2^n), Space: O(n)
+   - Educational only
+   - Shows why DP is needed
+
+Key Insights:
+1. This is a classic DP problem with optimal substructure
+2. Each house has two states: robbed or not robbed
+3. Decision at house i depends on decisions at i-1 and i-2
+4. Space can be optimized since we only need previous two values
+
+Recurrence Relation:
+Base cases:
+- dp[0] = nums[0] (only one house)
+- dp[1] = max(nums[0], nums[1]) (better of first two houses)
+
+General
+ case:
+- dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+Edge Cases:
+- Empty array: return 0
+- Single house: return nums[0]
+- Two houses: return max(nums[0], nums[1])
+- All houses have same value: rob every other house
+
+Common Mistakes:
+1. Not handling base cases properly
+2. Incorrect recurrence relation
+3. Off-by-one errors in indexing
+4. Not optimizing space when possible
+5. Forgetting that we can choose not to rob a house
+
+Optimization Techniques:
+1. Space optimization: O(n) → O(1)
+2. Early termination for special cases
+3. Avoid unnecessary array creation
+4. Use descriptive variable names
+
+Applications:
+- Resource allocation with constraints
+- Scheduling with conflicts
+- Maximum weight independent set
+- Stock trading with cooldown
+
+Follow-up Questions:
+1. House Robber II (houses in circle)
+2. House Robber III (binary tree)
+3. Return actual houses robbed
+4. Minimum houses to rob for target amount
+5. Rob with additional constraints
+
+Variations:
+- House Robber II: first and last houses are adjacent
+- House Robber III: houses arranged in binary tree
+- Stock with cooldown: similar constraint pattern
+- Paint house: similar DP structure
+
+Mathematical Properties:
+- Optimal substructure: optimal solution contains optimal subsolutions
+- Overlapping subproblems: same subproblems solved multiple times
+- Greedy doesn't work: local optimal ≠ global optimal
+- Related to Fibonacci sequence structure
+
+Performance Analysis:
+- Time complexity is optimal O(n) - must examine each house
+- Space can be reduced to O(1) with optimization
+- Constant factor improvements possible
+- Cache-friendly access pattern
+
+Testing Strategy:
+- Basic cases: [1,2,3,1] → 4
+- Edge cases: [], [1], [1,2] → 0, 5, 2
+- All same: [3,3,3,3] → 6
+- Increasing: [1,2,3,4,5] → 9
+- Decreasing: [5,4,3,2,1] → 9
+- Large values: test for integer overflow
+
+State Transition Visualization:
+For [2,7,9,3,1]:
+
+House 0: Rob(2) vs Skip(0) → Rob(2)
+House 1: Rob(7) vs Skip(2) → Rob(7)  
+House 2: Rob(2+9=11) vs Skip(7) → Rob(11)
+House 3: Rob(7+3=10) vs Skip(11) → Skip(11)
+House 4: Rob(11+1=12) vs Skip(11) → Rob(12)
+
+Final answer: 12
+*/
+```
+
+### 49. House Robber II
+
+```java
+/**
+ * Problem: Rob houses arranged in circle (first and last are adjacent)
+ * 
+ * Key insight: Solve two subproblems and take maximum
+ */
+public class HouseRobberII {
+    
+    // Approach 1: Two separate linear problems - Most elegant
+    // Time: O(n), Space: O(1)
+    public int rob1(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        
+        // Case 1: Rob houses 0 to n-2 (exclude last house)
+        int robWithFirst = robLin
+ear(nums, 0, nums.length - 2);
+        
+        // Case 2: Rob houses 1 to n-1 (exclude first house)
+        int robWithoutFirst = robLinear(nums, 1, nums.length - 1);
+        
+        return Math.max(robWithFirst, robWithoutFirst);
+    }
+    
+    // Helper method for linear house robber problem
+    private int robLinear(int[] nums, int start, int end) {
+        int prev2 = 0; // Max money up to i-2
+        int prev1 = 0; // Max money up to i-1
+        
+        for (int i = start; i <= end; i++) {
+            int current = Math.max(prev1, prev2 + nums[i]);
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return prev1;
+    }
+    
+    // Approach 2: DP with explicit state tracking
+    // Time: O(n), Space: O(n)
+    public int rob2(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        
+        int n = nums.length;
+        
+        // Case 1: Include first house, exclude last
+        int[] dp1 = new int[n - 1];
+        dp1[0] = nums[0];
+        dp1[1] = Math.max(nums[0], nums[1]);
+        
+        for (int i = 2; i < n - 1; i++) {
+            dp1[i] = Math.max(dp1[i - 1], dp1[i - 2] + nums[i]);
+        }
+        
+        // Case 2: Exclude first house, include last
+        int[] dp2 = new int[n - 1];
+        dp2[0] = nums[1];
+        if (n > 2) {
+            dp2[1] = Math.max(nums[1], nums[2]);
+        }
+        
+        for (int i = 2; i < n - 1; i++) {
+            dp2[i] = Math.max(dp2[i - 1], dp2[i - 2] + nums[i + 1]);
+        }
+        
+        return Math.max(dp1[n - 2], dp2[n - 2]);
+    }
+    
+    // Approach 3: Memoization with state
+    // Time: O(n), Space: O(n)
+    public int rob3(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        
+        // Case 1: Can rob first house, cannot rob last
+        int[][] memo1 = new int[nums.length][2];
+        for (int[] row : memo1) Arrays.fill(row, -1);
+        int case1 = robHelper(nums, 0, true, false, memo1);
+        
+        // Case 2: Cannot rob first house, can rob last  
+        int[][] memo2 = new int[nums.length][2];
+        for (int[] row : memo2) Arrays.fill(row, -1);
+        int case2 = robHelper(nums, 0, false, true, memo2);
+        
+        return Math.max(case1, case2);
+    }
+    
+    private int robHelper(int[] nums, int index, boolean canRobFirst, boolean canRobLast, int[][] memo) {
+        if (index >= nums.length) return 0;
+        
+        // Check constraints
+        if (index == 0 && !canRobFirst) {
+            return robHelper(nums, index + 1, canRobFirst, canRobLast, memo);
+        }
+        if (index == nums.length - 1 && !canRobLast) {
+            return robHelper(nums, index + 1, canRobFirst, canRobLast, memo);
+        }
+        
+        int memoIndex = (canRobFirst ? 1 : 0);
+        if (memo[index][memoIndex] != -1) {
+            return memo[index][memoIndex];
+        }
+        
+        // Two choices: rob current or skip
+        int robCurrent = nums[index] + robHelper(nums, index + 2, canRobFirst, canRobLast, memo);
+        int skipCurrent = robHelper(nums, index + 1, canRobFirst, canRobLast, memo);
+        
+        memo[index][memoIndex] = Math.max(robCurrent, skipCurrent);
+        return memo[index][memoIndex];
+    }
+    
+    // Approach 4: Single pass with state machine
+    // Time: O(n), Space: O(1)
+    public int rob4(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        
+        int n = nums.length;
+        
+        // State: [robFirst, notRobFirst] for max money
+        int[] robFirst = new int[2];    // [prev2, prev1] when first house is robbed
+        int[] notRobFirst = new int[2]; // [prev2, prev1] when first house is not robbed
+        
+        // Initialize
+        robFirst[0] = nums[0];  // Must rob first house
+        robFirst[1] = nums[0];  // Cannot rob second house if first is robbed
+        
+        notRobFirst[0] = 0;     // Don't rob first house
+        notRobFirst[1] = nums[1]; // Can rob second house
+        
+        for (int i = 2; i < n -
+ 1; i++) {
+            int newRobFirst = Math.max(robFirst[1], robFirst[0] + nums[i]);
+            int newNotRobFirst = Math.max(notRobFirst[1], notRobFirst[0] + nums[i]);
+            
+            robFirst[0] = robFirst[1];
+            robFirst[1] = newRobFirst;
+            
+            notRobFirst[0] = notRobFirst[1];
+            notRobFirst[1] = newNotRobFirst;
+        }
+        
+        // Handle last house
+        int maxRobFirst = robFirst[1]; // Cannot rob last house if first is robbed
+        int maxNotRobFirst = Math.max(notRobFirst[1], notRobFirst[0] + nums[n - 1]);
+        
+        return Math.max(maxRobFirst, maxNotRobFirst);
+    }
+    
+    // Approach 5: Simplified version of approach 1
+    // Time: O(n), Space: O(1)
+    public int rob5(int[] nums) {
+        if (nums.length == 1) return nums[0];
+        
+        return Math.max(
+            robRange(nums, 0, nums.length - 2),  // Rob first, skip last
+            robRange(nums, 1, nums.length - 1)   // Skip first, rob last
+        );
+    }
+    
+    private int robRange(int[] nums, int start, int end) {
+        int prev = 0, curr = 0;
+        
+        for (int i = start; i <= end; i++) {
+            int temp = Math.max(curr, prev + nums[i]);
+            prev = curr;
+            curr = temp;
+        }
+        
+        return curr;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Houses are arranged in a circle. First and last houses are adjacent.
+Cannot rob two adjacent houses. Maximize money robbed.
+
+Key Insight: Since first and last houses are adjacent, we cannot rob both.
+This gives us two scenarios:
+1. Rob first house → cannot rob last house
+2. Don't rob first house → can rob last house
+
+Solve both scenarios as linear house robber problems and take maximum.
+
+Example:
+nums = [2,3,2]
+Scenario 1: Rob houses [2,3] (indices 0,1) → max = 3
+Scenario 2: Rob houses [3,2] (indices 1,2) → max = 3
+Result: max(3,3) = 3
+
+nums = [1,2,3,1]
+Scenario 1: Rob houses [1,2,3] (indices 0,1,2) → max = 4 (rob 1,3)
+Scenario 2: Rob houses [2,3,1] (indices 1,2,3) → max = 3 (rob 2,1)
+Result: max(4,3) = 4
+
+Approach 1 (Two Linear Problems):
+Most elegant and efficient solution.
+1. Solve linear problem for houses 0 to n-2
+2. Solve linear problem for houses 1 to n-1
+3. Return maximum of both
+
+Approach 2 (Explicit DP Arrays):
+Use separate DP arrays for each scenario.
+More space but clearer logic.
+
+Approach 3 (Memoization):
+Top-down approach with state tracking.
+More complex but shows recursive structure.
+
+Approach 4 (State Machine):
+Track states for both scenarios simultaneously.
+Single pass but more complex state management.
+
+Approach 5 (Simplified):
+Clean version of approach 1 with helper method.
+
+Approach Comparison:
+
+1. Two Linear Problems (Best):
+   - Time: O(n), Space: O(1)
+   - Most elegant and efficient
+   - Easy to understand and implement
+
+2. Explicit DP:
+   - Time: O(n), Space: O(n)
+   - Clear separation of scenarios
+   - Good for understanding
+
+3. Memoization:
+   - Time: O(n), Space: O(n)
+   - Shows recursive structure
+   - More complex implementation
+
+4. State Machine:
+   - Time: O(n), Space: O(1)
+   - Single pass solution
+   - Complex state management
+
+5. Simplified:
+   - Time: O(n), Space: O(1)
+   - Clean and readable
+   - Good for interviews
+
+Key Insights:
+1. Circle constraint creates mutual exclusion between first and last house
+2. Problem reduces to two linear house robber problems
+3. Cannot use greedy approach - need to consider both scenarios
+4. Optimal sub
+structure still holds within each scenario
+
+Edge Cases:
+- Single house: return nums[0]
+- Two houses: return max(nums[0], nums[1])
+- All houses same value: rob every other house
+- Empty array: return 0
+
+Common Mistakes:
+1. Not recognizing the two-scenario structure
+2. Trying to solve in single pass without considering constraints
+3. Incorrect handling of edge cases
+4. Off-by-one errors in range calculations
+5. Not optimizing space when possible
+
+Optimization Techniques:
+1. Reduce to two linear problems
+2. Space optimization in linear solver
+3. Early termination for small inputs
+4. Reuse linear house robber solution
+
+Applications:
+- Circular resource allocation
+- Scheduling with circular constraints
+- Game theory with circular positions
+- Network security with circular topology
+
+Follow-up Questions:
+1. House Robber III (binary tree structure)
+2. Multiple circles of houses
+3. Houses with different constraints
+4. Minimum houses to rob for target
+5. Probabilistic house values
+
+Variations:
+- House Robber III: binary tree
+- Paint House: similar circular constraints
+- Decode Ways: similar constraint patterns
+- Stock trading: similar state transitions
+
+Mathematical Properties:
+- Still has optimal substructure within each scenario
+- Overlapping subproblems in recursive formulation
+- Constraint creates dependency between first and last elements
+- Related to circular array problems
+
+Performance Analysis:
+- Time: O(n) - optimal, must examine each house
+- Space: O(1) - optimal with space optimization
+- Two passes through array
+- Constant factor: ~2x linear house robber
+
+Testing Strategy:
+- Basic circle: [2,3,2] → 3
+- Larger circle: [1,2,3,1] → 4
+- Edge cases: [1], [1,2] → 5, 2
+- All same: [3,3,3,3] → 6
+- Optimal first: [10,1,1,10] → 20
+- Optimal last: [1,10,10,1] → 20
+
+Complexity Comparison with Linear Version:
+- Linear House Robber: O(n) time, O(1) space
+- Circular House Robber: O(n) time, O(1) space
+- Same asymptotic complexity but ~2x constant factor
+- Additional constraint handling but same core algorithm
+*/
+```
+
+### 50. Decode Ways
+
+```java
+/**
+ * Problem: Count ways to decode a string of digits to letters (A=1, B=2, ..., Z=26)
+ * 
+ * Multiple approaches: DP, Memoization, Space-optimized
+ */
+public class DecodeWays {
+    
+    // Approach 1: Space-optimized DP - Most efficient
+    // Time: O(n), Space: O(1)
+    public int numDecodings1(String s) {
+        if (s == null || s.length() == 0 || s.charAt(0) == '0') {
+            return 0;
+        }
+        
+        int n = s.length();
+        int prev2 = 1; // dp[i-2]: ways to decode up to position i-2
+        int prev1 = 1; // dp[i-1]: ways to decode up to position i-1
+        
+        for (int i = 1; i < n; i++) {
+            int current = 0;
+            
+            // Single digit decode (if not '0')
+            if (s.charAt(i) != '0') {
+                current += prev1;
+            }
+            
+            // Two digit decode (if valid: 10-26)
+            int twoDigit = Integer.parseInt(s.substring(i - 1, i + 1));
+            if (twoDigit >= 10 && twoDigit <= 26) {
+                current += prev2;
+            }
+            
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return prev1;
+    }
+    
+    // Approach 2: Standard DP array
+    // Time: O(n), Space: O(n)
+    public int numDecodings2(String s) {
+        if (s == null || s.length() == 0 || s.charAt(0) == '0') {
+            return 0;
+        }
+        
+        int n = s.length();
+
+        int[] dp = new int[n + 1];
+        
+        dp[0] = 1; // Empty string has one way to decode
+        dp[1] = 1; // First character (already validated not '0')
+        
+        for (int i = 2; i <= n; i++) {
+            // Single digit decode
+            if (s.charAt(i - 1) != '0') {
+                dp[i] += dp[i - 1];
+            }
+            
+            // Two digit decode
+            int twoDigit = Integer.parseInt(s.substring(i - 2, i));
+            if (twoDigit >= 10 && twoDigit <= 26) {
+                dp[i] += dp[i - 2];
+            }
+        }
+        
+        return dp[n];
+    }
+    
+    // Approach 3: Memoization (Top-down)
+    // Time: O(n), Space: O(n)
+    public int numDecodings3(String s) {
+        if (s == null || s.length() == 0) return 0;
+        
+        int[] memo = new int[s.length()];
+        Arrays.fill(memo, -1);
+        return decodeHelper(s, 0, memo);
+    }
+    
+    private int decodeHelper(String s, int index, int[] memo) {
+        // Base case: reached end of string
+        if (index >= s.length()) {
+            return 1;
+        }
+        
+        // Invalid: leading zero
+        if (s.charAt(index) == '0') {
+            return 0;
+        }
+        
+        // Check memo
+        if (memo[index] != -1) {
+            return memo[index];
+        }
+        
+        int ways = 0;
+        
+        // Single digit decode
+        ways += decodeHelper(s, index + 1, memo);
+        
+        // Two digit decode (if valid)
+        if (index + 1 < s.length()) {
+            int twoDigit = Integer.parseInt(s.substring(index, index + 2));
+            if (twoDigit <= 26) {
+                ways += decodeHelper(s, index + 2, memo);
+            }
+        }
+        
+        memo[index] = ways;
+        return ways;
+    }
+    
+    // Approach 4: Iterative with character checking
+    // Time: O(n), Space: O(1)
+    public int numDecodings4(String s) {
+        if (s == null || s.length() == 0 || s.charAt(0) == '0') {
+            return 0;
+        }
+        
+        int n = s.length();
+        int prev2 = 1, prev1 = 1;
+        
+        for (int i = 1; i < n; i++) {
+            int current = 0;
+            
+            // Check single digit
+            char currentChar = s.charAt(i);
+            if (currentChar >= '1' && currentChar <= '9') {
+                current += prev1;
+            }
+            
+            // Check two digits
+            char prevChar = s.charAt(i - 1);
+            if (prevChar == '1' || (prevChar == '2' && currentChar <= '6')) {
+                current += prev2;
+            }
+            
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return prev1;
+    }
+    
+    // Approach 5: Recursive (for understanding - exponential time)
+    // Time: O(2^n), Space: O(n)
+    public int numDecodings5(String s) {
+        return decodeRecursive(s, 0);
+    }
+    
+    private int decodeRecursive(String s, int index) {
+        // Base case: processed entire string
+        if (index >= s.length()) {
+            return 1;
+        }
+        
+        // Invalid: leading zero
+        if (s.charAt(index) == '0') {
+            return 0;
+        }
+        
+        int ways = 0;
+        
+        // Single digit decode
+        ways += decodeRecursive(s, index + 1);
+        
+        // Two digit decode (if valid)
+        if (index + 1 < s.length()) {
+            int twoDigit = Integer.parseInt(s.substring(index, index + 2));
+            if (twoDigit <= 26) {
+                ways += decodeRecursive(s, index + 2);
+            }
+        }
+        
+        return ways;
+    }
+    
+    // Bonus: Return all possible decodings
+    public List<String> allDecodings(String s) {
+        List<String> result = new ArrayList<>();
+        if (s == null || s.length() == 0) return result;
+        
+        decodeAllHelper(s, 0, new StringBuilder(), result);
+        return result;
+    }
+    
+    private void decodeAllHelper(String s, int index, StringBuilder current, List<String> result) {
+        if (index >= s.length()) {
+            result.add(current.toString());
+            return;
+        }
+        
+        if (s.charAt(index) == '0') {
+            return; // Invalid path
+        }
+        
+        // Single digit decode
+        int singleDigit = s.charAt(index) - '0';
+        char singleChar = (char)('A' + singleDigit - 1);
+        current.append(singleChar);
+        decodeAllHelper(s, index + 1, current, result);
+        current.deleteCharAt(current.length() - 1);
+        
+        // Two digit decode (if valid)
+        if (index + 1 < s.length()) {
+            int twoDigit = Integer.parseInt(s.substring(index, index + 2));
+            if (twoDigit <= 26) {
+                char twoChar = (char)('A' + twoDigit - 1);
+                current.append(twoChar);
+                decodeAllHelper(s, index + 2, current, result);
+                current.deleteCharAt(current.length() - 1);
+
+            }
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Decode string of digits to letters where A=1, B=2, ..., Z=26.
+Count number of ways to decode the string.
+
+Example:
+s = "12" → 2 ways: "AB" (1,2) or "L" (12)
+s = "226" → 3 ways: "BBF" (2,2,6), "BZ" (2,26), "VF" (22,6)
+s = "06" → 0 ways (leading zero invalid)
+
+DP Recurrence:
+dp[i] = number of ways to decode s[0..i-1]
+
+For position i:
+1. Single digit decode: if s[i-1] != '0', add dp[i-1]
+2. Two digit decode: if s[i-2:i] is valid (10-26), add dp[i-2]
+
+dp[i] = (s[i-1] != '0' ? dp[i-1] : 0) + (valid_two_digit ? dp[i-2] : 0)
+
+Approach 1 (Space-optimized DP):
+Since we only need previous two values, use two variables.
+
+Example trace for s = "226":
+prev2=1, prev1=1 (base cases)
+i=1: current = (2 != '0' ? 1 : 0) + (valid 22 ? 1 : 0) = 1 + 1 = 2
+     prev2=1, prev1=2
+i=2: current = (6 != '0' ? 2 : 0) + (valid 26 ? 1 : 0) = 2 + 1 = 3
+     prev2=2, prev1=3
+Result: 3
+
+Approach 2 (Standard DP):
+Use array to store all intermediate results.
+Easier to understand and debug.
+
+Approach 3 (Memoization):
+Top-down recursive approach with caching.
+Natural recursive structure.
+
+Approach 4 (Character checking):
+Avoid string parsing by checking characters directly.
+More efficient character operations.
+
+Approach 5 (Pure recursion):
+Naive recursive solution for understanding.
+Exponential time due to overlapping subproblems.
+
+Approach Comparison:
+
+1. Space-optimized DP (Best):
+   - Time: O(n), Space: O(1)
+   - Most efficient solution
+   - Industry standard
+
+2. Standard DP:
+   - Time: O(n), Space: O(n)
+   - Easy to understand and extend
+   - Good for learning DP
+
+3. Memoization:
+   - Time: O(n), Space: O(n)
+   - Natural recursive thinking
+   - Good for understanding problem structure
+
+4. Character checking:
+   - Time: O(n), Space: O(1)
+   - Avoids string parsing overhead
+   - More efficient constant factors
+
+5. Pure recursion:
+   - Time: O(2^n), Space: O(n)
+   - Educational only
+   - Shows why DP is needed
+
+Key Insights:
+1. Each position has at most two decoding choices
+2. Leading zeros make decoding impossible
+3. Two-digit numbers must be ≤ 26
+4. Similar structure to Fibonacci/climbing stairs
+
+Valid Two-Digit Numbers:
+- 10, 11, 12, ..., 26
+- Cannot start with 0 (except 10)
+- Cannot exceed 26
+
+Edge Cases:
+- Empty string: return 0
+- String starting with '0': return 0
+- Single digit: return 1 (if not '0')
+- All zeros: return 0
+- Very long strings: consider integer overflow
+
+Common Mistakes:
+1. Not handling leading zeros correctly
+2. Incorrect two-digit validation (forgetting 27-99 are invalid)
+3. Off-by-one errors in indexing
+4. Not considering empty string case
+5. Integer overflow for very long strings
+
+Optimization Techniques:
+1. Space optimization: O(n) → O(1)
+2. Character checking instead of string parsing
+3. Early termination for invalid cases
+4. Avoid unnecessary
+ substring operations
+
+Applications:
+- Text encoding/decoding
+- Cryptography
+- Data compression
+- Protocol parsing
+- Number system conversions
+
+Follow-up Questions:
+1. Return all possible decodings (not just count)
+2. Decode with different mapping (A=0, B=1, etc.)
+3. Decode with wildcards ('*' can be any digit)
+4. Minimum cost decoding with character costs
+5. Decode with additional constraints
+
+Variations:
+- Decode Ways II (with wildcards)
+- Different character mappings
+- Weighted decoding (different costs)
+- Constrained decoding (some numbers forbidden)
+
+Mathematical Properties:
+- Optimal substructure: optimal solution contains optimal subsolutions
+- Overlapping subproblems: same subproblems solved multiple times
+- Similar to Fibonacci sequence structure
+- Growth rate depends on input pattern
+
+Performance Analysis:
+- Time: O(n) - optimal, must examine each character
+- Space: O(1) with optimization - optimal
+- Constant factors depend on string operations
+- Cache-friendly access pattern
+
+Testing Strategy:
+- Basic cases: "12" → 2, "226" → 3
+- Edge cases: "", "0", "10" → 0, 0, 1
+- Invalid: "06", "100" → 0, 0
+- Long valid: "1111" → 5 (Fibonacci-like)
+- Boundary: "26", "27" → 2, 1
+
+State Transition Visualization:
+For s = "226":
+
+Position 0: '2' → 1 way (B)
+Position 1: '22' → 2 ways (BB, V)  
+Position 2: '226' → 3 ways (BBF, VF, BZ)
+
+Each position can extend previous solutions in 1-2 ways.
+*/
+```
+
+### 51. Unique Paths
+
+```java
+/**
+ * Problem: Count unique paths from top-left to bottom-right in grid
+ * Can only move right or down
+ * 
+ * Multiple approaches: DP, Math, Space-optimized
+ */
+public class UniquePaths {
+    
+    // Approach 1: Mathematical solution - Most efficient
+    // Time: O(min(m,n)), Space: O(1)
+    public int uniquePaths1(int m, int n) {
+        // Total moves needed: (m-1) down + (n-1) right = m+n-2
+        // Choose (m-1) positions for down moves: C(m+n-2, m-1)
+        
+        // Use smaller value to minimize computation
+        int moves = m + n - 2;
+        int choose = Math.min(m - 1, n - 1);
+        
+        long result = 1;
+        
+        // Calculate C(moves, choose) = moves! / (choose! * (moves-choose)!)
+        // Optimized: result = (moves * (moves-1) * ... * (moves-choose+1)) / (choose!)
+        for (int i = 0; i < choose; i++) {
+            result = result * (moves - i) / (i + 1);
+        }
+        
+        return (int) result;
+    }
+    
+    // Approach 2: 2D DP - Most intuitive
+    // Time: O(m*n), Space: O(m*n)
+    public int uniquePaths2(int m, int n) {
+        // dp[i][j] = number of unique paths to reach cell (i,j)
+        int[][] dp = new int[m][n];
+        
+        // Initialize first row and column (only one way to reach)
+        for (int i = 0; i < m; i++) {
+            dp[i][0] = 1;
+        }
+        for (int j = 0; j < n; j++) {
+            dp[0][j] = 1;
+        }
+        
+        // Fill the DP table
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                // Can reach (i,j) from (i-1,j) or (i,j-1)
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        
+        return dp[m - 1][n - 1];
+    
+}
+    
+    // Approach 3: Space-optimized DP - O(n) space
+    // Time: O(m*n), Space: O(n)
+    public int uniquePaths3(int m, int n) {
+        // Only need previous row to compute current row
+        int[] dp = new int[n];
+        
+        // Initialize first row
+        Arrays.fill(dp, 1);
+        
+        // Process each row
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                // dp[j] = dp[j] (from above) + dp[j-1] (from left)
+                dp[j] += dp[j - 1];
+            }
+        }
+        
+        return dp[n - 1];
+    }
+    
+    // Approach 4: Further space-optimized - O(min(m,n)) space
+    // Time: O(m*n), Space: O(min(m,n))
+    public int uniquePaths4(int m, int n) {
+        // Use smaller dimension for space optimization
+        if (m > n) {
+            return uniquePaths4(n, m);
+        }
+        
+        int[] dp = new int[m];
+        Arrays.fill(dp, 1);
+        
+        for (int j = 1; j < n; j++) {
+            for (int i = 1; i < m; i++) {
+                dp[i] += dp[i - 1];
+            }
+        }
+        
+        return dp[m - 1];
+    }
+    
+    // Approach 5: Memoization (Top-down)
+    // Time: O(m*n), Space: O(m*n)
+    public int uniquePaths5(int m, int n) {
+        int[][] memo = new int[m][n];
+        return pathsHelper(m - 1, n - 1, memo);
+    }
+    
+    private int pathsHelper(int i, int j, int[][] memo) {
+        // Base cases
+        if (i == 0 || j == 0) {
+            return 1; // Only one way to reach first row or column
+        }
+        
+        if (memo[i][j] != 0) {
+            return memo[i][j];
+        }
+        
+        // Can reach (i,j) from (i-1,j) or (i,j-1)
+        memo[i][j] = pathsHelper(i - 1, j, memo) + pathsHelper(i, j - 1, memo);
+        return memo[i][j];
+    }
+    
+    // Approach 6: Pure recursion (for understanding - exponential time)
+    // Time: O(2^(m+n)), Space: O(m+n)
+    public int uniquePaths6(int m, int n) {
+        return pathsRecursive(0, 0, m, n);
+    }
+    
+    private int pathsRecursive(int i, int j, int m, int n) {
+        // Base case: reached destination
+        if (i == m - 1 && j == n - 1) {
+            return 1;
+        }
+        
+        // Out of bounds
+        if (i >= m || j >= n) {
+            return 0;
+        }
+        
+        // Two choices: move right or move down
+        return pathsRecursive(i + 1, j, m, n) + pathsRecursive(i, j + 1, m, n);
+    }
+    
+    // Bonus: Return all unique paths (not just count)
+    public List<String> allUniquePaths(int m, int n) {
+        List<String> result = new ArrayList<>();
+        StringBuilder path = new StringBuilder();
+        generatePaths(0, 0, m, n, path, result);
+        return result;
+    }
+    
+    private void generatePaths(int i, int j, int m, int n, StringBuilder path, List<String> result) {
+        if (i == m - 1 && j == n - 1) {
+            result.add(path.toString());
+            return;
+        }
+        
+        if (i >= m || j >= n) {
+            return;
+        }
+        
+        // Move right
+        if (j < n - 1) {
+            path.append('R');
+            generatePaths(i, j + 1, m, n, path, result);
+            path.deleteCharAt(path.length() - 1);
+        }
+        
+        // Move down
+        if (i < m - 1) {
+            path.append('D');
+            generatePaths(i + 1, j, m, n, path, result);
+            path.deleteCharAt(path.length() - 1);
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Robot starts at top-left corner of m×n grid. 
+Can only move right or down. Count unique paths to bottom-right corner.
+
+Example:
+3×7 grid: 28 unique paths
+2×3 grid: 3 unique paths
+
+Mathematical Insight:
+To reach (m-1, n-1) from (0,0):
+- Need exactly (m-1) down moves
+- Need exactly (n-1) right moves  
+- Total moves = m+n-2
+- Problem: arrange (m-1) D's and (n-1) R's
+- Answer: C(m+n-2, m-1) = (m+n-2)! / ((m-1)! × (n-1)!)
+
+Approach 1 (Mathematical):
+Direct calculation using combination formula.
+Most efficient but requires careful overflow handling.
+
+Approach 2 
+(2D DP):
+dp[i][j] = number of paths to reach cell (i,j)
+Base case: dp[0][j] = dp[i][0] = 1 (only one way along edges)
+Recurrence: dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+Example for 3×3 grid:
+dp = [[1, 1, 1],
+      [1, 2, 3],
+      [1, 3, 6]]
+
+Approach 3 (Space-optimized):
+Since we only need previous row, use 1D array.
+Update array in-place as we process each row.
+
+Approach 4 (Further optimized):
+Use smaller dimension for space optimization.
+Reduces space from O(max(m,n)) to O(min(m,n)).
+
+Approach 5 (Memoization):
+Top-down recursive approach with caching.
+Natural recursive structure.
+
+Approach 6 (Pure recursion):
+Naive recursive solution for understanding.
+Exponential time due to overlapping subproblems.
+
+Approach Comparison:
+
+1. Mathematical (Best for large grids):
+   - Time: O(min(m,n)), Space: O(1)
+   - Most efficient but overflow concerns
+   - Requires mathematical insight
+
+2. 2D DP (Most intuitive):
+   - Time: O(m*n), Space: O(m*n)
+   - Easy to understand and extend
+   - Good for learning DP
+
+3. Space-optimized DP:
+   - Time: O(m*n), Space: O(n)
+   - Good balance of efficiency and clarity
+   - Commonly used in practice
+
+4. Further optimized:
+   - Time: O(m*n), Space: O(min(m,n))
+   - Best space complexity for DP approach
+   - Slightly more complex
+
+5. Memoization:
+   - Time: O(m*n), Space: O(m*n)
+   - Natural recursive thinking
+   - Good for understanding problem structure
+
+6. Pure recursion:
+   - Time: O(2^(m+n)), Space: O(m+n)
+   - Educational only
+   - Shows why DP is needed
+
+Key Insights:
+1. This is a classic combinatorics problem
+2. Each path corresponds to a sequence of R's and D's
+3. Optimal substructure: paths to (i,j) = paths to (i-1,j)

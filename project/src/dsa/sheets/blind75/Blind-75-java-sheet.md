@@ -16220,3 +16220,2399 @@ That completes all the Graph problems (53-58)! The graph problems covered import
 - **Union-Find** (Efficient cycle detection and connectivity)
 
 ---------------------------------------------------------------------------------
+
+
+Looking at our original organized list, after completing Graph Problems (53-58), the next categories in order are:
+
+## Binary/Bit Manipulation Problems (59-63)
+
+### 59. Sum of Two Integers
+
+```java
+/**
+ * Problem: Add two integers without using + or - operators
+ * 
+ * Optimal Approach: Bit manipulation (XOR for sum, AND for carry)
+ * Time: O(1), Space: O(1)
+ */
+public class SumOfTwoIntegers {
+    
+    // Approach 1: Iterative bit manipulation - Most common
+    // Time: O(1), Space: O(1)
+    public int getSum1(int a, int b) {
+        while (b != 0) {
+            // Calculate carry
+            int carry = a & b;
+            
+            // Calculate sum without carry
+            a = a ^ b;
+            
+            // Shift carry to left for next iteration
+            b = carry << 1;
+        }
+        
+        return a;
+    }
+    
+    // Approach 2: Recursive approach
+    // Time: O(1), Space: O(1)
+    public int getSum2(int a, int b) {
+        if (b == 0) {
+            return a;
+        }
+        
+        int sum = a ^ b;        // XOR gives sum without carry
+        int carry = (a & b) << 1; // AND gives carry, shift left
+        
+        return getSum2(sum, carry);
+    }
+    
+    // Approach 3: Handle negative numbers explicitly
+    // Time: O(1), Space: O(1)
+    public int getSum3(int a, int b) {
+        // Handle the case where one number is negative
+        if (a == 0) return b;
+        if (b == 0) return a;
+        
+        while (b != 0) {
+            int carry = a & b;
+            a = a ^ b;
+            b = carry << 1;
+        }
+        
+        return a;
+    }
+    
+    // Approach 4: Using bit manipulation properties
+    // Time: O(1), Space: O(1)
+    public int getSum4(int a, int b) {
+        // Continue until there's no carry
+        while ((a & b) != 0) {
+            int temp = a ^ b;  // Sum without carry
+            b = (a & b) << 1;  // Carry
+            a = temp;
+        }
+        
+        return a ^ b;  // Final sum
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Bit Manipulation Logic:
+1. XOR (^) gives sum without considering carry
+2. AND (&) gives carry bits
+3. Shift carry left by 1 position
+4. Repeat until no carry
+
+Example: a = 5 (101), b = 3 (011)
+Iteration 1:
+carry = 5 & 3 = 101 & 011 = 001
+a = 5 ^ 3 = 101 ^ 011 = 110 (6)
+b = carry << 1 = 001 << 1 = 010 (2)
+
+Iteration 2:
+carry = 6 & 2 = 110 & 010 = 010
+a = 6 ^ 2 = 110 ^ 010 = 100 (4)  
+b = carry << 1 = 010 << 1 = 100 (4)
+
+Iteration 
+3:
+carry = 4 & 4 = 100 & 100 = 100
+a = 4 ^ 4 = 100 ^ 100 = 000 (0)
+b = carry << 1 = 100 << 1 = 1000 (8)
+
+Iteration 4:
+carry = 0 & 8 = 000 & 1000 = 000
+a = 0 ^ 8 = 000 ^ 1000 = 1000 (8)
+b = carry << 1 = 000 << 1 = 000 (0)
+
+b == 0, so return a = 8
+
+Verification: 5 + 3 = 8 ✓
+
+Why this works:
+- XOR performs addition without carry
+- AND identifies where carries occur
+- Left shift positions carry for next bit
+- Process continues until no more carries
+
+Handling negative numbers:
+- Two's complement representation handles negatives automatically
+- Same algorithm works for positive and negative numbers
+- Java's arithmetic right shift preserves sign bit
+
+Edge cases:
+- a = 0: return b
+- b = 0: return a  
+- Both negative: algorithm handles correctly
+- Overflow: follows Java integer overflow rules
+*/
+```
+
+### 60. Number of 1 Bits
+
+```java
+/**
+ * Problem: Count number of 1 bits in integer (Hamming weight)
+ * 
+ * Multiple approaches with different efficiencies
+ */
+public class NumberOf1Bits {
+    
+    // Approach 1: Brian Kernighan's Algorithm - Most Efficient
+    // Time: O(number of 1 bits), Space: O(1)
+    public int hammingWeight1(int n) {
+        int count = 0;
+        
+        while (n != 0) {
+            // Remove the rightmost 1 bit
+            n = n & (n - 1);
+            count++;
+        }
+        
+        return count;
+    }
+    
+    // Approach 2: Check each bit
+    // Time: O(32) = O(1), Space: O(1)
+    public int hammingWeight2(int n) {
+        int count = 0;
+        
+        while (n != 0) {
+            // Check if rightmost bit is 1
+            if ((n & 1) == 1) {
+                count++;
+            }
+            // Right shift to check next bit
+            n >>>= 1; // Use unsigned right shift
+        }
+        
+        return count;
+    }
+    
+    // Approach 3: Built-in function
+    // Time: O(1), Space: O(1)
+    public int hammingWeight3(int n) {
+        return Integer.bitCount(n);
+    }
+    
+    // Approach 4: Lookup table approach
+    // Time: O(1), Space: O(1)
+    private static final int[] BIT_COUNT_TABLE = new int[1];
+    
+    static {
+        for (int i = 0; i < 256; i++) {
+            BIT_COUNT_TABLE[i] = (i & 1) + BIT_COUNT_TABLE[i >>> 1];
+        }
+    }
+    
+    public int hammingWeight4(int n) {
+        return BIT_COUNT_TABLE[n & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 8) & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 16) & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 24) & 0xFF];
+    }
+    
+    // Approach 5: Parallel bit counting
+    // Time: O(1), Space: O(1)
+    public int hammingWeight5(int n) {
+        // Count bits in parallel
+        n = n - ((n >>> 1) & 0x55555555);
+        n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+        n = (n + (n >>> 4)) & 0x0F0F0F0F;
+        n = n + (n >>> 8);
+        n = n + (n >>> 16);
+        return n & 0x3F;
+    }
+    
+    // Approach 6: Simple loop with bit manipulation
+    // Time: O(32) = O(1), Space: O(1)
+    public int hammingWeight6(int n) {
+        int count = 0;
+        
+        for (int i = 0; i < 32; i++) {
+            if ((n & (1 << i)) != 0) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Brian Kernighan's Algorithm Explanation:
+n & (n-1) removes the rightmost 1 bit
+
+Example: n = 12 (1100)
+Iteration 1: n = 1100, n-1 = 1011, n & (n-1) = 1100 & 1011 = 1000, count = 1
+Iteration 2: n = 1000, n-1 = 0111, n & (n-1) = 1000 & 0111 = 0000, count = 2
+n = 0, exit loop,
+ return count = 2
+
+Why n & (n-1) works:
+- Subtracting 1 flips all trailing zeros and the rightmost 1
+- ANDing with original number removes that rightmost 1
+- Example: 1100 - 1 = 1011, then 1100 & 1011 = 1000
+
+This is optimal because it only iterates for the number of 1 bits,
+not all 32 bits like the naive approach.
+
+Approach Comparison:
+
+1. Brian Kernighan's (Best for sparse bits):
+   - Time: O(number of 1s)
+   - Most efficient when few 1 bits
+   - Industry standard
+
+2. Check each bit:
+   - Time: O(32) = O(1)
+   - Simple and straightforward
+   - Always checks all bits
+
+3. Built-in function:
+   - Time: O(1)
+   - Highly optimized
+   - Platform dependent
+
+4. Lookup table:
+   - Time: O(1)
+   - Fast but uses memory
+   - Good for repeated calls
+
+5. Parallel counting:
+   - Time: O(1)
+   - Most complex but fastest
+   - Uses bit manipulation tricks
+
+6. Simple loop:
+   - Time: O(32) = O(1)
+   - Easy to understand
+   - Less efficient than others
+
+Key Insights:
+1. Brian Kernighan's algorithm is optimal for sparse numbers
+2. Parallel counting is fastest for dense numbers
+3. Built-in functions are usually best in practice
+4. Unsigned right shift (>>>) handles negative numbers correctly
+
+Applications:
+- Population count in databases
+- Error detection and correction
+- Cryptography and hashing
+- Computer graphics and image processing
+*/
+```
+
+### 61. Counting Bits
+
+```java
+/**
+ * Problem: Count 1 bits for all numbers from 0 to n
+ * 
+ * Optimal Approach: Dynamic Programming with bit manipulation
+ * Time: O(n), Space: O(1) excluding output
+ */
+public class CountingBits {
+    
+    // Approach 1: DP with right shift - Most elegant
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits1(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 1; i <= n; i++) {
+            // Key insight: result[i] = result[i >> 1] + (i & 1)
+            // i >> 1 is i divided by 2 (removing rightmost bit)
+            // i & 1 is 1 if i is odd, 0 if i is even
+            result[i] = result[i >> 1] + (i & 1);
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: DP using Brian Kernighan's insight
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits2(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 1; i <= n; i++) {
+            // result[i] = result[i & (i-1)] + 1
+            // i & (i-1) removes the rightmost 1 bit
+            result[i] = result[i & (i - 1)] + 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 3: DP with powers of 2
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits3(int n) {
+        int[] result = new int[n + 1];
+        int powerOf2 = 1;
+        int nextPowerOf2 = 2;
+        
+        for (int i = 1; i <= n; i++) {
+            if (i == nextPowerOf2) {
+                powerOf2 = i;
+                nextPowerOf2 = i << 1;
+            }
+            
+            result[i] = result[i - powerOf2] + 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 4: Naive approach (for comparison)
+    // Time: O(n * log n), Space: O(1) excluding output
+    public int[] countBits4(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 0; i <= n; i++) {
+            result[i] = hammingWeight(i);
+        }
+        
+        return result;
+    }
+    
+    private int hammingWeight(int n) {
+        int count = 0;
+        while (n != 
+0) {
+            n = n & (n - 1);
+            count++;
+        }
+        return count;
+    }
+    
+    // Approach 5: DP with offset pattern
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits5(int n) {
+        int[] result = new int[n + 1];
+        int offset = 1;
+        
+        for (int i = 1; i <= n; i++) {
+            if (offset * 2 == i) {
+                offset = i;
+            }
+            result[i] = result[i - offset] + 1;
+        }
+        
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+DP Relation Explanation:
+Method 1: result[i] = result[i >> 1] + (i & 1)
+- i >> 1 removes the rightmost bit
+- If i is odd, we add 1 (the removed bit was 1)
+- If i is even, we add 0 (the removed bit was 0)
+
+Example: n = 5
+i=0: result[2] = 0 (base case)
+i=1: result[3] = result[2] + 1 = 0 + 1 = 1  (binary: 1)
+i=2: result[4] = result[3] + 0 = 1 + 0 = 1  (binary: 10)
+i=3: result[5] = result[3] + 1 = 1 + 1 = 2  (binary: 11)
+i=4: result[6] = result[4] + 0 = 1 + 0 = 1  (binary: 100)
+i=5: result[7] = result[4] + 1 = 1 + 1 = 2  (binary: 101)
+
+Method 2: result[i] = result[i & (i-1)] + 1
+- i & (i-1) gives the number with rightmost 1 bit removed
+- We add 1 for the removed bit
+
+Example: i = 5 (101)
+i & (i-1) = 101 & 100 = 100 (4)
+result[7] = result[6] + 1 = 1 + 1 = 2
+
+Method 3: Powers of 2 pattern
+- Numbers from 2^k to 2^(k+1)-1 have pattern
+- result[i] = result[i - 2^k] + 1 where 2^k is largest power ≤ i
+
+Binary patterns:
+0: 0     -> 0 bits
+1: 1     -> 1 bit
+2: 10    -> 1 bit
+3: 11    -> 2 bits
+4: 100   -> 1 bit
+5: 101   -> 2 bits
+6: 110   -> 2 bits
+7: 111   -> 3 bits
+8: 1000  -> 1 bit
+
+Pattern observation:
+- Powers of 2 always have 1 bit
+- Other numbers build on previous patterns
+
+Approach Comparison:
+
+1. Right shift DP (Best):
+   - Time: O(n), Space: O(1)
+   - Most intuitive and elegant
+   - Easy to understand and implement
+
+2. Brian Kernighan's DP:
+   - Time: O(n), Space: O(1)
+   - Uses bit manipulation insight
+   - Slightly more complex
+
+3. Powers of 2 DP:
+   - Time: O(n), Space: O(1)
+   - Pattern-based approach
+   - Good for understanding bit patterns
+
+4. Naive approach:
+   - Time: O(n log n), Space: O(1)
+   - Straightforward but inefficient
+   - Good for verification
+
+5. Offset pattern:
+   - Time: O(n), Space: O(1)
+   - Alternative pattern recognition
+   - Similar to powers of 2
+
+Key Insights:
+1. Bit counting has recursive structure
+2. Removing rightmost bit reduces problem size
+3. Powers of 2 create repeating patterns
+4. DP avoids recomputing same values
+
+Mathematical Properties:
+- f(2k) = f(k) (even numbers)
+- f(2k+1) = f(k) + 1 (odd numbers)
+- f(2^k) = 1 for all k ≥ 0
+- f(2^k + i) = 1 + f(i) for 0 ≤ i 
+< 2^k
+
+Applications:
+- Population count arrays
+- Bit manipulation algorithms
+- Digital signal processing
+- Cryptographic applications
+
+Time Complexity Analysis:
+- Naive: O(n * log n) - count bits for each number
+- DP approaches: O(n) - each number processed once
+- Space: O(1) excluding output array
+
+Both methods avoid recalculating bit counts from scratch,
+instead building on previously computed results.
+*/
+```
+
+### 62. Missing Number
+
+```java
+/**
+ * Problem: Find missing number in array containing n distinct numbers from 0 to n
+ * 
+ * Multiple optimal approaches
+ */
+public class MissingNumber {
+    
+    // Approach 1: XOR - Most elegant
+    // Time: O(n), Space: O(1)
+    public int missingNumber1(int[] nums) {
+        int result = nums.length; // Start with n
+        
+        for (int i = 0; i < nums.length; i++) {
+            result ^= i ^ nums[i];
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: Sum formula
+    // Time: O(n), Space: O(1)
+    public int missingNumber2(int[] nums) {
+        int n = nums.length;
+        int expectedSum = n * (n + 1) / 2; // Sum of 0 to n
+        int actualSum = 0;
+        
+        for (int num : nums) {
+            actualSum += num;
+        }
+        
+        return expectedSum - actualSum;
+    }
+    
+    // Approach 3: Binary Search (requires sorted array)
+    // Time: O(n log n) for sorting + O(log n) for search, Space: O(1)
+    public int missingNumber3(int[] nums) {
+        Arrays.sort(nums);
+        int left = 0, right = nums.length;
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] == mid) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return left;
+    }
+    
+    // Approach 4: HashSet
+    // Time: O(n), Space: O(n)
+    public int missingNumber4(int[] nums) {
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        for (int i = 0; i <= nums.length; i++) {
+            if (!numSet.contains(i)) {
+                return i;
+            }
+        }
+        
+        return -1; // Should never reach here
+    }
+    
+    // Approach 5: Bit manipulation with index
+    // Time: O(n), Space: O(1)
+    public int missingNumber5(int[] nums) {
+        int result = 0;
+        
+        // XOR all indices from 0 to n
+        for (int i = 0; i <= nums.length; i++) {
+            result ^= i;
+        }
+        
+        // XOR all array elements
+        for (int num : nums) {
+            result ^= num;
+        }
+        
+        return result;
+    }
+    
+    // Approach 6: Cyclic sort approach
+    // Time: O(n), Space: O(1)
+    public int missingNumber6(int[] nums) {
+        int n = nums.length;
+        
+        // Place each number at its correct index
+        for (int i = 0; i < n; i++) {
+            while (nums[i] < n && nums[i] != i) {
+                // Swap nums[i] with nums[nums[i]]
+                int temp = nums[nums[i]];
+                nums[nums[i]] = nums[i];
+                nums[i] = temp;
+            }
+        }
+        
+        // Find the first index where nums[i] != i
+        for (int i = 0; i < n; i++) {
+            if (nums[i] != i) {
+                return i;
+            }
+        }
+        
+        return n; // Missing number is n
+    }
+}
+
+/*
+Algorithm Explanation:
+
+XOR Approach Explanation:
+Key property: a ^ a = 0, a ^ 0 = a
+
+We XOR all indices (0 to n) with all array elements.
+Every number except the missing one will be XORed twice, becoming 0.
+Only the missing number will be XORed once, giving us the result.
+
+Example: nums = [3,0,1], missing = 2
+result = 3 (length)
+i=0: result = 3 ^ 0 ^ 3 = 0
+i=1: result = 0 ^ 1 ^ 0 = 1  
+i=2: result = 1 ^ 2 ^ 1 = 2
+
+Alternative XOR implementation:
+int result = 0;
+for (int i = 0; i < nums.length; i++) {
+    result ^= (i + 1)
+ ^ nums[i];
+}
+return result;
+
+Sum Approach:
+Expected sum = 0+1+2+...+n = n*(n+1)/2
+Actual sum = sum of array elements
+Missing number = Expected - Actual
+
+Example: nums = [3,0,1]
+Expected sum = 3*4/2 = 6
+Actual sum = 3+0+1 = 4
+Missing = 6-4 = 2
+
+Binary Search Approach:
+In sorted array, nums[i] should equal i.
+First position where nums[i] != i is our missing number.
+
+Example: nums = [0,1,3] (sorted)
+mid=1: nums[3]=1, equals index, search right
+mid=2: nums[4]=3, not equal to index, missing number is 2
+
+HashSet Approach:
+Store all numbers in set, then check which number from 0 to n is missing.
+
+Cyclic Sort Approach:
+Place each number at its correct index (nums[i] should be at index i).
+After sorting, first index where nums[i] != i is the missing number.
+
+Approach Comparison:
+
+1. XOR (Best overall):
+   - Time: O(n), Space: O(1)
+   - No overflow risk
+   - Elegant bit manipulation
+
+2. Sum formula:
+   - Time: O(n), Space: O(1)
+   - Simple arithmetic
+   - Risk of integer overflow for large n
+
+3. Binary search:
+   - Time: O(n log n), Space: O(1)
+   - Requires sorting
+   - Good if array already sorted
+
+4. HashSet:
+   - Time: O(n), Space: O(n)
+   - Straightforward approach
+   - Uses extra space
+
+5. Bit manipulation:
+   - Time: O(n), Space: O(1)
+   - Alternative XOR implementation
+   - Same efficiency as approach 1
+
+6. Cyclic sort:
+   - Time: O(n), Space: O(1)
+   - Modifies input array
+   - Good for understanding sorting
+
+Key Insights:
+1. XOR properties make it perfect for finding single missing element
+2. Mathematical formula provides direct calculation
+3. Binary search works on sorted data
+4. Multiple O(n) solutions exist with different trade-offs
+
+Edge Cases:
+- Missing number is 0: handle correctly
+- Missing number is largest (n): check boundary
+- Single element array: missing is either 0 or 1
+- Empty array: missing is 0
+
+Overflow Considerations:
+- Sum approach: n*(n+1)/2 might overflow for large n
+- XOR approach: no overflow risk
+- Use long for sum if overflow possible
+
+Applications:
+- Data validation
+- Error detection in sequences
+- Database integrity checks
+- Network packet validation
+
+Follow-up Questions:
+1. Find two missing numbers
+2. Find missing number in range [a,b]
+3. Find missing positive integer
+4. Handle duplicates in array
+
+Performance Notes:
+- XOR is fastest and most elegant
+- Sum formula is intuitive but has overflow risk
+- HashSet uses extra space but is straightforward
+- Choose based on constraints and requirements
+*/
+```
+
+### 63. Reverse Bits
+
+```java
+/**
+ * Problem: Reverse bits of 32-bit unsigned integer
+ * 
+ * Optimal Approach: Bit manipulation
+ * Time: O(1), Space: O(1)
+ */
+public class ReverseBits {
+    
+    // Approach 1: Bit by bit reversal - Most intuitive
+    // Time: O(1), Space: O(1)
+    public int reverseBits1(int n) {
+        int result = 0;
+        
+        for (int i = 0; i < 32; i++) {
+            // Shift result left to make room for next bit
+            result <<= 1;
+            
+            // Add the rightmost bit of n to result
+            result |= (
+n & 1);
+            
+            // Shift n right to process next bit
+            n >>= 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: Optimized with bit manipulation tricks
+    // Time: O(1), Space: O(1)
+    public int reverseBits2(int n) {
+        // Swap adjacent bits
+        n = ((n & 0xAAAAAAAA) >>> 1) | ((n & 0x55555555) << 1);
+        
+        // Swap adjacent pairs
+        n = ((n & 0xCCCCCCCC) >>> 2) | ((n & 0x33333333) << 2);
+        
+        // Swap adjacent nibbles
+        n = ((n & 0xF0F0F0F0) >>> 4) | ((n & 0x0F0F0F0F) << 4);
+        
+        // Swap adjacent bytes
+        n = ((n & 0xFF00FF00) >>> 8) | ((n & 0x00FF00FF) << 8);
+        
+        // Swap adjacent 16-bit blocks
+        n = (n >>> 16) | (n << 16);
+        
+        return n;
+    }
+    
+    // Approach 3: Lookup table approach
+    // Time: O(1), Space: O(1)
+    private static final int[] REVERSE_TABLE = new int[1];
+    
+    static {
+        for (int i = 0; i < 256; i++) {
+            REVERSE_TABLE[i] = reverseByte(i);
+        }
+    }
+    
+    private static int reverseByte(int b) {
+        int result = 0;
+        for (int i = 0; i < 8; i++) {
+            result = (result << 1) | (b & 1);
+            b >>= 1;
+        }
+        return result;
+    }
+    
+    public int reverseBits3(int n) {
+        return (REVERSE_TABLE[n & 0xFF] << 24) |
+               (REVERSE_TABLE[(n >>> 8) & 0xFF] << 16) |
+               (REVERSE_TABLE[(n >>> 16) & 0xFF] << 8) |
+               (REVERSE_TABLE[(n >>> 24) & 0xFF]);
+    }
+    
+    // Approach 4: Recursive divide and conquer
+    // Time: O(1), Space: O(1)
+    public int reverseBits4(int n) {
+        return reverseRange(n, 0, 31);
+    }
+    
+    private int reverseRange(int n, int left, int right) {
+        if (left >= right) {
+            return n;
+        }
+        
+        // Swap bits at left and right positions
+        if (((n >>> left) & 1) != ((n >>> right) & 1)) {
+            n ^= (1 << left) | (1 << right);
+        }
+        
+        return reverseRange(n, left + 1, right - 1);
+    }
+    
+    // Approach 5: Using Integer.reverse() concept
+    // Time: O(1), Space: O(1)
+    public int reverseBits5(int n) {
+        n = (n >>> 1 & 0x55555555) | (n & 0x55555555) << 1;
+        n = (n >>> 2 & 0x33333333) | (n & 0x33333333) << 2;
+        n = (n >>> 4 & 0x0F0F0F0F) | (n & 0x0F0F0F0F) << 4;
+        n = (n >>> 8 & 0x00FF00FF) | (n & 0x00FF00FF) << 8;
+        n = (n >>> 16) | (n << 16);
+        return n;
+    }
+    
+    // Approach 6: Simple iterative with bit extraction
+    // Time: O(1), Space: O(1)
+    public int reverseBits6(int n) {
+        int result = 0;
+        int power = 31;
+        
+        while (n != 0) {
+            result += (n & 1) << power;
+            n >>>= 1;
+            power--;
+        }
+        
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Basic Approach Explanation:
+1. Process each bit from right to left
+2. Shift result left and add current bit
+3. Shift input right to get next bit
+
+Example: n = 43261596 (00000010100101000001111010011100)
+We want: 964176192 (00111001011110000010100101000000)
+
+Iteration by iteration:
+i=0: result=0, add bit 0: result=0, n becomes 21630798
+i=1: result=0, add bit 0: result=0, n becomes 10815399
+i=2: result=0, add bit 1: result=1, n becomes 5407699
+...continue for all 32 bits
+
+Optimized Approach:
+Uses divide-and-conquer with bit masks:
+1. Swap every 2 adjacent bits
+2. Swap every 2 adjacent pairs (
+4 bits)
+3. Swap every 2 adjacent nibbles (8 bits)
+4. Swap every 2 adjacent bytes (16 bits)
+5. Swap the two 16-bit halves
+
+Masks explanation:
+0xAAAAAAAA = 10101010... (even positions)
+0x55555555 = 01010101... (odd positions)
+0xCCCCCCCC = 11001100... (positions 2,3,6,7,...)
+0x33333333 = 00110011... (positions 0,1,4,5,...)
+
+Example for 8-bit number 11010010:
+Step 1: Swap adjacent bits
+  11010010 -> 11100001
+Step 2: Swap adjacent pairs
+  11100001 -> 01001110
+Step 3: Swap adjacent nibbles
+  01001110 -> 01001110
+
+Lookup Table Approach:
+Precompute reverse of all 8-bit values (0-255).
+Split 32-bit number into 4 bytes and reverse each.
+
+Approach Comparison:
+
+1. Bit by bit (Most common):
+   - Time: O(1), Space: O(1)
+   - Easy to understand
+   - 32 iterations always
+
+2. Optimized bit manipulation (Fastest):
+   - Time: O(1), Space: O(1)
+   - Constant number of operations
+   - More complex but very efficient
+
+3. Lookup table (Good for repeated calls):
+   - Time: O(1), Space: O(1)
+   - Fast after initialization
+   - Uses 256 integers of memory
+
+4. Recursive (Educational):
+   - Time: O(1), Space: O(1)
+   - Shows divide-and-conquer
+   - Not practical due to recursion overhead
+
+5. Integer.reverse concept:
+   - Time: O(1), Space: O(1)
+   - Similar to approach 2
+   - Different bit manipulation pattern
+
+6. Simple iterative:
+   - Time: O(1), Space: O(1)
+   - Alternative implementation
+   - Stops early when n becomes 0
+
+Key Insights:
+1. Bit reversal can be done in O(1) time
+2. Divide-and-conquer approach is most efficient
+3. Lookup tables trade space for speed
+4. Multiple bit manipulation techniques exist
+
+Applications:
+- Graphics programming (texture mapping)
+- Digital signal processing
+- Cryptography (bit permutations)
+- Network protocols (endianness conversion)
+- Fast Fourier Transform algorithms
+
+Bit Manipulation Tricks:
+- n & 1: get rightmost bit
+- n >> 1: remove rightmost bit
+- result << 1: shift left to make room
+- result | bit: add bit to result
+- Use >>> for unsigned right shift
+
+Performance Notes:
+- Approach 2 is fastest (constant operations)
+- Approach 1 is most readable
+- Approach 3 is best for many repeated calls
+- All approaches are O(1) time and space
+
+Edge Cases:
+- n = 0: returns 0
+- n = -1 (all 1s): returns -1
+- Powers of 2: specific patterns
+- Maximum/minimum integers: handle correctly
+
+Testing Strategy:
+- Test with known patterns (all 0s, all 1s)
+- Test with powers of 2
+- Test with alternating patterns
+- Verify with manual calculation for small numbers
+*/
+```
+-----------------------------------------------------------
+
+
+
+Looking at our original organized list, after completing Graph Problems (53-58), the next categories in order are:
+
+## Binary/Bit Manipulation Problems (59-63)
+
+### 59. Sum of Two Integers
+
+```java
+/**
+ * Problem: Add two integers without using + or - operators
+ * 
+ * Optimal Approach: Bit manipulation (XOR for sum, AND for carry)
+ * Time: O(1), Space: O(1)
+ */
+public class SumOfTwoIntegers {
+    
+    // Approach 1: Iterative bit manipulation - Most common
+    // Time: O(1), Space: O(1)
+    public int getSum1(int a, int b) {
+        while (b != 0) {
+            // Calculate carry
+            int carry = a & b;
+            
+            // Calculate sum without carry
+            a = a ^ b;
+            
+            // Shift carry to left for next iteration
+            b = carry << 1;
+        }
+        
+        return a;
+    }
+    
+    // Approach 2: Recursive approach
+    // Time: O(1), Space: O(1)
+    public int getSum2(int a, int b) {
+        if (b == 0) {
+            return a;
+        }
+        
+        int sum = a ^ b;        // XOR gives sum without carry
+        int carry = (a & b) << 1; // AND gives carry, shift left
+        
+        return getSum2(sum, carry);
+    }
+    
+    // Approach 3: Handle negative numbers explicitly
+    // Time: O(1), Space: O(1)
+    public int getSum3(int a, int b) {
+        // Handle the case where one number is negative
+        if (a == 0) return b;
+        if (b == 0) return a;
+        
+        while (b != 0) {
+            int carry = a & b;
+            a = a ^ b;
+            b = carry << 1;
+        }
+        
+        return a;
+    }
+    
+    // Approach 4: Using bit manipulation properties
+    // Time: O(1), Space: O(1)
+    public int getSum4(int a, int b) {
+        // Continue until there's no carry
+        while ((a & b) != 0) {
+            int temp = a ^ b;  // Sum without carry
+            b = (a & b) << 1;  // Carry
+            a = temp;
+        }
+        
+        return a ^ b;  // Final sum
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Bit Manipulation Logic:
+1. XOR (^) gives sum without considering carry
+2. AND (&) gives carry bits
+3. Shift carry left by 1 position
+4. Repeat until no carry
+
+Example: a = 5 (101), b = 3 (011)
+Iteration 1:
+carry = 5 & 3 = 101 & 011 = 001
+a = 5 ^ 3 = 101 ^ 011 = 110 (6)
+b = carry << 1 = 001 << 1 = 010 (2)
+
+Iteration 2:
+carry = 6 & 2 = 110 & 010 = 010
+a = 6 ^ 2 = 110 ^ 010 = 100 (4)  
+b = carry << 1 = 010 << 1 = 100 (4)
+
+Iteration 
+3:
+carry = 4 & 4 = 100 & 100 = 100
+a = 4 ^ 4 = 100 ^ 100 = 000 (0)
+b = carry << 1 = 100 << 1 = 1000 (8)
+
+Iteration 4:
+carry = 0 & 8 = 000 & 1000 = 000
+a = 0 ^ 8 = 000 ^ 1000 = 1000 (8)
+b = carry << 1 = 000 << 1 = 000 (0)
+
+b == 0, so return a = 8
+
+Verification: 5 + 3 = 8 ✓
+
+Why this works:
+- XOR performs addition without carry
+- AND identifies where carries occur
+- Left shift positions carry for next bit
+- Process continues until no more carries
+
+Handling negative numbers:
+- Two's complement representation handles negatives automatically
+- Same algorithm works for positive and negative numbers
+- Java's arithmetic right shift preserves sign bit
+
+Edge cases:
+- a = 0: return b
+- b = 0: return a  
+- Both negative: algorithm handles correctly
+- Overflow: follows Java integer overflow rules
+*/
+```
+
+### 60. Number of 1 Bits
+
+```java
+/**
+ * Problem: Count number of 1 bits in integer (Hamming weight)
+ * 
+ * Multiple approaches with different efficiencies
+ */
+public class NumberOf1Bits {
+    
+    // Approach 1: Brian Kernighan's Algorithm - Most Efficient
+    // Time: O(number of 1 bits), Space: O(1)
+    public int hammingWeight1(int n) {
+        int count = 0;
+        
+        while (n != 0) {
+            // Remove the rightmost 1 bit
+            n = n & (n - 1);
+            count++;
+        }
+        
+        return count;
+    }
+    
+    // Approach 2: Check each bit
+    // Time: O(32) = O(1), Space: O(1)
+    public int hammingWeight2(int n) {
+        int count = 0;
+        
+        while (n != 0) {
+            // Check if rightmost bit is 1
+            if ((n & 1) == 1) {
+                count++;
+            }
+            // Right shift to check next bit
+            n >>>= 1; // Use unsigned right shift
+        }
+        
+        return count;
+    }
+    
+    // Approach 3: Built-in function
+    // Time: O(1), Space: O(1)
+    public int hammingWeight3(int n) {
+        return Integer.bitCount(n);
+    }
+    
+    // Approach 4: Lookup table approach
+    // Time: O(1), Space: O(1)
+    private static final int[] BIT_COUNT_TABLE = new int[1];
+    
+    static {
+        for (int i = 0; i < 256; i++) {
+            BIT_COUNT_TABLE[i] = (i & 1) + BIT_COUNT_TABLE[i >>> 1];
+        }
+    }
+    
+    public int hammingWeight4(int n) {
+        return BIT_COUNT_TABLE[n & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 8) & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 16) & 0xFF] +
+               BIT_COUNT_TABLE[(n >>> 24) & 0xFF];
+    }
+    
+    // Approach 5: Parallel bit counting
+    // Time: O(1), Space: O(1)
+    public int hammingWeight5(int n) {
+        // Count bits in parallel
+        n = n - ((n >>> 1) & 0x55555555);
+        n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+        n = (n + (n >>> 4)) & 0x0F0F0F0F;
+        n = n + (n >>> 8);
+        n = n + (n >>> 16);
+        return n & 0x3F;
+    }
+    
+    // Approach 6: Simple loop with bit manipulation
+    // Time: O(32) = O(1), Space: O(1)
+    public int hammingWeight6(int n) {
+        int count = 0;
+        
+        for (int i = 0; i < 32; i++) {
+            if ((n & (1 << i)) != 0) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Brian Kernighan's Algorithm Explanation:
+n & (n-1) removes the rightmost 1 bit
+
+Example: n = 12 (1100)
+Iteration 1: n = 1100, n-1 = 1011, n & (n-1) = 1100 & 1011 = 1000, count = 1
+Iteration 2: n = 1000, n-1 = 0111, n & (n-1) = 1000 & 0111 = 0000, count = 2
+n = 0, exit loop,
+ return count = 2
+
+Why n & (n-1) works:
+- Subtracting 1 flips all trailing zeros and the rightmost 1
+- ANDing with original number removes that rightmost 1
+- Example: 1100 - 1 = 1011, then 1100 & 1011 = 1000
+
+This is optimal because it only iterates for the number of 1 bits,
+not all 32 bits like the naive approach.
+
+Approach Comparison:
+
+1. Brian Kernighan's (Best for sparse bits):
+   - Time: O(number of 1s)
+   - Most efficient when few 1 bits
+   - Industry standard
+
+2. Check each bit:
+   - Time: O(32) = O(1)
+   - Simple and straightforward
+   - Always checks all bits
+
+3. Built-in function:
+   - Time: O(1)
+   - Highly optimized
+   - Platform dependent
+
+4. Lookup table:
+   - Time: O(1)
+   - Fast but uses memory
+   - Good for repeated calls
+
+5. Parallel counting:
+   - Time: O(1)
+   - Most complex but fastest
+   - Uses bit manipulation tricks
+
+6. Simple loop:
+   - Time: O(32) = O(1)
+   - Easy to understand
+   - Less efficient than others
+
+Key Insights:
+1. Brian Kernighan's algorithm is optimal for sparse numbers
+2. Parallel counting is fastest for dense numbers
+3. Built-in functions are usually best in practice
+4. Unsigned right shift (>>>) handles negative numbers correctly
+
+Applications:
+- Population count in databases
+- Error detection and correction
+- Cryptography and hashing
+- Computer graphics and image processing
+*/
+```
+
+### 61. Counting Bits
+
+```java
+/**
+ * Problem: Count 1 bits for all numbers from 0 to n
+ * 
+ * Optimal Approach: Dynamic Programming with bit manipulation
+ * Time: O(n), Space: O(1) excluding output
+ */
+public class CountingBits {
+    
+    // Approach 1: DP with right shift - Most elegant
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits1(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 1; i <= n; i++) {
+            // Key insight: result[i] = result[i >> 1] + (i & 1)
+            // i >> 1 is i divided by 2 (removing rightmost bit)
+            // i & 1 is 1 if i is odd, 0 if i is even
+            result[i] = result[i >> 1] + (i & 1);
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: DP using Brian Kernighan's insight
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits2(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 1; i <= n; i++) {
+            // result[i] = result[i & (i-1)] + 1
+            // i & (i-1) removes the rightmost 1 bit
+            result[i] = result[i & (i - 1)] + 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 3: DP with powers of 2
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits3(int n) {
+        int[] result = new int[n + 1];
+        int powerOf2 = 1;
+        int nextPowerOf2 = 2;
+        
+        for (int i = 1; i <= n; i++) {
+            if (i == nextPowerOf2) {
+                powerOf2 = i;
+                nextPowerOf2 = i << 1;
+            }
+            
+            result[i] = result[i - powerOf2] + 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 4: Naive approach (for comparison)
+    // Time: O(n * log n), Space: O(1) excluding output
+    public int[] countBits4(int n) {
+        int[] result = new int[n + 1];
+        
+        for (int i = 0; i <= n; i++) {
+            result[i] = hammingWeight(i);
+        }
+        
+        return result;
+    }
+    
+    private int hammingWeight(int n) {
+        int count = 0;
+        while (n != 
+0) {
+            n = n & (n - 1);
+            count++;
+        }
+        return count;
+    }
+    
+    // Approach 5: DP with offset pattern
+    // Time: O(n), Space: O(1) excluding output
+    public int[] countBits5(int n) {
+        int[] result = new int[n + 1];
+        int offset = 1;
+        
+        for (int i = 1; i <= n; i++) {
+            if (offset * 2 == i) {
+                offset = i;
+            }
+            result[i] = result[i - offset] + 1;
+        }
+        
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+DP Relation Explanation:
+Method 1: result[i] = result[i >> 1] + (i & 1)
+- i >> 1 removes the rightmost bit
+- If i is odd, we add 1 (the removed bit was 1)
+- If i is even, we add 0 (the removed bit was 0)
+
+Example: n = 5
+i=0: result[2] = 0 (base case)
+i=1: result[3] = result[2] + 1 = 0 + 1 = 1  (binary: 1)
+i=2: result[4] = result[3] + 0 = 1 + 0 = 1  (binary: 10)
+i=3: result[5] = result[3] + 1 = 1 + 1 = 2  (binary: 11)
+i=4: result[6] = result[4] + 0 = 1 + 0 = 1  (binary: 100)
+i=5: result[7] = result[4] + 1 = 1 + 1 = 2  (binary: 101)
+
+Method 2: result[i] = result[i & (i-1)] + 1
+- i & (i-1) gives the number with rightmost 1 bit removed
+- We add 1 for the removed bit
+
+Example: i = 5 (101)
+i & (i-1) = 101 & 100 = 100 (4)
+result[7] = result[6] + 1 = 1 + 1 = 2
+
+Method 3: Powers of 2 pattern
+- Numbers from 2^k to 2^(k+1)-1 have pattern
+- result[i] = result[i - 2^k] + 1 where 2^k is largest power ≤ i
+
+Binary patterns:
+0: 0     -> 0 bits
+1: 1     -> 1 bit
+2: 10    -> 1 bit
+3: 11    -> 2 bits
+4: 100   -> 1 bit
+5: 101   -> 2 bits
+6: 110   -> 2 bits
+7: 111   -> 3 bits
+8: 1000  -> 1 bit
+
+Pattern observation:
+- Powers of 2 always have 1 bit
+- Other numbers build on previous patterns
+
+Approach Comparison:
+
+1. Right shift DP (Best):
+   - Time: O(n), Space: O(1)
+   - Most intuitive and elegant
+   - Easy to understand and implement
+
+2. Brian Kernighan's DP:
+   - Time: O(n), Space: O(1)
+   - Uses bit manipulation insight
+   - Slightly more complex
+
+3. Powers of 2 DP:
+   - Time: O(n), Space: O(1)
+   - Pattern-based approach
+   - Good for understanding bit patterns
+
+4. Naive approach:
+   - Time: O(n log n), Space: O(1)
+   - Straightforward but inefficient
+   - Good for verification
+
+5. Offset pattern:
+   - Time: O(n), Space: O(1)
+   - Alternative pattern recognition
+   - Similar to powers of 2
+
+Key Insights:
+1. Bit counting has recursive structure
+2. Removing rightmost bit reduces problem size
+3. Powers of 2 create repeating patterns
+4. DP avoids recomputing same values
+
+Mathematical Properties:
+- f(2k) = f(k) (even numbers)
+- f(2k+1) = f(k) + 1 (odd numbers)
+- f(2^k) = 1 for all k ≥ 0
+- f(2^k + i) = 1 + f(i) for 0 ≤ i 
+< 2^k
+
+Applications:
+- Population count arrays
+- Bit manipulation algorithms
+- Digital signal processing
+- Cryptographic applications
+
+Time Complexity Analysis:
+- Naive: O(n * log n) - count bits for each number
+- DP approaches: O(n) - each number processed once
+- Space: O(1) excluding output array
+
+Both methods avoid recalculating bit counts from scratch,
+instead building on previously computed results.
+*/
+```
+
+### 62. Missing Number
+
+```java
+/**
+ * Problem: Find missing number in array containing n distinct numbers from 0 to n
+ * 
+ * Multiple optimal approaches
+ */
+public class MissingNumber {
+    
+    // Approach 1: XOR - Most elegant
+    // Time: O(n), Space: O(1)
+    public int missingNumber1(int[] nums) {
+        int result = nums.length; // Start with n
+        
+        for (int i = 0; i < nums.length; i++) {
+            result ^= i ^ nums[i];
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: Sum formula
+    // Time: O(n), Space: O(1)
+    public int missingNumber2(int[] nums) {
+        int n = nums.length;
+        int expectedSum = n * (n + 1) / 2; // Sum of 0 to n
+        int actualSum = 0;
+        
+        for (int num : nums) {
+            actualSum += num;
+        }
+        
+        return expectedSum - actualSum;
+    }
+    
+    // Approach 3: Binary Search (requires sorted array)
+    // Time: O(n log n) for sorting + O(log n) for search, Space: O(1)
+    public int missingNumber3(int[] nums) {
+        Arrays.sort(nums);
+        int left = 0, right = nums.length;
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] == mid) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return left;
+    }
+    
+    // Approach 4: HashSet
+    // Time: O(n), Space: O(n)
+    public int missingNumber4(int[] nums) {
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        for (int i = 0; i <= nums.length; i++) {
+            if (!numSet.contains(i)) {
+                return i;
+            }
+        }
+        
+        return -1; // Should never reach here
+    }
+    
+    // Approach 5: Bit manipulation with index
+    // Time: O(n), Space: O(1)
+    public int missingNumber5(int[] nums) {
+        int result = 0;
+        
+        // XOR all indices from 0 to n
+        for (int i = 0; i <= nums.length; i++) {
+            result ^= i;
+        }
+        
+        // XOR all array elements
+        for (int num : nums) {
+            result ^= num;
+        }
+        
+        return result;
+    }
+    
+    // Approach 6: Cyclic sort approach
+    // Time: O(n), Space: O(1)
+    public int missingNumber6(int[] nums) {
+        int n = nums.length;
+        
+        // Place each number at its correct index
+        for (int i = 0; i < n; i++) {
+            while (nums[i] < n && nums[i] != i) {
+                // Swap nums[i] with nums[nums[i]]
+                int temp = nums[nums[i]];
+                nums[nums[i]] = nums[i];
+                nums[i] = temp;
+            }
+        }
+        
+        // Find the first index where nums[i] != i
+        for (int i = 0; i < n; i++) {
+            if (nums[i] != i) {
+                return i;
+            }
+        }
+        
+        return n; // Missing number is n
+    }
+}
+
+/*
+Algorithm Explanation:
+
+XOR Approach Explanation:
+Key property: a ^ a = 0, a ^ 0 = a
+
+We XOR all indices (0 to n) with all array elements.
+Every number except the missing one will be XORed twice, becoming 0.
+Only the missing number will be XORed once, giving us the result.
+
+Example: nums = [3,0,1], missing = 2
+result = 3 (length)
+i=0: result = 3 ^ 0 ^ 3 = 0
+i=1: result = 0 ^ 1 ^ 0 = 1  
+i=2: result = 1 ^ 2 ^ 1 = 2
+
+Alternative XOR implementation:
+int result = 0;
+for (int i = 0; i < nums.length; i++) {
+    result ^= (i + 1)
+ ^ nums[i];
+}
+return result;
+
+Sum Approach:
+Expected sum = 0+1+2+...+n = n*(n+1)/2
+Actual sum = sum of array elements
+Missing number = Expected - Actual
+
+Example: nums = [3,0,1]
+Expected sum = 3*4/2 = 6
+Actual sum = 3+0+1 = 4
+Missing = 6-4 = 2
+
+Binary Search Approach:
+In sorted array, nums[i] should equal i.
+First position where nums[i] != i is our missing number.
+
+Example: nums = [0,1,3] (sorted)
+mid=1: nums[3]=1, equals index, search right
+mid=2: nums[4]=3, not equal to index, missing number is 2
+
+HashSet Approach:
+Store all numbers in set, then check which number from 0 to n is missing.
+
+Cyclic Sort Approach:
+Place each number at its correct index (nums[i] should be at index i).
+After sorting, first index where nums[i] != i is the missing number.
+
+Approach Comparison:
+
+1. XOR (Best overall):
+   - Time: O(n), Space: O(1)
+   - No overflow risk
+   - Elegant bit manipulation
+
+2. Sum formula:
+   - Time: O(n), Space: O(1)
+   - Simple arithmetic
+   - Risk of integer overflow for large n
+
+3. Binary search:
+   - Time: O(n log n), Space: O(1)
+   - Requires sorting
+   - Good if array already sorted
+
+4. HashSet:
+   - Time: O(n), Space: O(n)
+   - Straightforward approach
+   - Uses extra space
+
+5. Bit manipulation:
+   - Time: O(n), Space: O(1)
+   - Alternative XOR implementation
+   - Same efficiency as approach 1
+
+6. Cyclic sort:
+   - Time: O(n), Space: O(1)
+   - Modifies input array
+   - Good for understanding sorting
+
+Key Insights:
+1. XOR properties make it perfect for finding single missing element
+2. Mathematical formula provides direct calculation
+3. Binary search works on sorted data
+4. Multiple O(n) solutions exist with different trade-offs
+
+Edge Cases:
+- Missing number is 0: handle correctly
+- Missing number is largest (n): check boundary
+- Single element array: missing is either 0 or 1
+- Empty array: missing is 0
+
+Overflow Considerations:
+- Sum approach: n*(n+1)/2 might overflow for large n
+- XOR approach: no overflow risk
+- Use long for sum if overflow possible
+
+Applications:
+- Data validation
+- Error detection in sequences
+- Database integrity checks
+- Network packet validation
+
+Follow-up Questions:
+1. Find two missing numbers
+2. Find missing number in range [a,b]
+3. Find missing positive integer
+4. Handle duplicates in array
+
+Performance Notes:
+- XOR is fastest and most elegant
+- Sum formula is intuitive but has overflow risk
+- HashSet uses extra space but is straightforward
+- Choose based on constraints and requirements
+*/
+```
+
+### 63. Reverse Bits
+
+```java
+/**
+ * Problem: Reverse bits of 32-bit unsigned integer
+ * 
+ * Optimal Approach: Bit manipulation
+ * Time: O(1), Space: O(1)
+ */
+public class ReverseBits {
+    
+    // Approach 1: Bit by bit reversal - Most intuitive
+    // Time: O(1), Space: O(1)
+    public int reverseBits1(int n) {
+        int result = 0;
+        
+        for (int i = 0; i < 32; i++) {
+            // Shift result left to make room for next bit
+            result <<= 1;
+            
+            // Add the rightmost bit of n to result
+            result |= (
+n & 1);
+            
+            // Shift n right to process next bit
+            n >>= 1;
+        }
+        
+        return result;
+    }
+    
+    // Approach 2: Optimized with bit manipulation tricks
+    // Time: O(1), Space: O(1)
+    public int reverseBits2(int n) {
+        // Swap adjacent bits
+        n = ((n & 0xAAAAAAAA) >>> 1) | ((n & 0x55555555) << 1);
+        
+        // Swap adjacent pairs
+        n = ((n & 0xCCCCCCCC) >>> 2) | ((n & 0x33333333) << 2);
+        
+        // Swap adjacent nibbles
+        n = ((n & 0xF0F0F0F0) >>> 4) | ((n & 0x0F0F0F0F) << 4);
+        
+        // Swap adjacent bytes
+        n = ((n & 0xFF00FF00) >>> 8) | ((n & 0x00FF00FF) << 8);
+        
+        // Swap adjacent 16-bit blocks
+        n = (n >>> 16) | (n << 16);
+        
+        return n;
+    }
+    
+    // Approach 3: Lookup table approach
+    // Time: O(1), Space: O(1)
+    private static final int[] REVERSE_TABLE = new int[1];
+    
+    static {
+        for (int i = 0; i < 256; i++) {
+            REVERSE_TABLE[i] = reverseByte(i);
+        }
+    }
+    
+    private static int reverseByte(int b) {
+        int result = 0;
+        for (int i = 0; i < 8; i++) {
+            result = (result << 1) | (b & 1);
+            b >>= 1;
+        }
+        return result;
+    }
+    
+    public int reverseBits3(int n) {
+        return (REVERSE_TABLE[n & 0xFF] << 24) |
+               (REVERSE_TABLE[(n >>> 8) & 0xFF] << 16) |
+               (REVERSE_TABLE[(n >>> 16) & 0xFF] << 8) |
+               (REVERSE_TABLE[(n >>> 24) & 0xFF]);
+    }
+    
+    // Approach 4: Recursive divide and conquer
+    // Time: O(1), Space: O(1)
+    public int reverseBits4(int n) {
+        return reverseRange(n, 0, 31);
+    }
+    
+    private int reverseRange(int n, int left, int right) {
+        if (left >= right) {
+            return n;
+        }
+        
+        // Swap bits at left and right positions
+        if (((n >>> left) & 1) != ((n >>> right) & 1)) {
+            n ^= (1 << left) | (1 << right);
+        }
+        
+        return reverseRange(n, left + 1, right - 1);
+    }
+    
+    // Approach 5: Using Integer.reverse() concept
+    // Time: O(1), Space: O(1)
+    public int reverseBits5(int n) {
+        n = (n >>> 1 & 0x55555555) | (n & 0x55555555) << 1;
+        n = (n >>> 2 & 0x33333333) | (n & 0x33333333) << 2;
+        n = (n >>> 4 & 0x0F0F0F0F) | (n & 0x0F0F0F0F) << 4;
+        n = (n >>> 8 & 0x00FF00FF) | (n & 0x00FF00FF) << 8;
+        n = (n >>> 16) | (n << 16);
+        return n;
+    }
+    
+    // Approach 6: Simple iterative with bit extraction
+    // Time: O(1), Space: O(1)
+    public int reverseBits6(int n) {
+        int result = 0;
+        int power = 31;
+        
+        while (n != 0) {
+            result += (n & 1) << power;
+            n >>>= 1;
+            power--;
+        }
+        
+        return result;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Basic Approach Explanation:
+1. Process each bit from right to left
+2. Shift result left and add current bit
+3. Shift input right to get next bit
+
+Example: n = 43261596 (00000010100101000001111010011100)
+We want: 964176192 (00111001011110000010100101000000)
+
+Iteration by iteration:
+i=0: result=0, add bit 0: result=0, n becomes 21630798
+i=1: result=0, add bit 0: result=0, n becomes 10815399
+i=2: result=0, add bit 1: result=1, n becomes 5407699
+...continue for all 32 bits
+
+Optimized Approach:
+Uses divide-and-conquer with bit masks:
+1. Swap every 2 adjacent bits
+2. Swap every 2 adjacent pairs (
+4 bits)
+3. Swap every 2 adjacent nibbles (8 bits)
+4. Swap every 2 adjacent bytes (16 bits)
+5. Swap the two 16-bit halves
+
+Masks explanation:
+0xAAAAAAAA = 10101010... (even positions)
+0x55555555 = 01010101... (odd positions)
+0xCCCCCCCC = 11001100... (positions 2,3,6,7,...)
+0x33333333 = 00110011... (positions 0,1,4,5,...)
+
+Example for 8-bit number 11010010:
+Step 1: Swap adjacent bits
+  11010010 -> 11100001
+Step 2: Swap adjacent pairs
+  11100001 -> 01001110
+Step 3: Swap adjacent nibbles
+  01001110 -> 01001110
+
+Lookup Table Approach:
+Precompute reverse of all 8-bit values (0-255).
+Split 32-bit number into 4 bytes and reverse each.
+
+Approach Comparison:
+
+1. Bit by bit (Most common):
+   - Time: O(1), Space: O(1)
+   - Easy to understand
+   - 32 iterations always
+
+2. Optimized bit manipulation (Fastest):
+   - Time: O(1), Space: O(1)
+   - Constant number of operations
+   - More complex but very efficient
+
+3. Lookup table (Good for repeated calls):
+   - Time: O(1), Space: O(1)
+   - Fast after initialization
+   - Uses 256 integers of memory
+
+4. Recursive (Educational):
+   - Time: O(1), Space: O(1)
+   - Shows divide-and-conquer
+   - Not practical due to recursion overhead
+
+5. Integer.reverse concept:
+   - Time: O(1), Space: O(1)
+   - Similar to approach 2
+   - Different bit manipulation pattern
+
+6. Simple iterative:
+   - Time: O(1), Space: O(1)
+   - Alternative implementation
+   - Stops early when n becomes 0
+
+Key Insights:
+1. Bit reversal can be done in O(1) time
+2. Divide-and-conquer approach is most efficient
+3. Lookup tables trade space for speed
+4. Multiple bit manipulation techniques exist
+
+Applications:
+- Graphics programming (texture mapping)
+- Digital signal processing
+- Cryptography (bit permutations)
+- Network protocols (endianness conversion)
+- Fast Fourier Transform algorithms
+
+Bit Manipulation Tricks:
+- n & 1: get rightmost bit
+- n >> 1: remove rightmost bit
+- result << 1: shift left to make room
+- result | bit: add bit to result
+- Use >>> for unsigned right shift
+
+Performance Notes:
+- Approach 2 is fastest (constant operations)
+- Approach 1 is most readable
+- Approach 3 is best for many repeated calls
+- All approaches are O(1) time and space
+
+Edge Cases:
+- n = 0: returns 0
+- n = -1 (all 1s): returns -1
+- Powers of 2: specific patterns
+- Maximum/minimum integers: handle correctly
+
+Testing Strategy:
+- Test with known patterns (all 0s, all 1s)
+- Test with powers of 2
+- Test with alternating patterns
+- Verify with manual calculation for small numbers
+*/
+```
+
+That completes all the **Binary/Bit Manipulation Problems (59-63)**!
+
+---------------------------------------------------------------------------------
+
+Perfect choice revising with **Blind 75** — these problems hit *core patterns* you’ll see again and again in system design + interviews.
+I’ll structure this cleanly:
+
+For **each problem**:
+
+1. **Intuition** (how to think)
+2. **Approach**
+3. **Java Code**
+4. **Example walkthrough**
+
+I’ll group them **topic-wise** exactly as you asked.
+
+---
+
+# 🔥 HEAP PROBLEMS (3)
+
+---
+
+## 1️⃣ Merge K Sorted Lists (Linked List)
+
+### 🔹 Intuition
+
+You have **k sorted lists** → always pick the **smallest current node**.
+This screams **Min Heap**.
+
+Instead of merging one by one (slow), keep a heap of size `k`.
+
+---
+
+### 🔹 Approach
+
+1. Push the **head of each list** into a min-heap
+2. Pop smallest node → add to result
+3. Push its `next` node into heap
+4. Repeat until heap is empty
+
+⏱ Time: `O(N log K)`
+📦 Space: `O(K)`
+
+---
+
+### 🔹 Java Code
+
+```java
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int v) { val = v; }
+}
+
+public ListNode mergeKLists(ListNode[] lists) {
+    PriorityQueue<ListNode> pq =
+        new PriorityQueue<>((a, b) -> a.val - b.val);
+
+    for (ListNode node : lists) {
+        if (node != null) pq.offer(node);
+    }
+
+    ListNode dummy = new ListNode(0);
+    ListNode curr = dummy;
+
+    while (!pq.isEmpty()) {
+        ListNode node = pq.poll();
+        curr.next = node;
+        curr = curr.next;
+
+        if (node.next != null) pq.offer(node.next);
+    }
+    return dummy.next;
+}
+```
+
+---
+
+### 🔹 Example
+
+```
+Input:
+[1->4->5]
+[1->3->4]
+[2->6]
+
+Heap picks: 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6
+```
+
+---
+
+## 2️⃣ Top K Frequent Elements
+
+### 🔹 Intuition
+
+* Count frequencies
+* We want **top K**, not sorted order → heap again
+
+---
+
+### 🔹 Approach
+
+1. Frequency map
+2. Min-heap of size `k`
+3. Remove smaller frequencies
+
+⏱ Time: `O(N log K)`
+
+---
+
+### 🔹 Java Code
+
+```java
+public int[] topKFrequent(int[] nums, int k) {
+    Map<Integer, Integer> freq = new HashMap<>();
+    for (int n : nums) freq.put(n, freq.getOrDefault(n, 0) + 1);
+
+    PriorityQueue<Integer> pq =
+        new PriorityQueue<>((a, b) -> freq.get(a) - freq.get(b));
+
+    for (int n : freq.keySet()) {
+        pq.offer(n);
+        if (pq.size() > k) pq.poll();
+    }
+
+    int[] res = new int[k];
+    for (int i = k - 1; i >= 0; i--) {
+        res[i] = pq.poll();
+    }
+    return res;
+}
+```
+
+---
+
+### 🔹 Example
+
+```
+nums = [1,1,1,2,2,3], k=2
+freq = {1=3, 2=2, 3=1}
+Output = [1,2]
+```
+
+---
+
+## 3️⃣ Find Median from Data Stream
+
+### 🔹 Intuition
+
+Split numbers into **two halves**:
+
+* Max Heap → smaller half
+* Min Heap → larger half
+
+Balance them.
+
+---
+
+### 🔹 Approach
+
+1. Add to maxHeap
+2. Move max → min
+3. Balance sizes
+
+---
+
+### 🔹 Java Code
+
+```java
+class MedianFinder {
+    PriorityQueue<Integer> maxHeap =
+        new PriorityQueue<>(Collections.reverseOrder());
+    PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+
+    public void addNum(int num) {
+        maxHeap.offer(num);
+        minHeap.offer(maxHeap.poll());
+
+        if (minHeap.size() > maxHeap.size()) {
+            maxHeap.offer(minHeap.poll());
+        }
+    }
+
+    public double findMedian() {
+        if (maxHeap.size() > minHeap.size())
+            return maxHeap.peek();
+        return (maxHeap.peek() + minHeap.peek()) / 2.0;
+    }
+}
+```
+
+---
+
+### 🔹 Example
+
+```
+add(1), add(2) → median = 1.5
+add(3) → median = 2
+```
+
+---
+
+# 📦 INTERVAL PROBLEMS (4)
+
+---
+
+## 4️⃣ Insert Interval
+
+### 🔹 Intuition
+
+Three cases:
+
+1. Before new interval
+2. Overlapping → merge
+3. After new interval
+
+---
+
+### 🔹 Java Code
+
+```java
+public int[][] insert(int[][] intervals, int[] newInterval) {
+    List<int[]> res = new ArrayList<>();
+
+    for (int[] in : intervals) {
+        if (in[1] < newInterval[0]) {
+            res.add(in);
+        } else if (in[0] > newInterval[1]) {
+            res.add(newInterval);
+            newInterval = in;
+        } else {
+            newInterval[0] = Math.min(in[0], newInterval[0]);
+            newInterval[1] = Math.max(in[1], newInterval[1]);
+        }
+    }
+    res.add(newInterval);
+    return res.toArray(new int[res.size()][]);
+}
+```
+
+---
+
+## 5️⃣ Merge Intervals
+
+### 🔹 Intuition
+
+Sort by start → merge overlaps
+
+---
+
+### 🔹 Java Code
+
+```java
+public int[][] merge(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+    List<int[]> res = new ArrayList<>();
+
+    for (int[] in : intervals) {
+        if (res.isEmpty() || res.get(res.size()-1)[1] < in[0]) {
+            res.add(in);
+        } else {
+            res.get(res.size()-1)[1] =
+                Math.max(res.get(res.size()-1)[1], in[1]);
+        }
+    }
+    return res.toArray(new int[res.size()][]);
+}
+```
+
+---
+
+## 6️⃣ Non-overlapping Intervals
+
+### 🔹 Intuition
+
+Remove minimum intervals → **greedy by end time**
+
+---
+
+### 🔹 Java Code
+
+```java
+public int eraseOverlapIntervals(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -> a[1] - b[1]);
+    int count = 0;
+    int end = Integer.MIN_VALUE;
+
+    for (int[] in : intervals) {
+        if (in[0] >= end) {
+            end = in[1];
+        } else {
+            count++;
+        }
+    }
+    return count;
+}
+```
+
+---
+
+## 7️⃣ Meeting Rooms
+
+### 🔹 Intuition
+
+If sorted meetings overlap → need more rooms
+
+---
+
+### 🔹 Java Code
+
+```java
+public boolean canAttendMeetings(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
+    for (int i = 1; i < intervals.length; i++) {
+        if (intervals[i][0] < intervals[i-1][1])
+            return false;
+    }
+    return true;
+}
+```
+
+---
+
+# 🌳 TRIE PROBLEMS (3)
+
+---
+
+## 8️⃣ Implement Trie
+
+```java
+class TrieNode {
+    TrieNode[] children = new TrieNode[26];
+    boolean isEnd;
+}
+
+class Trie {
+    TrieNode root = new TrieNode();
+
+    public void insert(String word) {
+        TrieNode node = root;
+        for (char c : word.toCharArray()) {
+            int i = c - 'a';
+            if (node.children[i] == null)
+                node.children[i] = new TrieNode();
+            node = node.children[i];
+        }
+        node.isEnd = true;
+    }
+
+    public boolean search(String word) {
+        TrieNode node = root;
+        for (char c : word.toCharArray()) {
+            int i = c - 'a';
+            if (node.children[i] == null) return false;
+            node = node.children[i];
+        }
+        return node.isEnd;
+    }
+
+    public boolean startsWith(String prefix) {
+        TrieNode node = root;
+        for (char c : prefix.toCharArray()) {
+            int i = c - 'a';
+            if (node.children[i] == null) return false;
+            node = node.children[i];
+        }
+        return true;
+    }
+}
+```
+
+---
+
+## 9️⃣ Add and Search Word (Wildcard)
+
+### 🔹 DFS Search
+
+```java
+public boolean search(String word) {
+    return dfs(word, 0, root);
+}
+
+private boolean dfs(String word, int i, TrieNode node) {
+    if (node == null) return false;
+    if (i == word.length()) return node.isEnd;
+
+    char c = word.charAt(i);
+    if (c == '.') {
+        for (TrieNode child : node.children) {
+            if (dfs(word, i+1, child)) return true;
+        }
+        return false;
+    }
+    return dfs(word, i+1, node.children[c - 'a']);
+}
+```
+
+---
+
+## 🔟 Word Search II
+
+### 🔹 Intuition
+
+Trie + DFS backtracking
+
+*(This one is heavy; interviewers care about idea more than perfect code)*
+
+---
+
+# 🧠 ADVANCED (2)
+
+---
+
+## 1️⃣1️⃣ Alien Dictionary
+
+### 🔹 Intuition
+
+* Build graph of character order
+* Topological sort (Kahn’s BFS)
+
+---
+
+### 🔹 Key Idea
+
+If `"abc"` comes before `"abx"` → `c → x`
+
+---
+
+## 1️⃣2️⃣ Encode and Decode Strings
+
+### 🔹 Intuition
+
+Length-prefix encoding avoids delimiter collision
+
+---
+
+### 🔹 Java Code
+
+```java
+public String encode(List<String> strs) {
+    StringBuilder sb = new StringBuilder();
+    for (String s : strs) {
+        sb.append(s.length()).append('#').append(s);
+    }
+    return sb.toString();
+}
+
+public List<String> decode(String s) {
+    List<String> res = new ArrayList<>();
+    int i = 0;
+
+    while (i < s.length()) {
+        int j = i;
+        while (s.charAt(j) != '#') j++;
+        int len = Integer.parseInt(s.substring(i, j));
+        i = j + 1;
+        res.add(s.substring(i, i + len));
+        i += len;
+    }
+    return res;
+}
+```
+
+---
+
+## 🚀 Recommend patterns for System Design
+
+system-design oriented:
+
+* Convert **Median Finder → real-time analytics system**
+* Convert **Trie → autocomplete service**
+* Convert **Alien Dictionary → dependency resolver**
+
+

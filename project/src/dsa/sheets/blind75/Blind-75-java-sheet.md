@@ -18144,11 +18144,7 @@ Testing Strategy:
 That completes all the **Binary/Bit Manipulation Problems (59-63)**!
 
 ---------------------------------------------------------------------------------
-
-Perfect choice revising with **Blind 75** — these problems hit *core patterns* you’ll see again and again in system design + interviews.
-I’ll structure this cleanly:
-
-For **each problem**:
+For **each problem below**:
 
 1. **Intuition** (how to think)
 2. **Approach**
@@ -18163,7 +18159,7 @@ I’ll group them **topic-wise** exactly as you asked.
 
 ---
 
-## 1️⃣ Merge K Sorted Lists (Linked List)
+## 64 Merge K Sorted Lists (Linked List)
 
 ### 🔹 Intuition
 
@@ -18232,7 +18228,7 @@ Heap picks: 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6
 
 ---
 
-## 2️⃣ Top K Frequent Elements
+## 65 Top K Frequent Elements
 
 ### 🔹 Intuition
 
@@ -18286,7 +18282,7 @@ Output = [1,2]
 
 ---
 
-## 3️⃣ Find Median from Data Stream
+## 66 Find Median from Data Stream
 
 ### 🔹 Intuition
 
@@ -18341,13 +18337,13 @@ add(1), add(2) → median = 1.5
 add(3) → median = 2
 ```
 
----
+--------------------------------------------------------------------------------
 
 # 📦 INTERVAL PROBLEMS (4)
 
 ---
 
-## 4️⃣ Insert Interval
+## 67 Insert Interval
 
 ### 🔹 Intuition
 
@@ -18383,7 +18379,7 @@ public int[][] insert(int[][] intervals, int[] newInterval) {
 
 ---
 
-## 5️⃣ Merge Intervals
+## 68 Merge Intervals
 
 ### 🔹 Intuition
 
@@ -18412,7 +18408,7 @@ public int[][] merge(int[][] intervals) {
 
 ---
 
-## 6️⃣ Non-overlapping Intervals
+## 69. Non-overlapping Intervals
 
 ### 🔹 Intuition
 
@@ -18441,7 +18437,7 @@ public int eraseOverlapIntervals(int[][] intervals) {
 
 ---
 
-## 7️⃣ Meeting Rooms
+## 7️0. Meeting Rooms
 
 ### 🔹 Intuition
 
@@ -18463,13 +18459,13 @@ public boolean canAttendMeetings(int[][] intervals) {
 }
 ```
 
----
+------------------------------------------------------------
 
 # 🌳 TRIE PROBLEMS (3)
 
 ---
 
-## 8️⃣ Implement Trie
+## 71. Implement Trie
 
 ```java
 class TrieNode {
@@ -18515,7 +18511,7 @@ class Trie {
 
 ---
 
-## 9️⃣ Add and Search Word (Wildcard)
+## 72. Add and Search Word (Wildcard)
 
 ### 🔹 DFS Search
 
@@ -18541,7 +18537,7 @@ private boolean dfs(String word, int i, TrieNode node) {
 
 ---
 
-## 🔟 Word Search II
+## 73. Word Search II
 
 ### 🔹 Intuition
 
@@ -18555,7 +18551,7 @@ Trie + DFS backtracking
 
 ---
 
-## 1️⃣1️⃣ Alien Dictionary
+## 74. Alien Dictionary
 
 ### 🔹 Intuition
 
@@ -18570,7 +18566,7 @@ If `"abc"` comes before `"abx"` → `c → x`
 
 ---
 
-## 1️⃣2️⃣ Encode and Decode Strings
+## 75. Encode and Decode Strings
 
 ### 🔹 Intuition
 

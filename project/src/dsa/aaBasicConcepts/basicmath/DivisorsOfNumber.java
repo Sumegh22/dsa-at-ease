@@ -17,7 +17,7 @@ public class DivisorsOfNumber {
     }
 
     public static void main(String[] args) {
-        int n = 6;
+        int n = 63;
 
         /* Creating an instance of  Solution class */
         DivisorsOfNumber sol = new DivisorsOfNumber();

@@ -14438,3 +14438,1785 @@ That completes all the Graph problems! The graph problems covered important patt
 
 --------------------------------------------------
 
+
+
+## Graph Problems Solutions
+
+### 53. Clone Graph
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Clone an undirected graph (deep copy)
+ * 
+ * Multiple approaches: DFS, BFS with HashMap for node mapping
+ */
+public class CloneGraph {
+    
+    // Definition for a Node
+    class Node {
+        public int val;
+        public List<Node> neighbors;
+        public Node() {
+            val = 0;
+            neighbors = new ArrayList<Node>();
+        }
+        public Node(int _val) {
+            val = _val;
+            neighbors = new ArrayList<Node>();
+        }
+        public Node(int _val, ArrayList<Node> _neighbors) {
+            val = _val;
+            neighbors = _neighbors;
+        }
+    }
+    
+    // Approach 1: DFS with HashMap - Most intuitive
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph1(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        return dfsClone(node, visited);
+    }
+    
+    private Node dfsClone(Node node, Map<Node, Node> visited) {
+        if (visited.containsKey(node)) {
+            return visited.get(node);
+        }
+        
+        // Create clone of current node
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        
+        // Clone all neighbors
+        for (Node neighbor : node.neighbors) {
+            clone.neighbors.add(dfsClone(neighbor, visited));
+        }
+        
+        return clone;
+    }
+    
+    // Approach 2: BFS with HashMap
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph2(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        Queue<Node> queue = new LinkedList<>();
+        
+        // Create clone of starting node
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        queue.offer(node);
+        
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+            
+            for (Node neighbor : current.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    // Create clone of neighbor
+                    visited.put(neighbor, new Node(neighbor.val));
+                    queue.offer(neighbor);
+                }
+                
+                // Add cloned neighbor to current clone's neighbors
+                visited.get(current).neighbors.add(visited.get(neighbor));
+            }
+        }
+        
+        return clone;
+    }
+    
+    // Approach 3: Iterative DFS with Stack
+    // Time: O(V + E), Space: O(V)
+    public Node cloneGraph3(Node node) {
+        if (node == null) return null;
+        
+        Map<Node, Node> visited = new HashMap<>();
+        Stack<Node> stack = new Stack<>();
+        
+        Node clone = new Node(node.val);
+        visited.put(node, clone);
+        stack.push(node);
+        
+        while (!stack.isEmpty()) {
+            Node current = stack.pop();
+            
+            for (Node neighbor : current.neighbors) {
+                if (!visited.containsKey(neighbor)) {
+                    visited.put(neighbor, new Node(neighbor.val));
+                    stack.push(neighbor);
+                }
+                
+                visited.get(current).neighbors.add(visited.get(neighbor));
+            }
+        }
+        
+        return clone;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Create a deep copy of an undirected graph.
+Each node has a value and a list of neighbors.
+
+Key Challenge: Handle cycles in the graph without infinite recursion.
+
+Example Graph:
+Node 1 -- Node 2
+|          |
+Node 4 -- Node 3
+
+Adjacency representation:
+1: [2, 4]
+2: [1, 3]  
+3: [2, 4]
+4: [1, 3]
+
+Approach 1 (DFS with HashMap):
+Use HashMap to track original -> clone mapping.
+This prevents
+ infinite recursion on cycles.
+
+Step-by-step for above graph starting from node 1:
+1. Create clone of node 1, add to map
+2. Process neighbor 2:
+   - Create clone of node 2, add to map
+   - Process neighbor 1: already in map, return existing clone
+   - Process neighbor 3:
+     - Create clone of node 3, add to map
+     - Process neighbor 2: already in map, return existing clone
+     - Process neighbor 4:
+       - Create clone of node 4, add to map
+       - Process neighbor 1: already in map, return existing clone
+       - Process neighbor 3: already in map, return existing clone
+3. Process neighbor 4: already in map, return existing clone
+
+Approach 2 (BFS with HashMap):
+Level-by-level traversal using queue.
+Create clones and connect them as we discover nodes.
+
+BFS traversal:
+1. Start with node 1, create clone, add to queue
+2. Process node 1: discover neighbors 2, 4
+   - Create clones of 2, 4, add to queue
+   - Connect clone 1 to clones 2, 4
+3. Process node 2: discover neighbor 3
+   - Create clone of 3, add to queue
+   - Connect clone 2 to clones 1, 3
+4. Process node 4: no new neighbors
+   - Connect clone 4 to clones 1, 3
+5. Process node 3: no new neighbors
+   - Connect clone 3 to clones 2, 4
+
+Key Insights:
+1. HashMap prevents infinite loops in cyclic graphs
+2. Clone nodes before processing neighbors
+3. Both DFS and BFS work equally well
+4. Space complexity dominated by storing node mappings
+
+Edge Cases:
+- Null input: return null
+- Single node with no neighbors: return clone with empty neighbors
+- Self-loop: node points to itself
+- Disconnected components: only clone reachable nodes
+
+Common Mistakes:
+1. Not handling cycles (infinite recursion)
+2. Creating multiple clones of same node
+3. Not properly connecting cloned neighbors
+4. Modifying original graph structure
+*/
+```
+
+### 54. Course Schedule
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Determine if you can finish all courses given prerequisites
+ * This is a cycle detection problem in directed graph
+ * 
+ * Multiple approaches: DFS, BFS (Kahn's Algorithm), Union-Find
+ */
+public class CourseSchedule {
+    
+    // Approach 1: DFS with cycle detection - Most intuitive
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish1(int numCourses, int[][] prerequisites) {
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[0]); // prereq[1] -> prereq[0]
+        }
+        
+        // 0: unvisited, 1: visiting, 2: visited
+        int[] state = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (state[i] == 0 && hasCycle(graph, i, state)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean hasCycle(List<List<Integer>> graph, int node, int[] state) {
+        if (state[node] == 1) {
+            return true; // Back edge found - cycle detected
+        }
+        
+        if (state[node] == 2) {
+            return false; // Already processed
+        }
+        
+        state[node] = 1; // Mark as visiting
+        
+        for (int neighbor : graph.get(node)) {
+            if (hasCycle(graph, neighbor, state)) {
+                return true;
+            }
+        }
+        
+        state[node] = 2; // Mark as visited
+        return false;
+    }
+    
+    // Approach 2: BFS (Kahn's Algorithm) - Topological Sort
+    // Time: O(V + E), Space: O(V + E)
+    public boolean canFinish2(int numCourses, int[][] prerequisites) {
+        // Build adjacency list and in-degree array
+        List<List<Integer>> graph = new ArrayList<>();
+        int[] inDegree = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[0]);
+
+            inDegree[prereq[0]]++;
+        }
+        
+        // Start with courses that have no prerequisites
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (inDegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        
+        int processedCourses = 0;
+        
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            processedCourses++;
+            
+            // Remove this course and update in-degrees
+            for (int nextCourse : graph.get(course)) {
+                inDegree[nextCourse]--;
+                if (inDegree[nextCourse] == 0) {
+                    queue.offer(nextCourse);
+                }
+            }
+        }
+        
+        return processedCourses == numCourses;
+    }
+    
+    // Approach 3: Union-Find (less common for this problem)
+    // Time: O(E * α(V)), Space: O(V)
+    public boolean canFinish3(int numCourses, int[][] prerequisites) {
+        UnionFind uf = new UnionFind(numCourses);
+        
+        // Build adjacency list for cycle detection
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] prereq : prerequisites) {
+            graph.get(prereq[1]).add(prereq[0]);
+        }
+        
+        // Check for cycles using DFS
+        boolean[] visited = new boolean[numCourses];
+        boolean[] recStack = new boolean[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (!visited[i] && hasCycleDFS(graph, i, visited, recStack)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean hasCycleDFS(List<List<Integer>> graph, int node, 
+                               boolean[] visited, boolean[] recStack) {
+        visited[node] = true;
+        recStack[node] = true;
+        
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor] && hasCycleDFS(graph, neighbor, visited, recStack)) {
+                return true;
+            } else if (recStack[neighbor]) {
+                return true;
+            }
+        }
+        
+        recStack[node] = false;
+        return false;
+    }
+    
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+        
+        public boolean union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX == rootY) return false;
+            
+            if (rank[rootX] < rank[rootY]) {
+                parent[rootX] = rootY;
+            } else if (rank[rootX] > rank[rootY]) {
+                parent[rootY] = rootX;
+            } else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+            
+            return true;
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Given courses and prerequisites, determine if all courses can be finished.
+This is equivalent to detecting cycles in a directed graph.
+
+Example: numCourses = 2, prerequisites = [[1,0]]
+Course 1 requires course 0. This is valid (no cycle).
+
+Example: numCourses = 2, prerequisites = [[1,0],[0,1]]
+Course 1 requires course 0, and course 0 requires course 1. This creates a cycle.
+
+Approach 1 (DFS Cycle Detection):
+Use three states for each node:
+- 0: unvisited
+- 1: visiting (in current DFS path)
+- 2: visited (completely processed)
+
+If we encounter a node in state 1, we found a back edge (cycle).
+
+Approach 2 (Kahn's Algorithm - Topological Sort):
+1. Calculate in-degree for each course
+2. Start with courses having in-degree 0 (no prerequisites)
+3. Process courses and reduce in-degree of dependent courses
+4. If all courses are processed, no cycle exists
+
+Example trace for [[1,0],[2,1],[3,2]]:
+Initial in-degrees: [0,1,1,1]
+Queue: [1]
+Process 0: reduce in-degree of 1 to 0, queue: [2]
+Process 1: reduce in-degree of 2 to 0, queue: [3]
+Process 2: reduce in-degree of 3 to 0, queue: [4]
+Process 3: queue empty
+All 4 courses processed → valid
+
+Key Insights:
+1. Course schedule = cycle detection in directed graph
+2. DFS with states efficiently det
+ects cycles
+3. Topological sort works only if no cycles exist
+4. Both approaches have same time complexity
+
+Applications:
+- Build systems (dependency resolution)
+- Task scheduling
+- Academic course planning
+- Software module dependencies
+*/
+```
+
+### 55. Pacific Atlantic Water Flow
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find cells where water can flow to both Pacific and Atlantic oceans
+ * Water flows from higher to lower or equal height
+ * 
+ * Approach: Reverse thinking - start from oceans and find reachable cells
+ */
+public class PacificAtlanticWaterFlow {
+    
+    // Approach 1: DFS from ocean borders - Most intuitive
+    // Time: O(m*n), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic1(int[][] heights) {
+        if (heights == null || heights.length == 0) {
+            return new ArrayList<>();
+        }
+        
+        int m = heights.length;
+        int n = heights[0].length;
+        
+        boolean[][] pacific = new boolean[m][n];
+        boolean[][] atlantic = new boolean[m][n];
+        
+        // DFS from Pacific borders (top and left)
+        for (int i = 0; i < m; i++) {
+            dfs(heights, i, 0, pacific, heights[i][0]);
+        }
+        for (int j = 0; j < n; j++) {
+            dfs(heights, 0, j, pacific, heights[0][j]);
+        }
+        
+        // DFS from Atlantic borders (bottom and right)
+        for (int i = 0; i < m; i++) {
+            dfs(heights, i, n - 1, atlantic, heights[i][n - 1]);
+        }
+        for (int j = 0; j < n; j++) {
+            dfs(heights, m - 1, j, atlantic, heights[m - 1][j]);
+        }
+        
+        // Find cells reachable by both oceans
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pacific[i][j] && atlantic[i][j]) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private void dfs(int[][] heights, int i, int j, boolean[][] visited, int prevHeight) {
+        int m = heights.length;
+        int n = heights[0].length;
+        
+        if (i < 0 || i >= m || j < 0 || j >= n || visited[i][j] || heights[i][j] < prevHeight) {
+            return;
+        }
+        
+        visited[i][j] = true;
+        
+        // Explore all 4 directions
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] dir : directions) {
+            dfs(heights, i + dir[0], j + dir[1], visited, heights[i][j]);
+        }
+    }
+    
+    // Approach 2: BFS from ocean borders
+    // Time: O(m*n), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic2(int[][] heights) {
+        int m = heights.length;
+        int n = heights[0].length;
+        
+        boolean[][] pacific = new boolean[m][n];
+        boolean[][] atlantic = new boolean[m][n];
+        
+        Queue<int[]> pacificQueue = new LinkedList<>();
+        Queue<int[]> atlanticQueue = new LinkedList<>();
+        
+        // Add Pacific border cells to queue
+        for (int i = 0; i < m; i++) {
+            pacificQueue.offer(new int[]{i, 0});
+            pacific[i][0] = true;
+        }
+        for (int j = 1; j < n; j++) {
+            pacificQueue.offer(new int[]{0, j});
+            pacific[0][j] = true;
+        }
+        
+        // Add Atlantic border cells to queue
+        for (int i = 0; i < m; i++) {
+            atlanticQueue.offer(new int[]{i, n - 1});
+            atlantic[i][n - 1] = true;
+        }
+        for (int j = 0; j < n - 1; j++) {
+            atlanticQueue.offer(new int[]{m - 1, j});
+            atlantic[m - 1][j] = true;
+        }
+        
+        // BFS from Pacific
+        bfs(heights, pacificQueue, pacific);
+        
+        // BFS from Atlantic
+        bfs(heights, atlanticQueue, atlantic);
+        
+        // Find intersection
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pacific[i][j] && atlantic[i][j]) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private void bfs(int[][] heights, Queue<int[]> queue, boolean[][] visited) {
+        int m = heights.length;
+        int n = heights[0].length;
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            int x = cell[0], y = cell[1];
+            
+            for (int[] dir : directions) {
+                int nx = x + dir[0];
+                int ny = y + dir[1];
+                
+                if (nx >= 0 && nx < m && ny >= 0 && ny < n && 
+                    !visited[nx][ny] && heights[nx][ny] >= heights[x][y]) {
+                    visited[nx][ny] = true;
+                    queue.offer(
+new int[]{nx, ny});
+                }
+            }
+        }
+    }
+    
+    // Approach 3: Union-Find approach (less common)
+    // Time: O(m*n*α(m*n)), Space: O(m*n)
+    public List<List<Integer>> pacificAtlantic3(int[][] heights) {
+        int m = heights.length;
+        int n = heights[0].length;
+        
+        UnionFind pacificUF = new UnionFind(m * n + 1); // +1 for pacific ocean
+        UnionFind atlanticUF = new UnionFind(m * n + 1); // +1 for atlantic ocean
+        
+        int pacificOcean = m * n;
+        int atlanticOcean = m * n;
+        
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int current = i * n + j;
+                
+                // Connect to Pacific ocean if on border
+                if (i == 0 || j == 0) {
+                    pacificUF.union(current, pacificOcean);
+                }
+                
+                // Connect to Atlantic ocean if on border
+                if (i == m - 1 || j == n - 1) {
+                    atlanticUF.union(current, atlanticOcean);
+                }
+                
+                // Connect to neighbors with higher or equal height
+                for (int[] dir : directions) {
+                    int ni = i + dir[0];
+                    int nj = j + dir[1];
+                    
+                    if (ni >= 0 && ni < m && nj >= 0 && nj < n && 
+                        heights[ni][nj] >= heights[i][j]) {
+                        int neighbor = ni * n + nj;
+                        pacificUF.union(current, neighbor);
+                        atlanticUF.union(current, neighbor);
+                    }
+                }
+            }
+        }
+        
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int current = i * n + j;
+                if (pacificUF.connected(current, pacificOcean) && 
+                    atlanticUF.connected(current, atlanticOcean)) {
+                    result.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    class UnionFind {
+        private int[] parent;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+        
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            if (rootX != rootY) {
+                parent[rootX] = rootY;
+            }
+        }
+        
+        public boolean connected(int x, int y) {
+            return find(x) == find(y);
+        }
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Find cells where rainwater can flow to both Pacific and Atlantic oceans.
+- Pacific ocean borders top and left edges
+- Atlantic ocean borders bottom and right edges
+- Water flows from higher to lower or equal elevation
+
+Key Insight: Instead of checking if each cell can reach both oceans,
+start from ocean borders and find which cells are reachable.
+
+Example:
+Pacific ~   ~   ~   ~   ~ 
+       ~  1   2   2   3  (5) Atlantic
+       ~  3   2   3  (4) (4) Atlantic  
+       ~  2   4  (5)  3   1  Atlantic
+       ~ (6) (7)  1   4   5  Atlantic
+       ~   ~   ~   ~   ~   ~  Atlantic
+
+Cells in parentheses can reach both oceans.
+
+Approach 1 (DFS from borders):
+1. Start DFS from all Pacific border cells
+2. Mark all reachable cells (where water can flow from ocean to cell)
+3. Start DFS from all Atlantic border cells  
+4. Mark all reachable cells
+5. Find intersection of both sets
+
+DFS condition: heights[next] >= heights[current]
+(Water flows from higher to equal/lower, so we traverse in reverse)
+
+Approach 2 (BFS from borders):
+Same logic as DFS but uses BFS traversal.
+Ad
+d all border cells to queue and process level by level.
+
+Approach 3 (Union-Find):
+Connect cells that water can flow between.
+Connect border cells to respective oceans.
+Check if each cell is connected to both oceans.
+
+Time Complexity: O(m*n) for all approaches
+- Each cell is visited at most twice (once for each ocean)
+
+Space Complexity: O(m*n) for visited arrays
+
+Key Insights:
+1. Reverse thinking: start from destination (oceans)
+2. Water flows from high to low, so traverse from low to high
+3. Border cells are directly connected to oceans
+4. Intersection of reachable sets gives answer
+
+Edge Cases:
+- Single cell: always reachable by both oceans
+- All same height: all cells reachable by both
+- Monotonic increasing/decreasing: specific patterns
+
+Applications:
+- Watershed analysis in geography
+- Network flow problems
+- Reachability analysis in graphs
+*/
+```
+
+### 56. Number of Islands
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Count number of islands in 2D grid
+ * Island is surrounded by water and formed by connecting adjacent lands
+ * 
+ * Multiple approaches: DFS, BFS, Union-Find
+ */
+public class NumberOfIslands {
+    
+    // Approach 1: DFS - Most intuitive
+    // Time: O(m*n), Space: O(m*n) in worst case for recursion stack
+    public int numIslands1(char[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length;
+        int n = grid[0].length;
+        int islands = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    islands++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        
+        return islands;
+    }
+    
+    private void dfs(char[][] grid, int i, int j) {
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] != '1') {
+            return;
+        }
+        
+        grid[i][j] = '0'; // Mark as visited by sinking the island
+        
+        // Explore all 4 directions
+        dfs(grid, i - 1, j); // up
+        dfs(grid, i + 1, j); // down
+        dfs(grid, i, j - 1); // left
+        dfs(grid, i, j + 1); // right
+    }
+    
+    // Approach 2: BFS
+    // Time: O(m*n), Space: O(min(m,n)) for queue
+    public int numIslands2(char[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length;
+        int n = grid[0].length;
+        int islands = 0;
+        
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    islands++;
+                    
+                    // BFS to mark all connected land
+                    Queue<int[]> queue = new LinkedList<>();
+                    queue.offer(new int[]{i, j});
+                    grid[i][j] = '0';
+                    
+                    while (!queue.isEmpty()) {
+                        int[] cell = queue.poll();
+                        int x = cell[0], y = cell[1];
+                        
+                        for (int[] dir : directions) {
+                            int nx = x + dir[0];
+                            int ny = y + dir[1];
+                            
+                            if (nx >= 0 && nx < m && ny >= 0 && ny < n && grid[nx][ny] == '1') {
+                                grid[nx][ny] = '0';
+                                queue.offer(new int[]{nx, ny});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return islands;
+    }
+    
+    // Approach 3: Union-Find
+    // Time: O(m*n*α(m*n)), Space: O(m*n)
+    public int numIslands3(char[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        UnionFind uf = new UnionFind(grid);
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    for (int[] dir : directions) {
+                        int ni = i + dir[0];
+                        int nj = j + dir[1];
+                        
+                        if (ni >= 0 && ni < m && nj >= 0 && nj < n && grid[ni][nj] == '1') {
+                            uf.union(i * n + j, ni * n + nj);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return uf.getCount();
+    }
+    
+    class UnionFind {
+        private
+ int[] parent;
+        private int[] rank;
+        private int count;
+        
+        public UnionFind(char[][] grid) {
+            int m = grid.length;
+            int n = grid[0].length;
+            parent = new int[m * n];
+            rank = new int[m * n];
+            count = 0;
+            
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (grid[i][j] == '1') {
+                        int id = i * n + j;
+                        parent[id] = id;
+                        count++;
+                    }
+                }
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]);
+            }
+            return parent[x];
+        }
+        
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX != rootY) {
+                if (rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                } else if (rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
+                }
+                count--;
+            }
+        }
+        
+        public int getCount() {
+            return count;
+        }
+    }
+    
+    // Approach 4: DFS without modifying input
+    // Time: O(m*n), Space: O(m*n)
+    public int numIslands4(char[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length;
+        int n = grid[0].length;
+        boolean[][] visited = new boolean[m][n];
+        int islands = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1' && !visited[i][j]) {
+                    islands++;
+                    dfsWithVisited(grid, i, j, visited);
+                }
+            }
+        }
+        
+        return islands;
+    }
+    
+    private void dfsWithVisited(char[][] grid, int i, int j, boolean[][] visited) {
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        if (i < 0 || i >= m || j < 0 || j >= n || visited[i][j] || grid[i][j] != '1') {
+            return;
+        }
+        
+        visited[i][j] = true;
+        
+        dfsWithVisited(grid, i - 1, j, visited);
+        dfsWithVisited(grid, i + 1, j, visited);
+        dfsWithVisited(grid, i, j - 1, visited);
+        dfsWithVisited(grid, i, j + 1, visited);
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Count connected components of '1's in a 2D grid.
+'1' represents land, '0' represents water.
+Islands are formed by connecting adjacent lands horizontally or vertically.
+
+Example:
+[
+  ["1","1","1","1","0"],
+  ["1","1","0","1","0"],
+  ["1","1","0","0","0"],
+  ["0","0","0","0","0"]
+]
+Output: 1 (one large island)
+
+Example:
+[
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+Output: 3 (three separate islands)
+
+Approach 1 (DFS with Grid Modification):
+1. Iterate through each cell
+2. When we find a '1', increment island count
+3. Use DFS to mark all connected '1's as '0' (sink the island)
+4. This prevents counting the same island multiple times
+
+DFS Process:
+- Mark current cell as visited (change '1' to '0')
+- Recursively visit all 4 adjacent cells
+- Stop when hitting boundaries or water ('0')
+
+Approach 2 (BFS):
+Same logic as DFS but uses queue for level-by-level exploration.
+1. Find a '1', increment count
+2. Use BFS to mark all connected land
+3. Continue until all cells processed
+
+Approach 3 (Union-Find):
+1. Initialize each land cell as its own component
+2. Union adjacent land cells
+3. Count number of distinct components
+
+Union-Find Process:
+- Initially: count = number of '1' cells
+- For each land cell, union with adjacent land cells
+- Each union operation decreases count by 1
+- Final count = number of islands
+
+Approach 4 (DFS without Modification):
+Use separate visited array instead of modifying input grid.
+Useful when input should remain unchanged.
+
+Approach Comparison:
+
+1. DFS with Modification (Most Common):
+   - Time: O(m*n), Space: O(m*n) worst case
+   - Simple and efficient
+
+   - Modifies input grid
+
+2. BFS:
+   - Time: O(m*n), Space: O(min(m,n))
+   - Iterative approach
+   - Better space complexity for recursion-heavy cases
+
+3. Union-Find:
+   - Time: O(m*n*α(m*n)), Space: O(m*n)
+   - Good for dynamic connectivity queries
+   - Overkill for this specific problem
+
+4. DFS without Modification:
+   - Time: O(m*n), Space: O(m*n)
+   - Preserves input
+   - Uses extra space for visited array
+
+Key Insights:
+1. Connected component problem in 2D grid
+2. DFS/BFS naturally explores connected regions
+3. Mark visited cells to avoid double counting
+4. Only 4-directional connectivity (not diagonal)
+
+Edge Cases:
+- Empty grid: 0 islands
+- All water: 0 islands
+- All land: 1 island
+- Single cell: 1 island if land, 0 if water
+
+Applications:
+- Image processing (connected regions)
+- Geographic analysis (land masses)
+- Network connectivity
+- Cluster analysis
+
+Follow-up Questions:
+1. Count islands of different sizes
+2. Find largest island
+3. Handle diagonal connectivity
+4. Dynamic island updates (add/remove land)
+
+Performance Notes:
+- DFS is most commonly used and efficient
+- BFS has better space complexity for wide grids
+- Union-Find is overkill but shows algorithmic variety
+- Grid modification saves space but changes input
+*/
+```
+
+### 57. Longest Consecutive Sequence
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Find length of longest consecutive sequence in unsorted array
+ * Must run in O(n) time
+ * 
+ * Multiple approaches: HashSet, HashMap, Sorting
+ */
+public class LongestConsecutiveSequence {
+    
+    // Approach 1: HashSet - Optimal O(n) solution
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive1(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        int maxLength = 0;
+        
+        for (int num : numSet) {
+            // Only start counting from the beginning of a sequence
+            if (!numSet.contains(num - 1)) {
+                int currentNum = num;
+                int currentLength = 1;
+                
+                // Count consecutive numbers
+                while (numSet.contains(currentNum + 1)) {
+                    currentNum++;
+                    currentLength++;
+                }
+                
+                maxLength = Math.max(maxLength, currentLength);
+            }
+        }
+        
+        return maxLength;
+    }
+    
+    // Approach 2: HashMap with memoization
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive2(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Map<Integer, Integer> lengthMap = new HashMap<>();
+        int maxLength = 0;
+        
+        for (int num : nums) {
+            if (!lengthMap.containsKey(num)) {
+                int leftLength = lengthMap.getOrDefault(num - 1, 0);
+                int rightLength = lengthMap.getOrDefault(num + 1, 0);
+                int totalLength = leftLength + rightLength + 1;
+                
+                lengthMap.put(num, totalLength);
+                
+                // Update the boundaries of the sequence
+                lengthMap.put(num - leftLength, totalLength);
+                lengthMap.put(num + rightLength, totalLength);
+                
+                maxLength = Math.max(maxLength, totalLength);
+            }
+        }
+        
+        return maxLength;
+    }
+    
+    // Approach 3: Sorting (not O(n) but simple)
+    // Time: O(n log n), Space: O(1)
+    public int longestConsecutive3(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Arrays.sort(nums);
+        
+        int maxLength = 1;
+        int currentLength = 1;
+        
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] == nums[i - 1]) {
+                continue; // Skip duplicates
+            } else if (nums[i] == nums[i - 1] + 1) {
+                currentLength++;
+            } else {
+                maxLength = Math.max(maxLength, currentLength);
+                currentLength = 1;
+            }
+        }
+        
+        return Math.max(maxLength, currentLength
+);
+    }
+    
+    // Approach 4: Union-Find approach
+    // Time: O(n*α(n)), Space: O(n)
+    public int longestConsecutive4(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Map<Integer, Integer> parent = new HashMap<>();
+        Map<Integer, Integer> size = new HashMap<>();
+        
+        // Initialize Union-Find
+        for (int num : nums) {
+            if (!parent.containsKey(num)) {
+                parent.put(num, num);
+                size.put(num, 1);
+            }
+        }
+        
+        // Union consecutive numbers
+        for (int num : nums) {
+            if (parent.containsKey(num + 1)) {
+                union(parent, size, num, num + 1);
+            }
+        }
+        
+        return Collections.max(size.values());
+    }
+    
+    private int find(Map<Integer, Integer> parent, int x) {
+        if (parent.get(x) != x) {
+            parent.put(x, find(parent, parent.get(x)));
+        }
+        return parent.get(x);
+    }
+    
+    private void union(Map<Integer, Integer> parent, Map<Integer, Integer> size, int x, int y) {
+        int rootX = find(parent, x);
+        int rootY = find(parent, y);
+        
+        if (rootX != rootY) {
+            if (size.get(rootX) < size.get(rootY)) {
+                parent.put(rootX, rootY);
+                size.put(rootY, size.get(rootX) + size.get(rootY));
+            } else {
+                parent.put(rootY, rootX);
+                size.put(rootX, size.get(rootX) + size.get(rootY));
+            }
+        }
+    }
+    
+    // Approach 5: Optimized HashSet with early termination
+    // Time: O(n), Space: O(n)
+    public int longestConsecutive5(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        
+        int maxLength = 0;
+        
+        for (int num : nums) {
+            if (!numSet.contains(num - 1)) {
+                int length = 1;
+                while (numSet.contains(num + length)) {
+                    length++;
+                }
+                maxLength = Math.max(maxLength, length);
+                
+                // Early termination optimization
+                if (maxLength >= numSet.size() - (num - Collections.min(numSet))) {
+                    break;
+                }
+            }
+        }
+        
+        return maxLength;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+Problem: Find longest consecutive sequence in unsorted array.
+Must be O(n) time complexity.
+
+Example: [100,4,200,1,3,2]
+Consecutive sequences: [1,2,3,4] and [100] and [200]
+Longest: [1,2,3,4] with length 4
+
+Approach 1 (HashSet - Optimal):
+Key insight: Only start counting from the beginning of a sequence.
+
+1. Put all numbers in HashSet for O(1) lookup
+2. For each number, check if it's the start of a sequence (num-1 not in set)
+3. If it's a start, count consecutive numbers
+4. Track maximum length found
+
+Example trace for [100,4,200,1,3,2]:
+numSet = {100,4,200,1,3,2}
+
+Check 100: 99 not in set, so start sequence
+  100 -> 101 not in set, length = 1
+
+Check 4: 3 is in set, so not start of sequence, skip
+
+Check 200: 199 not in set, so start sequence  
+  200 -> 201 not in set, length = 1
+
+Check 1: 0 not in set, so start sequence
+  1 -> 2 in set, length = 2
+  2 -> 3 in set, length = 3  
+  3 -> 4 in set, length = 4
+  4 -> 5 not in set, final length = 4
+
+Check 3: 2 is in set, so not start, skip
+Check 2: 1 is in set, so not start, skip
+
+Maximum length = 4
+
+Why this is O(n):
+- Each number is visited at most twice
+- Once in the outer loop
+- Once when extending a sequence
+- Total operations = O(n)
+
+Approach 2 (HashMap with Memoization):
+Store length of sequence ending/starting at each number.
+When processing a number, check neighbors and merge sequences.
+
+Approach 3 (Sorting):
+Simple but O(n log n) approach:
+1. Sort array
+2. Scan for consecutive numbers
+3. Handle duplicates
+
+
+Approach 4 (Union-Find):
+Treat consecutive numbers as connected components.
+Union adjacent numbers and find largest component.
+
+Approach 5 (Optimized HashSet):
+Same as approach 1 with early termination optimizations.
+
+Approach Comparison:
+
+1. HashSet (Best):
+   - Time: O(n), Space: O(n)
+   - Optimal and intuitive
+   - Most commonly used
+
+2. HashMap Memoization:
+   - Time: O(n), Space: O(n)
+   - More complex but interesting approach
+   - Good for understanding DP concepts
+
+3. Sorting:
+   - Time: O(n log n), Space: O(1)
+   - Simple but doesn't meet O(n) requirement
+   - Good fallback if O(n) not required
+
+4. Union-Find:
+   - Time: O(n*α(n)), Space: O(n)
+   - Overkill for this problem
+   - Shows algorithmic variety
+
+5. Optimized HashSet:
+   - Time: O(n), Space: O(n)
+   - Same as approach 1 with micro-optimizations
+   - Marginal improvement in practice
+
+Key Insights:
+1. HashSet enables O(1) lookup for consecutive checking
+2. Only start counting from sequence beginnings
+3. Each number visited at most twice ensures O(n)
+4. Duplicates don't affect consecutive sequences
+
+Edge Cases:
+- Empty array: return 0
+- Single element: return 1
+- All same elements: return 1
+- No consecutive numbers: return 1
+- All consecutive: return array length
+
+Common Mistakes:
+1. Starting sequence count from every number (leads to O(n²))
+2. Not handling duplicates properly
+3. Off-by-one errors in sequence counting
+4. Not using HashSet for O(1) lookup
+
+Applications:
+- Data analysis (finding streaks)
+- Time series analysis
+- Game development (combo systems)
+- Bioinformatics (sequence analysis)
+
+Follow-up Questions:
+1. Find all consecutive sequences
+2. Find k longest consecutive sequences
+3. Handle negative numbers
+4. Stream processing version
+*/
+```
+
+### 58. Graph Valid Tree
+
+```java
+import java.util.*;
+
+/**
+ * Problem: Determine if edges form a valid tree
+ * A valid tree has exactly n-1 edges and is connected with no cycles
+ * 
+ * Multiple approaches: DFS, BFS, Union-Find
+ */
+public class GraphValidTree {
+    
+    // Approach 1: DFS with cycle detection - Most intuitive
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree1(int n, int[][] edges) {
+        // A tree must have exactly n-1 edges
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        
+        // Check for cycles using DFS
+        if (hasCycle(graph, 0, -1, visited)) {
+            return false;
+        }
+        
+        // Check if all nodes are visited (connected)
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+    
+    private boolean hasCycle(List<List<Integer>> graph, int node, int parent, boolean[] visited) {
+        visited[node] = true;
+        
+        for (int neighbor : graph.get(node)) {
+            if (neighbor == parent) continue; // Skip parent to avoid false cycle
+            
+            if (visited[neighbor] || hasCycle(graph, neighbor, node, visited)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Approach 2: BFS with cycle detection
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree2(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // Build adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+        int[] parent = new int[n];
+        Arrays.fill(parent, -1);
+        
+        queue
+.offer(0);
+        visited[0] = true;
+        
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            
+            for (int neighbor : graph.get(node)) {
+                if (neighbor == parent[node]) continue;
+                
+                if (visited[neighbor]) {
+                    return false; // Cycle detected
+                }
+                
+                visited[neighbor] = true;
+                parent[neighbor] = node;
+                queue.offer(neighbor);
+            }
+        }
+        
+        // Check if all nodes are visited
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+    
+    // Approach 3: Union-Find - Most efficient for this problem
+    // Time: O(E * α(V)), Space: O(V)
+    public boolean validTree3(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        UnionFind uf = new UnionFind(n);
+        
+        for (int[] edge : edges) {
+            if (!uf.union(edge[0], edge[1])) {
+                return false; // Cycle detected
+            }
+        }
+        
+        return true; // No cycles and correct number of edges
+    }
+    
+    class UnionFind {
+        private int[] parent;
+        private int[] rank;
+        
+        public UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                rank[i] = 0;
+            }
+        }
+        
+        public int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]); // Path compression
+            }
+            return parent[x];
+        }
+        
+        public boolean union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            
+            if (rootX == rootY) {
+                return false; // Already connected, adding edge creates cycle
+            }
+            
+            // Union by rank
+            if (rank[rootX] < rank[rootY]) {
+                parent[rootX] = rootY;
+            } else if (rank[rootX] > rank[rootY]) {
+                parent[rootY] = rootX;
+            } else {
+                parent[rootY] = rootX;
+                rank[rootX]++;
+            }
+            
+            return true;
+        }
+    }
+    
+    // Approach 4: Simple connectivity check (since we know edge count)
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree4(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        // If we have exactly n-1 edges, we just need to check connectivity
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+        }
+        
+        // DFS to count reachable nodes
+        boolean[] visited = new boolean[n];
+        int reachableNodes = dfsCount(graph, 0, visited);
+        
+        return reachableNodes == n;
+    }
+    
+    private int dfsCount(List<List<Integer>> graph, int node, boolean[] visited) {
+        visited[node] = true;
+        int count = 1;
+        
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor]) {
+                count += dfsCount(graph, neighbor, visited);
+            }
+        }
+        
+        return count;
+    }
+    
+    // Approach 5: Iterative DFS with explicit stack
+    // Time: O(V + E), Space: O(V + E)
+    public boolean validTree5(int n, int[][] edges) {
+        if (edges.length != n - 1) {
+            return false;
+        }
+        
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edges) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+        }
+        
+        boolean[] visited = new boolean[n];
+        Stack<Integer> stack = new Stack<>();
+        Map<Integer, Integer> parent = new HashMap<>();
+        
+        stack.push(0);
+        parent.put(0, -1);
+        
+        while (!stack.isEmpty()) {
+            int node = stack.pop();
+            
+            if (visited[node]) {
+                return false; // Cycle detected
+            }
+            
+            visited[node] = true;
+            
+            for (int neighbor : graph.get(node)) {
+                if (neighbor == parent.get(node)) continue;
+                
+                if (visited[neighbor]) {
+                    return false; // Back edge found
+                }
+                
+                stack.push(neighbor);
+                parent.put(neighbor, node);
+            }
+        }
+        
+        // Check connectivity
+        for (boolean v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+}
+
+/*
+Algorithm Explanation:
+
+A valid tree must satisfy two conditions:
+1. Connected: all nodes are reachable from any node
+2. Acyclic: no cycles exist
+
+Additionally, a tree with n nodes must have exactly n-1 edges.
+
+Example 1: n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]
+This forms a tree:
+    0
+   /|\
+  1 2 3
+  |
+  4
+
+Example 2: n = 5, edges = [[0,1],[1
+,2],[2,3],[1,3],[1,4]]
+This has a cycle: 1-2-3-1
+
+Approach 1 (DFS with Cycle Detection):
+1. Check if edges.length == n-1 (necessary condition)
+2. Build undirected graph
+3. Use DFS to detect cycles
+4. Check if all nodes are visited (connectivity)
+
+Key insight for cycle detection in undirected graph:
+- If we visit a node that's already visited AND it's not our parent,
+  then we found a cycle
+
+Approach 2 (BFS with Cycle Detection):
+Similar to DFS but uses BFS traversal.
+Maintains parent information to avoid false cycle detection.
+
+Approach 3 (Union-Find):
+Most elegant for this problem:
+1. Check edge count
+2. For each edge, try to union the nodes
+3. If nodes are already connected, adding edge creates cycle
+4. If all edges processed successfully, it's a valid tree
+
+Union-Find is perfect because:
+- It naturally detects cycles
+- With exactly n-1 edges, connectivity is guaranteed if no cycles
+
+Approach 4 (Simple Connectivity Check):
+Since we know there are exactly n-1 edges:
+- If connected, it must be a tree (no cycles possible with n-1 edges)
+- Just check if all nodes are reachable
+
+Approach 5 (Iterative DFS):
+Same logic as recursive DFS but using explicit stack.
+Good for avoiding stack overflow on large graphs.
+
+Approach Comparison:
+
+1. DFS with Cycle Detection:
+   - Time: O(V + E), Space: O(V + E)
+   - Most intuitive approach
+   - Clear cycle detection logic
+
+2. BFS with Cycle Detection:
+   - Time: O(V + E), Space: O(V + E)
+   - Level-by-level processing
+   - Alternative to DFS
+
+3. Union-Find (Best for this problem):
+   - Time: O(E * α(V)), Space: O(V)
+   - Most efficient and elegant
+   - Natural fit for cycle detection
+
+4. Simple Connectivity Check:
+   - Time: O(V + E), Space: O(V + E)
+   - Leverages tree property
+   - Simplest when edge count is correct
+
+5. Iterative DFS:
+   - Time: O(V + E), Space: O(V + E)
+   - Avoids recursion overhead
+   - Good for large graphs
+
+Key Insights:
+1. Tree with n nodes has exactly n-1 edges
+2. Union-Find naturally detects cycles
+3. With correct edge count, connectivity implies tree
+4. Parent tracking prevents false cycles in undirected graphs
+
+Edge Cases:
+- n = 1, edges = []: valid tree (single node)
+- n = 2, edges = [[0,1]]: valid tree
+- n = 2, edges = []: invalid (disconnected)
+- Self-loops: invalid tree
+- Multiple edges between same nodes: invalid
+
+Common Mistakes:
+1. Not checking edge count first
+2. False cycle detection due to parent node
+3. Not checking connectivity after cycle detection
+4. Incorrect Union-Find implementation
+5. Not handling undirected graph properly
+
+Optimization Techniques:
+1. Early termination on wrong edge count
+2. Union-Find with path compression and union by rank
+3. Using connectivity check when edge count is correct
+4. Avoiding unnecessary graph construction
+
+Applications:
+- Network topology validation
+- Minimum spanning tree verification
+- Social network analysis
+- Dependency graph validation
+
+Follow-up Questions:
+1. Find the redundant edge that makes it not a tree
+2. Count number of trees in forest
+3. Build minimum spanning tree
+4. Detect all cycles in graph
+
+Testing Strategy:
+- Valid tree: n=4
+, edges=[[0,1],[0,2],[0,3]]
+- Cycle: n=4, edges=[[0,1],[1,2],[2,3],[3,0]]
+- Disconnected: n=4, edges=[[0,1],[2,3]]
+- Wrong edge count: n=3, edges=[[0,1]]
+- Self-loop: n=2, edges=[[0,0]]
+
+Performance Notes:
+- Union-Find is most efficient for large graphs
+- DFS/BFS have same time complexity but different space usage
+- Early edge count check saves computation
+- Path compression in Union-Find is crucial for performance
+*/
+```
+
+That completes all the Graph problems (53-58)! The graph problems covered important patterns like:
+
+- **Graph Traversal** (DFS, BFS)
+- **Cycle Detection** (Course Schedule, Valid Tree)
+- **Topological Sorting** (Course Schedule)
+- **Connected Components** (Number of Islands, Graph Valid Tree)
+- **Graph Cloning** (Deep copy with cycle handling)
+- **Union-Find** (Efficient cycle detection and connectivity)
+
+---------------------------------------------------------------------------------

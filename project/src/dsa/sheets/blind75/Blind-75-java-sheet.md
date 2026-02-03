@@ -99,9 +99,24 @@
 
 ---
 
-Now let me solve all the **Array Problems** first with optimal approaches:
+# Array Concept and problems:
 
 ## Array Problems Solutions
+## Arrays
+* **Concept:** Fixed-size, continuous memory block storing elements of the same type.
+* **Key Features**: Index-based access (0 to n-1).
+
+## Time Complexity:
+* **Access:** O(1) Random access is fast (with index).
+* **Insertion/Deletion**: O(n) if resizing or shifting is needed {Like adding element at the first index}; O(1) at the end (within bounds).
+* **Search:** O(n) (Linear); O(log n) if sorted (Binary Search).
+
+* **Pros:** Fast access, memory efficiency (no pointers), easy implementation.
+* **Cons:** Fixed size (cannot grow dynamically without copying), costly insertion/deletion in middle.
+
+## ArrayList
+* **size** : Is flexible in size, doubles its size when the underlying Array is getting filled. May use extra unwanted memory
+---------------------
 
 ### 1. Two Sum
 

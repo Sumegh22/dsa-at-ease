@@ -6328,7 +6328,23 @@ The tree problems covered important patterns like:
 ---------------------------------------------------------------
 
 
-## Linked List Problems Solutions
+## Linked List Concepts and Problems Solutions
+
+# Linked Lists
+* Concept: Chain of nodes where each node contains data and a pointer (address) to the next node. Non-continuous memory.
+  
+* Types:
+  * Singly: Forward navigation only.
+  * Doubly: Forward and backward navigation (Prev/Next pointers).
+  * Circular: Last node connects back to the first.
+
+* Time Complexity:
+  * Insertion/Deletion: O(1) (if at start/known position), but finding the position takes time.
+  * Access/Search: O(n) (Sequential traversal required).
+
+* Pros: Dynamic size, efficient memory allocation.
+* Cons: No random access, extra memory for pointers.
+
 
 ### 36. Reverse Linked List
 

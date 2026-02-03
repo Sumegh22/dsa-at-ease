@@ -97,7 +97,7 @@
 74. Alien Dictionary
 75. Encode and Decode Strings
 
----
+-------------
 
 # Array Concept and problems:
 
@@ -3178,7 +3178,25 @@ The string problems covered important patterns like:
 
 
 
-## Tree Problems Solutions
+## Tree Concepts and Problems Solutions
+
+* Concept: Hierarchical structure with a Root node and sub-nodes connected by Edges. Acyclic.
+* Terminology: Root, Leaf (no children), Parent, Child, Depth, Height.
+
+## Types:
+  * Binary Tree: Max 2 children per node.
+  * Binary Search Tree (BST): Left < Node < Right. Optimized for sorting/searching (O(log n)).
+  * AVL/Red-Black Trees: Self-balancing BSTs.
+
+## Traversals:
+
+  * In-order: Left -> Node -> Right.
+  * Pre-order: Node -> Left -> Right.
+  * Post-order: Left -> Right -> Node.
+    
+## Use Cases: 
+* Databases (indexing), File systems, Hierarchical data representation.
+
 
 ### 25. Maximum Depth of Binary Tree
 
@@ -6344,6 +6362,20 @@ The tree problems covered important patterns like:
 
 * Pros: Dynamic size, efficient memory allocation.
 * Cons: No random access, extra memory for pointers.
+
+## Stacks
+* Principle: LIFO (Last In, First Out).
+* Operations: Push (add), Pop (remove), Peek (view top). All O(1).
+* Use Cases: Undo mechanisms (browser history), balanced parentheses checking, expression evaluation, backtracking.
+
+## Queues
+* Principle: FIFO (First In, First Out).
+* Operations: Enqueue (add), Dequeue (remove), Peek (view front). All O(1).
+* **Variants:**
+  * Circular Queue: Efficient ring buffer.
+  * Priority Queue: Elements processed by priority, not arrival order.
+  * Deque: Double-ended queue (add/remove from both ends).
+  * Use Cases: Task scheduling (printer, CPU), buffering (video streaming).
 
 
 ### 36. Reverse Linked List
@@ -14471,7 +14503,21 @@ That completes all the Graph problems! The graph problems covered important patt
 
 
 
-## Graph Problems Solutions
+## Graph Concepts and Problems Solutions
+
+* Concept: Network of Vertices (Nodes) connected by Edges. Can be cyclic.
+* Types: Directed/Undirected, Weighted/Unweighted, Cyclic/Acyclic (DAG).
+
+## Representation:
+  * Adjacency Matrix: 2D Grid (Better for dense graphs).
+  * Adjacency List: Lists of neighbors (Better for sparse graphs).
+
+## Traversals:
+  * BFS (Breadth-First): Explore neighbors first. Good for shortest path in unweighted graphs.
+  * DFS (Depth-First): Explore deep paths first. Good for mazes, backtracking.
+    
+## Use Cases: 
+* Social networks, GPS navigation (shortest path), Dependency resolution.
 
 ### 53. Clone Graph
 
